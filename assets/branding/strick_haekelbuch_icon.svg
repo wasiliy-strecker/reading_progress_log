@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs><clipPath id="wool"><circle cx="500" cy="550" r="236"/></clipPath></defs>
+  <rect width="1024" height="1024" fill="#526B59"/>
+  <circle cx="512" cy="512" r="372" fill="#5D7763"/>
+  <path d="M315 262L661 758" fill="none" stroke="#DAB49B" stroke-width="30" stroke-linecap="round"/>
+  <circle cx="304" cy="246" r="29" fill="#DAB49B"/>
+  <path d="M359 741L668 282Q687 256 709 272Q730 288 705 312L681 331" fill="none" stroke="#F2D6B9" stroke-width="32" stroke-linecap="round"/>
+  <circle cx="500" cy="550" r="236" fill="#FAF6EF"/>
+  <g clip-path="url(#wool)" fill="none" stroke="#BDBFA6" stroke-width="18" stroke-linecap="round">
+    <path d="M217 478Q431 431 680 720M237 421Q487 401 727 666M270 365Q550 397 757 599"/>
+    <path d="M244 518Q318 591 341 786M284 505Q378 601 390 796M332 511Q427 634 443 798M387 535Q476 658 497 799"/>
+    <path d="M390 320Q370 383 364 417M450 310Q416 367 407 429M510 310Q460 373 453 451M575 320Q511 394 502 479M638 349Q568 430 553 514M698 386Q627 463 606 556M743 438Q678 514 657 610"/>
+  </g>
+  <path d="M675 710Q745 744 723 797Q699 846 762 840Q799 837 808 809" fill="none" stroke="#FAF6EF" stroke-width="22" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,24 @@
+{
+  "sourceCommit": "49b242e5d9dfa32c776d9ade3d6a2f1cf2a7e491",
+  "files": {
+    "lib/core/persistence/app_database.dart": {
+      "sourceSha256": "cde5acf1ad2c23f01c78cd808febc8584e171243af7d310bc369d5ad6a7094db",
+      "localSha256": "b5b7de67d629e2b4d3504374297beb167bb26e61015b3ef82ba7a3dc6eebc7fd",
+      "reason": "Use the independent app database filename and temporary directory prefix; schema and migrations are unchanged.",
+      "tests": [
+        "test/core/persistence/app_database_migration_test.dart",
+        "test/features/meters/drift_meter_repositories_test.dart"
+      ]
+    },
+    "lib/features/backup/application/binary_backup_codec.dart": {
+      "sourceSha256": "e90cfd4c98a594ebb2e9adba9f2f1299c894f23c377aebf7e05ae68a12078124",
+      "localSha256": "ae20865c16b6260e6d108dae1bd81ed122e0f59d5a56aed2f0fc8d4688aed193",
+      "reason": "Use the independent app backup format identity in header and authenticated data; retain AES-256-GCM and all integrity checks.",
+      "tests": [
+        "test/features/backup/binary_backup_codec_test.dart",
+        "test/features/backup/encrypted_backup_service_test.dart",
+        "test/features/backup/backup_identity_test.dart"
+      ]
+    }
+  }
+}

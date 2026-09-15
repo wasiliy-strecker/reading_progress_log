@@ -1,0 +1,273 @@
+import 'dart:async';
+
+import 'package:strick_haekelbuch/features/evidence/domain/evidence_export.dart';
+import 'package:strick_haekelbuch/features/evidence/domain/evidence_export_page.dart';
+import 'package:strick_haekelbuch/features/meters/domain/meter.dart';
+import 'package:strick_haekelbuch/features/meters/domain/meter_reading.dart';
+import 'package:strick_haekelbuch/features/meters/domain/meter_reading_page.dart';
+import 'package:strick_haekelbuch/features/meters/domain/meter_repositories.dart';
+import 'package:strick_haekelbuch/core/reminders/local_notification_reminder_repository.dart';
+
+class NoopMeterReminderRepository implements MeterReminderRepository {
+  NoopMeterReminderRepository({
+    this.statuses = const {},
+    this.reminderTestResult = true,
+    this.permission = ReminderPermissionStatus.granted,
+    this.exactAlarmPermissionGranted = true,
+    String? initialMeterId,
+  }) : _initialMeterId = initialMeterId;
+
+  final Map<String, ReminderStatus> statuses;
+  final bool reminderTestResult;
+  final ReminderPermissionStatus permission;
+  bool exactAlarmPermissionGranted;
+  String? _initialMeterId;
+  final List<String> acknowledgedMeterIds = [];
+  final List<String> cancelledMeterIds = [];
+  final List<Meter> scheduledMeters = [];
+  final List<MeterReading?> scheduledLatestReadings = [];
+  final List<MeterReminderTestRequest> reminderTests = [];
+  int exactAlarmSettingsOpenCount = 0;
+  int exactAlarmPermissionRequestCount = 0;
+
+  @override
+  Stream<String> get notificationOpened => const Stream.empty();
+
+  @override
+  Stream<int> get statusChanges => const Stream.empty();
+
+  @override
+  Future<void> acknowledge(String meterId) async {
+    acknowledgedMeterIds.add(meterId);
+    final status = statuses[meterId];
+    if (status != null) {
+      statuses[meterId] = ReminderStatus(
+        meterId: meterId,
+        isNotificationActive: false,
+        lastTriggeredAt: status.lastTriggeredAt,
+      );
+    }
+  }
+
+  @override
+  Future<bool> canScheduleExactAlarms() async => exactAlarmPermissionGranted;
+
+  @override
+  Future<void> cancel(String meterId) async {
+    cancelledMeterIds.add(meterId);
+  }
+
+  @override
+  Future<String?> consumeInitialMeterId() async {
+    final meterId = _initialMeterId;
+    _initialMeterId = null;
+    return meterId;
+  }
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<Map<String, ReminderStatus>> loadStatuses(
+    Iterable<String> meterIds,
+  ) async {
+    final result = <String, ReminderStatus>{};
+    for (final meterId in meterIds) {
+      final status = statuses[meterId];
+      if (status != null) result[meterId] = status;
+    }
+    return result;
+  }
+
+  @override
+  Future<bool> openExactAlarmSettings() async {
+    exactAlarmSettingsOpenCount += 1;
+    return true;
+  }
+
+  @override
+  Future<ReminderPermissionStatus> permissionStatus() async => permission;
+
+  @override
+  void refreshStatuses() {}
+
+  @override
+  Future<bool> requestExactAlarmPermission() async {
+    exactAlarmPermissionRequestCount += 1;
+    return true;
+  }
+
+  @override
+  Future<ReminderPermissionStatus> requestPermission() async => permission;
+
+  @override
+  Future<void> schedule(Meter meter, {MeterReading? latestReading}) async {
+    scheduledMeters.add(meter);
+    scheduledLatestReadings.add(latestReading);
+  }
+
+  @override
+  Future<bool> showReminderTest(MeterReminderTestRequest request) async {
+    reminderTests.add(request);
+    return reminderTestResult;
+  }
+}
+
+class MemoryMeterRepository implements MeterRepository {
+  final Map<String, Meter> items = {};
+
+  @override
+  Future<void> delete(String id) async => items.remove(id);
+
+  @override
+  Future<Meter?> findById(String id) async => items[id];
+
+  @override
+  Future<List<Meter>> loadAll() async => items.values.toList();
+
+  @override
+  Future<void> save(Meter meter) async => items[meter.id] = meter;
+
+  @override
+  Stream<List<Meter>> watchAll() => Stream.value(items.values.toList());
+}
+
+class MemoryReadingRepository implements MeterReadingRepository {
+  final Map<String, MeterReading> items = {};
+  final Map<String, List<ReadingRevision>> revisions = {};
+  int watchPageForMeterCalls = 0;
+  int loadForMeterCalls = 0;
+  int? lastPageLimit;
+  int? lastPageOffset;
+  String? lastPageQuery;
+
+  @override
+  Stream<List<MeterReading>> watchAll() => Stream.value(items.values.toList());
+
+  @override
+  Future<void> delete(String id) async {
+    items.remove(id);
+    revisions.remove(id);
+  }
+
+  @override
+  Future<MeterReading?> findById(String id) async => items[id];
+
+  @override
+  Future<List<MeterReading>> loadAll() async => items.values.toList();
+
+  @override
+  Future<List<MeterReading>> loadForMeter(String meterId) async {
+    loadForMeterCalls++;
+    return items.values.where((item) => item.meterId == meterId).toList();
+  }
+
+  @override
+  Future<List<ReadingRevision>> loadRevisions(String readingId) async =>
+      revisions[readingId] ?? const [];
+
+  @override
+  Future<void> save(MeterReading reading) async => items[reading.id] = reading;
+
+  @override
+  Future<void> saveRevision(ReadingRevision revision) async {
+    revisions.putIfAbsent(revision.readingId, () => []).add(revision);
+  }
+
+  @override
+  Future<void> updateWithRevision(
+    MeterReading reading,
+    ReadingRevision revision,
+  ) async {
+    await save(reading);
+    await saveRevision(revision);
+  }
+
+  @override
+  Stream<List<MeterReading>> watchForMeter(String meterId) => Stream.value(
+    items.values.where((item) => item.meterId == meterId).toList(),
+  );
+
+  @override
+  Stream<MeterReadingPage> watchPageForMeter(
+    String meterId, {
+    required int limit,
+    int offset = 0,
+    String query = '',
+  }) {
+    watchPageForMeterCalls++;
+    lastPageLimit = limit;
+    lastPageOffset = offset;
+    lastPageQuery = query;
+    final all = items.values.where((item) => item.meterId == meterId).toList()
+      ..sort(_newestReadingFirst);
+    final matching = all
+        .where((reading) => meterReadingMatchesQuery(reading, query))
+        .toList(growable: false);
+    return Stream.value(
+      MeterReadingPage(
+        offset: offset,
+        readings: matching.skip(offset).take(limit).toList(growable: false),
+        totalCount: all.length,
+        matchingCount: matching.length,
+        latestReading: all.isEmpty ? null : all.first,
+        olderNeighbor: matching.length > offset + limit
+            ? matching[offset + limit]
+            : null,
+      ),
+    );
+  }
+}
+
+int _newestReadingFirst(MeterReading left, MeterReading right) {
+  final captured = right.capturedAt.compareTo(left.capturedAt);
+  if (captured != 0) return captured;
+  final stored = right.storedAt.compareTo(left.storedAt);
+  if (stored != 0) return stored;
+  return right.id.compareTo(left.id);
+}
+
+class MemoryEvidenceExportRepository implements EvidenceExportRepository {
+  final Map<String, EvidenceExportRecord> items = {};
+
+  @override
+  Stream<EvidenceExportPage> watchPageForMeter(
+    String meterId, {
+    required EvidenceExportKind kind,
+    required int limit,
+    int offset = 0,
+  }) {
+    final matching =
+        items.values
+            .where((item) => item.meterId == meterId && item.kind == kind)
+            .toList()
+          ..sort(compareExportsNewestFirst);
+    return Stream.value(
+      EvidenceExportPage(
+        exports: matching.skip(offset).take(limit).toList(),
+        totalCount: matching.length,
+        offset: offset,
+      ),
+    );
+  }
+
+  @override
+  Future<void> delete(String id) async => items.remove(id);
+
+  @override
+  Future<List<EvidenceExportRecord>> loadAll() async => items.values.toList();
+
+  @override
+  Future<List<EvidenceExportRecord>> loadForMeter(String meterId) async =>
+      items.values.where((item) => item.meterId == meterId).toList();
+
+  @override
+  Future<void> save(EvidenceExportRecord record) async =>
+      items[record.id] = record;
+
+  @override
+  Stream<List<EvidenceExportRecord>> watchForMeter(String meterId) =>
+      Stream.value(
+        items.values.where((item) => item.meterId == meterId).toList(),
+      );
+}
