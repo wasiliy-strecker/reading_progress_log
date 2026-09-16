@@ -101,6 +101,31 @@ internal object ReminderNotifier {
     private const val meterTagPrefix = "meter:"
     private const val testTag = "reminder:test"
 
+    fun doNotDisturbEnabled(context: Context): Boolean? = try {
+        when (context.getSystemService(NotificationManager::class.java).currentInterruptionFilter) {
+            NotificationManager.INTERRUPTION_FILTER_ALL -> false
+            NotificationManager.INTERRUPTION_FILTER_PRIORITY,
+            NotificationManager.INTERRUPTION_FILTER_ALARMS,
+            NotificationManager.INTERRUPTION_FILTER_NONE -> true
+            else -> null
+        }
+    } catch (_: Exception) {
+        null
+    }
+
+    fun channelId(punctual: Boolean): String = if (punctual) alarmChannelId else normalChannelId
+
+    fun channelEnabled(context: Context, punctual: Boolean): Boolean? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return true
+        return try {
+            val manager = context.getSystemService(NotificationManager::class.java)
+            val channel = manager.getNotificationChannel(channelId(punctual)) ?: return null
+            channel.importance != NotificationManager.IMPORTANCE_NONE
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     fun notificationsEnabled(context: Context): Boolean {
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -121,6 +146,7 @@ internal object ReminderNotifier {
     ): Long? {
         if (!notificationsEnabled(context)) return null
         ensureChannels(context)
+        if (channelEnabled(context, reminder.isPunctual) == false) return null
         val channelId = if (reminder.isPunctual) alarmChannelId else normalChannelId
         val category = if (reminder.isPunctual) {
             NotificationCompat.CATEGORY_ALARM
@@ -200,6 +226,7 @@ internal object ReminderNotifier {
     ): Boolean {
         if (!notificationsEnabled(context)) return false
         ensureChannels(context)
+        if (channelEnabled(context, punctual) == false) return false
         val latestReading = if (!latestValue.isNullOrBlank() && !latestUnit.isNullOrBlank()) {
             "Letzter Projektstand: $latestValue $latestUnit"
         } else {
@@ -228,7 +255,7 @@ internal object ReminderNotifier {
                 },
             )
             .setAutoCancel(true)
-            .setTimeoutAfter(10_000L)
+            .setTimeoutAfter(60_000L)
             .setContentIntent(
                 if (meterId.isNullOrBlank()) {
                     openAppIntent(context)

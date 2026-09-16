@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/reminders/local_notification_reminder_repository.dart';
+import '../core/reminders/reminder_permission_recovery.dart';
 import '../features/meters/domain/meter_reading.dart';
 import 'app_router.dart';
 import 'app_providers.dart';
@@ -17,24 +18,41 @@ class MeterReadingLogApp extends ConsumerStatefulWidget {
   ConsumerState<MeterReadingLogApp> createState() => _MeterReadingLogAppState();
 }
 
-class _MeterReadingLogAppState extends ConsumerState<MeterReadingLogApp> {
+class _MeterReadingLogAppState extends ConsumerState<MeterReadingLogApp>
+    with WidgetsBindingObserver {
   late final StreamSubscription<String> _notificationSubscription;
+  late final ReminderPermissionRecovery _permissionRecovery;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final reminders = ref.read(meterReminderRepositoryProvider);
+    _permissionRecovery = ReminderPermissionRecovery(
+      reminders: reminders,
+      synchronize: () => _synchronizeReminders(reminders),
+    );
     _notificationSubscription = reminders.notificationOpened.listen(_openMeter);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_synchronizeReminders(reminders));
+      if (!mounted) return;
+      unawaited(_permissionRecovery.start());
       unawaited(_openInitialNotification(reminders));
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _permissionRecovery.dispose();
     _notificationSubscription.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_permissionRecovery.refresh());
+    }
   }
 
   Future<void> _openInitialNotification(
@@ -45,8 +63,10 @@ class _MeterReadingLogAppState extends ConsumerState<MeterReadingLogApp> {
   }
 
   Future<void> _synchronizeReminders(MeterReminderRepository reminders) async {
+    if (!mounted) return;
     final meters = await ref.read(meterRepositoryProvider).loadAll();
     for (final meter in meters) {
+      if (!mounted) return;
       if (meter.reminder == null) {
         await reminders.cancel(meter.id);
         continue;

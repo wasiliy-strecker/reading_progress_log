@@ -14,6 +14,140 @@ import 'package:strick_haekelbuch/features/meters/domain/reading_value.dart';
 import 'support/fakes.dart';
 
 void main() {
+  testWidgets(
+    'returning after permission regrant schedules saved values and preserves the open draft',
+    (tester) async {
+      final meter = Meter(
+        id: 'recovery-project',
+        label: 'Gespeicherter Schal',
+        type: MeterType.knitting,
+        unit: 'Reihen',
+        meterNumber: '',
+        location: '',
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+        reminder: const ReadingReminderSchedule(
+          interval: ReminderInterval.daily,
+          day: 1,
+          hour: 9,
+          minute: 0,
+        ),
+      );
+      final meters = MemoryMeterRepository()..items[meter.id] = meter;
+      final reminders = NoopMeterReminderRepository(
+        permission: ReminderPermissionStatus.denied,
+      );
+      await tester.pumpWidget(_testApp(meters: meters, reminders: reminders));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(meter.label));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Projekt & Erinnerung bearbeiten'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Projektname *'),
+        'Noch nicht gespeichert',
+      );
+      final before = reminders.scheduledMeters.length;
+      reminders.permission = ReminderPermissionStatus.granted;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(reminders.scheduledMeters, hasLength(before + 1));
+      expect(reminders.scheduledMeters.last.label, 'Gespeicherter Schal');
+      expect(meters.items[meter.id]!.label, 'Gespeicherter Schal');
+      expect(find.text('Noch nicht gespeichert'), findsOneWidget);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(reminders.scheduledMeters, hasLength(before + 1));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  for (final appBlocked in [true, false]) {
+    for (final editing in [true, false]) {
+      testWidgets(
+        'saving with blocked notifications keeps project and offers settings: app=$appBlocked edit=$editing',
+        (tester) async {
+          await tester.binding.setSurfaceSize(const Size(430, 1100));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          final meters = MemoryMeterRepository();
+          final reminders = NoopMeterReminderRepository(
+            permission: appBlocked
+                ? ReminderPermissionStatus.denied
+                : ReminderPermissionStatus.granted,
+            normalChannel: appBlocked
+                ? ReminderChannelStatus.enabled
+                : ReminderChannelStatus.blocked,
+          );
+          final existing = Meter(
+            id: 'blocked-project',
+            label: 'Wollprojekt',
+            type: MeterType.knitting,
+            unit: 'Reihen',
+            meterNumber: '',
+            location: '',
+            createdAt: DateTime.utc(2026),
+            updatedAt: DateTime.utc(2026),
+            reminder: const ReadingReminderSchedule(
+              interval: ReminderInterval.daily,
+              day: 1,
+              hour: 9,
+              minute: 0,
+            ),
+          );
+          if (editing) meters.items[existing.id] = existing;
+          await tester.pumpWidget(
+            _testApp(meters: meters, reminders: reminders),
+          );
+          await tester.pumpAndSettle();
+          if (editing) {
+            await tester.tap(find.text('Wollprojekt'));
+            await tester.pumpAndSettle();
+            await tester.tap(find.text('Projekt & Erinnerung bearbeiten'));
+          } else {
+            await tester.tap(find.text('Projekt anlegen'));
+          }
+          await tester.pumpAndSettle();
+          await tester.enterText(
+            find.widgetWithText(TextFormField, 'Projektname *'),
+            'Mein Schal',
+          );
+          await tester.pumpAndSettle();
+          if (!editing) {
+            await tester.scrollUntilVisible(
+              find.text('Projekterinnerung'),
+              250,
+              scrollable: find.byType(Scrollable).first,
+            );
+            await tester.tap(find.text('Projekterinnerung'));
+            await tester.pumpAndSettle();
+          }
+          await tester.tap(
+            find.text(editing ? 'Änderungen speichern' : 'Projekt speichern'),
+          );
+          await tester.pumpAndSettle();
+          expect(meters.items.values.single.label, 'Mein Schal');
+          expect(meters.items.values.single.reminder, isNotNull);
+          expect(
+            find.text(
+              'Projekt gespeichert. Erinnerungen sind in Android blockiert.',
+            ),
+            findsOneWidget,
+          );
+          await tester.tap(
+            find.widgetWithText(SnackBarAction, 'Einstellungen'),
+          );
+          await tester.pumpAndSettle();
+          expect(reminders.notificationSettingsOpened, [
+            appBlocked ? null : ReminderDeliveryMode.normal,
+          ]);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   testWidgets('empty app opens meter creation flow', (tester) async {
     await tester.pumpWidget(_testApp());
     await tester.pumpAndSettle();
@@ -293,7 +427,10 @@ void main() {
 
     reminders.completeTest(true);
     await tester.pumpAndSettle();
-    expect(find.text('Test-Erinnerung wurde ausgelöst.'), findsOneWidget);
+    expect(
+      find.text('Test-Erinnerung wurde an Android übergeben.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets(

@@ -14,12 +14,22 @@ class NoopMeterReminderRepository implements MeterReminderRepository {
     this.reminderTestResult = true,
     this.permission = ReminderPermissionStatus.granted,
     this.exactAlarmPermissionGranted = true,
+    this.doNotDisturb = DoNotDisturbStatus.disabled,
+    this.normalChannel = ReminderChannelStatus.enabled,
+    this.alarmChannel = ReminderChannelStatus.enabled,
+    this.settingsOpenResult = true,
     String? initialMeterId,
   }) : _initialMeterId = initialMeterId;
 
   final Map<String, ReminderStatus> statuses;
   final bool reminderTestResult;
-  final ReminderPermissionStatus permission;
+  ReminderPermissionStatus permission;
+  DoNotDisturbStatus doNotDisturb;
+  ReminderChannelStatus normalChannel;
+  ReminderChannelStatus alarmChannel;
+  bool settingsOpenResult;
+  int doNotDisturbSettingsOpenCount = 0;
+  final List<ReminderDeliveryMode?> notificationSettingsOpened = [];
   bool exactAlarmPermissionGranted;
   String? _initialMeterId;
   final List<String> acknowledgedMeterIds = [];
@@ -51,6 +61,26 @@ class NoopMeterReminderRepository implements MeterReminderRepository {
 
   @override
   Future<bool> canScheduleExactAlarms() async => exactAlarmPermissionGranted;
+
+  @override
+  Future<DoNotDisturbStatus> doNotDisturbStatus() async => doNotDisturb;
+
+  @override
+  Future<ReminderChannelStatus> channelStatus(
+    ReminderDeliveryMode mode,
+  ) async => mode == ReminderDeliveryMode.normal ? normalChannel : alarmChannel;
+
+  @override
+  Future<bool> openDoNotDisturbSettings() async {
+    doNotDisturbSettingsOpenCount++;
+    return settingsOpenResult;
+  }
+
+  @override
+  Future<bool> openNotificationSettings({ReminderDeliveryMode? mode}) async {
+    notificationSettingsOpened.add(mode);
+    return settingsOpenResult;
+  }
 
   @override
   Future<void> cancel(String meterId) async {

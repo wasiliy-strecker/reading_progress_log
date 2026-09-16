@@ -8,6 +8,10 @@ import '../../features/meters/domain/meter_reading.dart';
 
 enum ReminderPermissionStatus { granted, denied, unknown, unsupported }
 
+enum DoNotDisturbStatus { enabled, disabled, unknown }
+
+enum ReminderChannelStatus { enabled, blocked, unknown, unsupported }
+
 class ReminderStatus {
   const ReminderStatus({
     required this.meterId,
@@ -54,6 +58,14 @@ abstract interface class MeterReminderRepository {
   Future<bool> requestExactAlarmPermission();
 
   Future<bool> openExactAlarmSettings();
+
+  Future<DoNotDisturbStatus> doNotDisturbStatus();
+
+  Future<ReminderChannelStatus> channelStatus(ReminderDeliveryMode mode);
+
+  Future<bool> openDoNotDisturbSettings();
+
+  Future<bool> openNotificationSettings({ReminderDeliveryMode? mode});
 
   Future<void> schedule(Meter meter, {MeterReading? latestReading});
 
@@ -172,6 +184,64 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
     try {
       return await _channel.invokeMethod<bool>('openExactAlarmSettings') ??
           false;
+    } on Object {
+      return false;
+    }
+  }
+
+  @override
+  Future<DoNotDisturbStatus> doNotDisturbStatus() async {
+    await initialize();
+    if (!_supportsNotifications) return DoNotDisturbStatus.unknown;
+    try {
+      return switch (await _channel.invokeMethod<bool>(
+        'getDoNotDisturbStatus',
+      )) {
+        true => DoNotDisturbStatus.enabled,
+        false => DoNotDisturbStatus.disabled,
+        null => DoNotDisturbStatus.unknown,
+      };
+    } on Object {
+      return DoNotDisturbStatus.unknown;
+    }
+  }
+
+  @override
+  Future<ReminderChannelStatus> channelStatus(ReminderDeliveryMode mode) async {
+    await initialize();
+    if (!_supportsNotifications) return ReminderChannelStatus.unsupported;
+    try {
+      return switch (await _channel.invokeMethod<bool>(
+        'isReminderChannelEnabled',
+        {'deliveryMode': mode.name},
+      )) {
+        true => ReminderChannelStatus.enabled,
+        false => ReminderChannelStatus.blocked,
+        null => ReminderChannelStatus.unknown,
+      };
+    } on Object {
+      return ReminderChannelStatus.unknown;
+    }
+  }
+
+  @override
+  Future<bool> openDoNotDisturbSettings() =>
+      _openSettings('openDoNotDisturbSettings');
+
+  @override
+  Future<bool> openNotificationSettings({ReminderDeliveryMode? mode}) =>
+      _openSettings('openNotificationSettings', {
+        if (mode != null) 'deliveryMode': mode.name,
+      });
+
+  Future<bool> _openSettings(
+    String method, [
+    Map<String, Object>? arguments,
+  ]) async {
+    await initialize();
+    if (!_supportsNotifications) return false;
+    try {
+      return await _channel.invokeMethod<bool>(method, arguments) ?? false;
     } on Object {
       return false;
     }

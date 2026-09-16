@@ -122,6 +122,19 @@ class MainActivity : FlutterActivity() {
                 result.success(ReminderScheduler.canScheduleExact(this))
             "requestExactAlarmPermission" -> requestExactAlarmPermission(result)
             "openExactAlarmSettings" -> result.success(openExactAlarmSettings())
+            "getDoNotDisturbStatus" -> result.success(ReminderNotifier.doNotDisturbEnabled(this))
+            "isReminderChannelEnabled" -> result.success(
+                ReminderNotifier.channelEnabled(
+                    this,
+                    call.argument<String>("deliveryMode") == "punctualWithSound",
+                ),
+            )
+            "openDoNotDisturbSettings" -> result.success(openFirstAvailableSettings(
+                listOf(Intent("android.settings.ZEN_MODE_SETTINGS"), Intent(Settings.ACTION_SOUND_SETTINGS)),
+            ))
+            "openNotificationSettings" -> result.success(
+                openNotificationSettings(call.argument<String>("deliveryMode")),
+            )
             "schedule" -> schedule(call, result)
             "cancel" -> cancel(call, result)
             "acknowledge" -> acknowledge(call, result)
@@ -333,6 +346,34 @@ class MainActivity : FlutterActivity() {
                 false
             }
         }
+    }
+
+    private fun openNotificationSettings(deliveryMode: String?): Boolean {
+        val intents = mutableListOf<Intent>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (deliveryMode != null) {
+                intents.add(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    .putExtra(Settings.EXTRA_CHANNEL_ID,
+                        ReminderNotifier.channelId(deliveryMode == "punctualWithSound")))
+            }
+            intents.add(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, packageName))
+        }
+        intents.add(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
+        return openFirstAvailableSettings(intents)
+    }
+
+    private fun openFirstAvailableSettings(intents: List<Intent>): Boolean {
+        for (intent in intents) {
+            try {
+                startActivity(intent)
+                return true
+            } catch (_: Exception) {
+                // OEM settings pages can be missing. Try the less specific destination.
+            }
+        }
+        return false
     }
 
     private fun schedule(call: MethodCall, result: MethodChannel.Result) {

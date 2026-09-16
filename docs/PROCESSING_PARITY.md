@@ -50,6 +50,33 @@ Quell-Hashes dürfen nicht zur Reparatur fehlgeschlagener Prüfungen geändert w
 - Die bestehende Datenschutzerklärung ist app-lokal und offline zugänglich;
   GitHub-Verweise auf die Vorlage oder auf nicht veröffentlichte Ziele entfallen.
 
+## Android-Erinnerungshinweise
+
+Der DND-Hinweis aus LeseLog (`8dec1f0`, Textkorrektur `a274907`) wurde
+app-lokal übernommen und um die Prüfung gesperrter App-Benachrichtigungen
+und einzelner Erinnerungsarten ergänzt. Es gilt die Reihenfolge App-Sperre,
+Kanalsperre und „Nicht stören“. Die Statusabfragen fordern keine zusätzliche
+Berechtigung an und verändern keine Android-Einstellungen. Unbekannte Zustände
+werden nicht als Freigabe oder erkannte Sperre dargestellt.
+
+Einstellungslinks führen zur betroffenen Kategorie oder zur App-Freigabe,
+mit Rückfall auf allgemeinere Einstellungsseiten und manueller Anleitung bei
+Fehlern. Der DND-Link fällt auf die Toneinstellungen zurück. Die Anzeige wird
+bei Rückkehr, Fokus- und Moduswechsel sowie beim Testen aktualisiert.
+
+Testbenachrichtigungen bleiben bis zu 60 statt 10 Sekunden bestehen. Eine
+bekannte Kanalsperre verhindert auch nativ eine vermeintliche Testbestätigung
+oder einen neuen Auslösezeitpunkt einer regulären Erinnerung. Die nächste
+geplante Erinnerung wird unabhängig davon wie bisher eingerichtet.
+
+Projekte lassen sich bei gesperrten Benachrichtigungen weiterhin speichern.
+Die Rückmeldung benennt die Sperre und bietet einen Einstellungslink an. Nach
+erneut erteilter App-Freigabe werden gespeicherte Zeitpläne erneut abgeglichen.
+Offene Eingaben bleiben davon getrennt. Gleichzeitige Statusabfragen und
+Abgleiche sind gegen veraltete Antworten und überlappende Wiederholungen geschützt.
+Die vorhandenen Kanal-IDs, gespeicherten Zeitpläne und Datenformate bleiben
+kompatibel. Die eingefrorenen Quell-Hashes sind unverändert.
+
 ## Prüfstrategie
 
 Die übernommene Suite prüft Speicherung, manuelle Eingabe, Foto-Lebenszyklus,

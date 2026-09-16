@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppSnackBar extends SnackBar {
-  AppSnackBar({super.key, required String message})
+  AppSnackBar({super.key, required String message, super.action})
     : super(
         content: SizedBox(
           width: double.infinity,

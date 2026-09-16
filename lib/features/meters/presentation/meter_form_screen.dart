@@ -9,10 +9,12 @@ import '../../../app/app_providers.dart';
 import '../../../app/widgets/app_snack_bar.dart';
 import '../../../app/widgets/confirm_dialog.dart';
 import '../../../core/reminders/local_notification_reminder_repository.dart';
+import '../../../core/reminders/reminder_delivery_state.dart';
 import '../../../core/utils/formatters.dart';
 import '../domain/meter.dart';
 import '../domain/meter_reading.dart';
 import 'meter_unit_field.dart';
+import 'reminder_delivery_hint.dart';
 
 typedef _MeterFormSnapshot = ({
   MeterType type,
@@ -88,6 +90,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
   bool _testingReminder = false;
   bool _awaitingExactAlarmSettings = false;
   bool? _exactAlarmAvailable;
+  ReminderDeliveryState _deliveryState = const ReminderDeliveryState();
+  int _deliveryQuery = 0;
+  StreamSubscription<int>? _reminderStatusSubscription;
   bool _discardDialogOpen = false;
   bool _allowPop = false;
 
@@ -141,14 +146,22 @@ class _MeterFormState extends ConsumerState<_MeterForm>
     _label.addListener(_handleTextChanged);
     _number.addListener(_handleTextChanged);
     _location.addListener(_handleTextChanged);
+    _reminderStatusSubscription = ref
+        .read(meterReminderRepositoryProvider)
+        .statusChanges
+        .listen((_) => unawaited(_refreshDeliveryState()));
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(_refreshExactAlarmAvailability());
+      if (mounted) {
+        unawaited(_refreshExactAlarmAvailability());
+        unawaited(_refreshDeliveryState());
+      }
     });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _reminderStatusSubscription?.cancel();
     _label.removeListener(_handleTextChanged);
     _number.removeListener(_handleTextChanged);
     _location.removeListener(_handleTextChanged);
@@ -162,6 +175,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(_refreshExactAlarmAvailability());
+      unawaited(_refreshDeliveryState());
     }
   }
 
@@ -438,7 +452,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                           icon: Icons.notifications_outlined,
                           selected:
                               _deliveryMode == ReminderDeliveryMode.normal,
-                          onTap: _saving
+                          onTap: _saving || _testingReminder
                               ? null
                               : () => _selectDeliveryMode(
                                   ReminderDeliveryMode.normal,
@@ -454,7 +468,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                           selected:
                               _deliveryMode ==
                               ReminderDeliveryMode.punctualWithSound,
-                          onTap: _saving
+                          onTap: _saving || _testingReminder
                               ? null
                               : () => _selectDeliveryMode(
                                   ReminderDeliveryMode.punctualWithSound,
@@ -493,6 +507,25 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                             ),
                           ),
                         ],
+                        if (_deliveryState.hasHint) ...[
+                          const SizedBox(height: 12),
+                          ReminderDeliveryHint(
+                            state: _deliveryState,
+                            mode: _deliveryMode,
+                            onOpenSettings: _saving || _testingReminder
+                                ? null
+                                : () => openReminderSettings(
+                                    messenger: ScaffoldMessenger.of(context),
+                                    reminders: ref.read(
+                                      meterReminderRepositoryProvider,
+                                    ),
+                                    doNotDisturb: !_deliveryState.blocked,
+                                    mode: _deliveryState.appBlocked
+                                        ? null
+                                        : _deliveryMode,
+                                  ),
+                          ),
+                        ],
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
@@ -510,6 +543,12 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                                 : const Icon(Icons.notification_add_outlined),
                             label: const Text('Erinnerung jetzt testen'),
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Prüfe beim Test die Benachrichtigungsleiste. '
+                          'Die Test-Erinnerung wird nach einer Minute automatisch entfernt.',
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ],
@@ -719,7 +758,26 @@ class _MeterFormState extends ConsumerState<_MeterForm>
         await service.update(meter);
       }
       if (!mounted) return;
+      final reminders = ref.read(meterReminderRepositoryProvider);
+      final delivery = reminder == null
+          ? const ReminderDeliveryState()
+          : await ReminderDeliveryState.read(reminders, reminder.deliveryMode);
+      if (!mounted) return;
       final messenger = ScaffoldMessenger.of(context);
+      final blockedNotice = delivery.blocked
+          ? AppSnackBar(
+              message:
+                  'Projekt gespeichert. Erinnerungen sind in Android blockiert.',
+              action: SnackBarAction(
+                label: 'Einstellungen',
+                onPressed: () => openReminderSettings(
+                  messenger: messenger,
+                  reminders: reminders,
+                  mode: delivery.appBlocked ? null : reminder!.deliveryMode,
+                ),
+              ),
+            )
+          : null;
       if (existing == null) {
         setState(() => _allowPop = true);
         context.pushReplacementNamed(
@@ -730,15 +788,21 @@ class _MeterFormState extends ConsumerState<_MeterForm>
           messenger
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              AppSnackBar(
-                message:
-                    'Projekt gespeichert. Als Nächstes kannst du den ersten Projektstand erfassen.',
-              ),
+              blockedNotice ??
+                  AppSnackBar(
+                    message:
+                        'Projekt gespeichert. Als Nächstes kannst du den ersten Projektstand erfassen.',
+                  ),
             );
         });
       } else {
         ref.invalidate(meterByIdProvider(meter.id));
         await _leaveWithoutGuard();
+        if (blockedNotice != null && messenger.mounted) {
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(blockedNotice);
+        }
       }
     } catch (error) {
       if (!mounted) return;
@@ -804,6 +868,12 @@ class _MeterFormState extends ConsumerState<_MeterForm>
   }
 
   Future<void> _selectDeliveryMode(ReminderDeliveryMode mode) async {
+    if (_saving || _testingReminder) return;
+    setState(() {
+      _deliveryMode = mode;
+      _deliveryState = const ReminderDeliveryState();
+    });
+    unawaited(_refreshDeliveryState());
     if (mode == ReminderDeliveryMode.normal) {
       setState(() {
         _deliveryMode = mode;
@@ -864,12 +934,25 @@ class _MeterFormState extends ConsumerState<_MeterForm>
     });
   }
 
+  Future<void> _refreshDeliveryState() async {
+    final query = ++_deliveryQuery;
+    final mode = _deliveryMode;
+    final state = await ReminderDeliveryState.read(
+      ref.read(meterReminderRepositoryProvider),
+      mode,
+    );
+    if (!mounted || query != _deliveryQuery || mode != _deliveryMode) return;
+    setState(() => _deliveryState = state);
+  }
+
   Future<void> _testReminderNow() async {
     if (_testingReminder) return;
     setState(() => _testingReminder = true);
     final reminders = ref.read(meterReminderRepositoryProvider);
     var displayed = false;
     try {
+      await _refreshDeliveryState();
+      if (!mounted) return;
       final meter = widget.meter;
       final readings = meter == null
           ? const <MeterReading>[]
@@ -897,19 +980,18 @@ class _MeterFormState extends ConsumerState<_MeterForm>
       displayed = false;
     }
     if (!mounted) return;
-    var permission = ReminderPermissionStatus.unknown;
-    if (!displayed) {
-      try {
-        permission = await reminders.permissionStatus();
-      } on Object {
-        permission = ReminderPermissionStatus.unknown;
-      }
-    }
+    await _refreshDeliveryState();
     if (!mounted) return;
     setState(() => _testingReminder = false);
-    final message = displayed
-        ? 'Test-Erinnerung wurde ausgelöst.'
-        : switch (permission) {
+    final message = _deliveryState.appBlocked
+        ? 'Benachrichtigungen sind nicht erlaubt.'
+        : _deliveryState.channelBlocked
+        ? 'Diese Erinnerungsart ist in Android ausgeschaltet.'
+        : displayed
+        ? _deliveryState.doNotDisturb == DoNotDisturbStatus.enabled
+              ? 'Test-Erinnerung wurde an Android übergeben. „Nicht stören“ ist aktiv. Ton und Banner können unterdrückt werden.'
+              : 'Test-Erinnerung wurde an Android übergeben.'
+        : switch (_deliveryState.permission) {
             ReminderPermissionStatus.denied =>
               'Benachrichtigungen sind nicht erlaubt.',
             ReminderPermissionStatus.unsupported =>
