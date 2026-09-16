@@ -84,6 +84,7 @@ flutter:
   uses-material-design: true
   assets:
     - PRIVACY.md
+    - assets/examples/project_photos/
     - assets/fonts/Roboto-Regular.ttf
     - assets/fonts/Roboto-Bold.ttf
 

@@ -15,6 +15,26 @@ import '../../support/fakes.dart';
 import '../../support/reading_fixtures.dart';
 
 void main() {
+  testWidgets(
+    'examples close back to capture choices without creating a draft',
+    (tester) async {
+      final readings = MemoryReadingRepository();
+      final photos = _Photos();
+      await _open(tester, readings, photos, pushCapture: true);
+      await _press(tester, 'Beispiele ansehen');
+      expect(find.text('Beispielfotos'), findsOneWidget);
+      await tester.tap(find.byTooltip('Schließen'));
+      await tester.pumpAndSettle();
+      _expectCaptureOptions();
+      expect(photos.captures, 0);
+      expect(readings.items, isEmpty);
+      await _back(tester, systemBack: true);
+      expect(find.text('Projektstand verwerfen?'), findsNothing);
+      expect(find.text('Projektübersicht'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('round entry and correction retain the round label', (
     tester,
   ) async {

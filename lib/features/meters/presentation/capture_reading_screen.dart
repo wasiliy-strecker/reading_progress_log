@@ -13,6 +13,7 @@ import '../domain/meter.dart';
 import '../domain/meter_reading.dart';
 import '../domain/reading_value.dart';
 import 'editable_reading_time_card.dart';
+import 'project_photo_examples.dart';
 
 class CaptureReadingScreen extends ConsumerStatefulWidget {
   const CaptureReadingScreen({super.key, required this.meterId});
@@ -91,6 +92,8 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
           children: [
             if (!_isEnteringReading) ...[
               const _CaptureGuidance(),
+              const SizedBox(height: 14),
+              ProjectPhotoExamplesButton(enabled: !_working),
               const SizedBox(height: 18),
               FilledButton.icon(
                 onPressed: _working

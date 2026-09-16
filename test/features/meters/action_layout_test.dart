@@ -111,6 +111,7 @@ void main() {
         expect(tester.takeException(), isNull);
         router.goNamed('captureReading', pathParameters: {'id': book.id});
         await tester.pumpAndSettle();
+        await _checkAction(tester, 'Beispiele ansehen');
         await _checkAction(tester, 'Projekt fotografieren');
         await _checkAction(tester, 'Foto aus Galerie');
         await _checkAction(tester, 'Stand eintragen', tap: true);
