@@ -516,7 +516,17 @@ class _RevisionEntry extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (revisionPhotos != null)
-          _RevisionPhotos(photos: revisionPhotos, revisionId: revision.id),
+          _RevisionPhotos(
+            photos: revisionPhotos,
+            revisionId: revision.id,
+            reordered:
+                revision.photoChange != null &&
+                revision.photoChange!.beforeIds.length ==
+                    revision.photoChange!.afterIds.length &&
+                revision.photoChange!.beforeIds.toSet().containsAll(
+                  revision.photoChange!.afterIds,
+                ),
+          ),
       ],
     );
   }
@@ -567,10 +577,15 @@ class _RevisionValue extends StatelessWidget {
 }
 
 class _RevisionPhotos extends StatelessWidget {
-  const _RevisionPhotos({required this.photos, required this.revisionId});
+  const _RevisionPhotos({
+    required this.photos,
+    required this.revisionId,
+    this.reordered = false,
+  });
 
   final ReadingRevisionPhotos photos;
   final String revisionId;
+  final bool reordered;
 
   @override
   Widget build(BuildContext context) {
@@ -578,6 +593,13 @@ class _RevisionPhotos extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (reordered) ...[
+            const Text(
+              'Fotoreihenfolge geändert',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+          ],
           Text(
             'Fotos nachher (${photos.afterList.length})',
             style: const TextStyle(fontWeight: FontWeight.w700),

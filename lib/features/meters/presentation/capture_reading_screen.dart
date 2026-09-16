@@ -143,6 +143,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
                 onGallery: () => _capture(ReadingSource.gallery),
                 onReplace: _replacePhoto,
                 onRemove: _removePhoto,
+                onReorder: _reorderPhotos,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -378,6 +379,20 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(message: 'Foto konnte nicht entfernt werden: $error'),
+        );
+      }
+    }
+  }
+
+  Future<void> _reorderPhotos(List<String> ids) async {
+    try {
+      await _photoSession.reorderPhotos(ids, _draftFields);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(
+            message: 'Fotoreihenfolge konnte nicht gespeichert werden: $error',
+          ),
         );
       }
     }

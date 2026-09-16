@@ -245,6 +245,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     onGallery: () => _capturePhoto(ReadingSource.gallery),
     onReplace: _replacePhoto,
     onRemove: _removePhoto,
+    onReorder: _reorderPhotos,
   );
 
   void _photosChanged() {
@@ -306,6 +307,20 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(message: 'Foto konnte nicht entfernt werden: $error'),
+        );
+      }
+    }
+  }
+
+  Future<void> _reorderPhotos(List<String> ids) async {
+    try {
+      await _photoSession.reorderPhotos(ids, _draftFields);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(
+            message: 'Fotoreihenfolge konnte nicht gespeichert werden: $error',
+          ),
         );
       }
     }

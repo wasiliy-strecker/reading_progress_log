@@ -24,6 +24,66 @@ ReadingPhotoVersion testPhoto(String id, {String? hash}) => ReadingPhotoVersion(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   test(
+    'reordering persists unchanged photo IDs without archiving or deleting files',
+    () async {
+      final db = AppDatabase.memory();
+      addTearDown(db.close);
+      final meters = DriftMeterRepository(db);
+      final readings = DriftMeterReadingRepository(db);
+      final photos = _Photos();
+      final service = MeterReadingService(
+        meters: meters,
+        readings: readings,
+        exports: DriftEvidenceExportRepository(db),
+        photos: photos,
+        reminders: NoopMeterReminderRepository(),
+      );
+      final meter = sampleBook();
+      await meters.save(meter);
+      final original = await service.createWithPhotos(
+        meter: meter,
+        photos: [testPhoto('a'), testPhoto('b'), testPhoto('c')],
+        value: ReadingValue.tryParseWhole('35')!,
+        capturedAt: DateTime.utc(2026, 9, 16),
+        note: 'Unverändert',
+      );
+      final updated = await service.update(
+        existing: original,
+        value: original.value,
+        capturedAt: original.capturedAt,
+        note: original.note,
+        reason: '',
+        photos: [original.currentPhotos[2], ...original.currentPhotos.take(2)],
+      );
+      final loaded = (await readings.findById(original.id))!;
+      expect(loaded.currentPhotos.map((p) => p.id), ['c', 'a', 'b']);
+      expect(loaded.photoPath, '/c.jpg');
+      expect(loaded.photoHistory, isEmpty);
+      expect(loaded.currentPhotos.map((p) => p.toJson()), [
+        original.currentPhotos[2].toJson(),
+        original.currentPhotos[0].toJson(),
+        original.currentPhotos[1].toJson(),
+      ]);
+      expect(loaded.manifestSha256, isNot(original.manifestSha256));
+      expect(loaded.value, original.value);
+      expect(loaded.capturedAt, original.capturedAt);
+      expect(loaded.note, original.note);
+      final revision = (await readings.loadRevisions(original.id)).single;
+      expect(revision.photoChange!.beforeIds, ['a', 'b', 'c']);
+      expect(revision.photoChange!.afterIds, ['c', 'a', 'b']);
+      expect(photos.deleted, isEmpty);
+      await service.update(
+        existing: updated,
+        value: updated.value,
+        capturedAt: updated.capturedAt,
+        note: updated.note,
+        reason: '',
+        photos: updated.currentPhotos,
+      );
+      expect(await readings.loadRevisions(original.id), hasLength(1));
+    },
+  );
+  test(
     'ordered photos survive individual corrections, removal and database reload',
     () async {
       final db = AppDatabase.memory();

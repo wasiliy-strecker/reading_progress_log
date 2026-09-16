@@ -185,6 +185,43 @@ class ReadingPhotoSession extends ChangeNotifier {
     await _cleanUnused();
   }
 
+  Future<void> reorderPhotos(
+    List<String> orderedIds,
+    Map<String, dynamic> formFields,
+  ) async {
+    if (busy || _closed) return;
+    final byId = {for (final photo in photos) photo.id: photo};
+    if (orderedIds.length != photos.length ||
+        orderedIds.toSet().length != photos.length ||
+        !orderedIds.every(byId.containsKey)) {
+      throw ArgumentError(
+        'Die Fotoreihenfolge muss alle aktuellen Fotos enthalten.',
+      );
+    }
+    if (listEquals(orderedIds, photos.map((photo) => photo.id).toList())) {
+      return;
+    }
+    final previous = List<ReadingPhotoVersion>.of(photos);
+    fields = formFields;
+    busy = true;
+    progress = 'Fotoreihenfolge wird gesichert …';
+    photos
+      ..clear()
+      ..addAll(orderedIds.map((id) => byId[id]!));
+    notifyListeners();
+    try {
+      await _persist();
+    } on Object {
+      photos
+        ..clear()
+        ..addAll(previous);
+      rethrow;
+    } finally {
+      busy = false;
+      if (!_closed) notifyListeners();
+    }
+  }
+
   Future<void> _cleanUnused() async {
     final used = photos.map((p) => p.path).toSet();
     for (final path in _owned.toList()) {

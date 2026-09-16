@@ -8,8 +8,74 @@ import 'package:strick_haekelbuch/features/meters/domain/meter_reading.dart';
 
 import '../../support/fakes.dart';
 import '../../support/reading_fixtures.dart';
+import 'multiple_photos_test.dart' show testPhoto;
 
 void main() {
+  test(
+    'reorder restores the draft and discard preserves saved files',
+    () async {
+      final original = sampleReading().copyWith(
+        photos: [testPhoto('a'), testPhoto('b'), testPhoto('c')],
+      );
+      final store = MemoryPhotoDraftStore();
+      final repo = _Photos();
+      final readings = MemoryReadingRepository()..items[original.id] = original;
+      ReadingPhotoSession makeSession() => ReadingPhotoSession(
+        route: '/edit',
+        repository: repo,
+        store: store,
+        readings: readings,
+        original: original,
+      );
+      final session = makeSession();
+      await session.reorderPhotos(
+        ['c', 'a', 'b'],
+        {'value': '35', 'note': 'Ärmel'},
+      );
+      expect(session.changed, true);
+      expect(session.photos.map((p) => p.id), ['c', 'a', 'b']);
+      final restored = makeSession();
+      await restored.restore();
+      expect(restored.photos.map((p) => p.id), ['c', 'a', 'b']);
+      expect(restored.fields, {'value': '35', 'note': 'Ärmel'});
+      await restored.discard();
+      expect(restored.photos.map((p) => p.id), ['a', 'b', 'c']);
+      expect(repo.deleted, isEmpty);
+      for (final ids in [
+        ['a', 'a', 'c'],
+        ['a', 'b'],
+        ['a', 'b', 'missing'],
+      ]) {
+        await expectLater(session.reorderPhotos(ids, {}), throwsArgumentError);
+      }
+      expect(session.photos.map((p) => p.id), ['c', 'a', 'b']);
+    },
+  );
+
+  test(
+    'failed reorder rolls back and unchanged order does not write',
+    () async {
+      final original = sampleReading().copyWith(
+        photos: [testPhoto('a'), testPhoto('b')],
+      );
+      final session = ReadingPhotoSession(
+        route: '/edit',
+        repository: _Photos(),
+        store: _FailingStore(),
+        readings: MemoryReadingRepository(),
+        original: original,
+      );
+      await session.reorderPhotos(['a', 'b'], {});
+      await expectLater(
+        session.reorderPhotos(['b', 'a'], {}),
+        throwsStateError,
+      );
+      expect(session.photos.map((p) => p.id), ['a', 'b']);
+      expect(session.changed, false);
+      expect(session.busy, false);
+    },
+  );
+
   test('failed draft storage never launches the picker', () async {
     final repo = _Photos();
     final session = ReadingPhotoSession(

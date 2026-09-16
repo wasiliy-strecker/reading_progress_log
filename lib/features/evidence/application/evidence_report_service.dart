@@ -316,16 +316,18 @@ class EvidenceReportService {
           if (kind == EvidenceExportKind.singleReading)
             ..._readingSection(
               reading: readings.single,
+              number: 1,
               date: date,
               photoMode: photoMode,
               photoAssets: photoAssets,
             ),
           if (kind == EvidenceExportKind.meterHistory) ...[
             _historyTable(readings, date),
-            for (final reading in readings)
+            for (final (index, reading) in readings.indexed)
               if (_hasReadingDetails(reading, reportMeter, photoMode)) ...[
                 ..._readingSection(
                   reading: reading,
+                  number: index + 1,
                   date: date,
                   photoMode: photoMode,
                   photoAssets: photoAssets,
@@ -408,7 +410,7 @@ class EvidenceReportService {
   static pw.Widget _historyTable(List<MeterReading> readings, DateFormat date) {
     final rows = historyTableData(readings, date);
     return pw.TableHelper.fromTextArray(
-      headers: const ['Zeitpunkt', 'Projektstand', 'Fortschritt'],
+      headers: const ['Nr.', 'Zeitpunkt', 'Projektstand', 'Fortschritt'],
       headerStyle: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
       cellStyle: const pw.TextStyle(fontSize: 12),
       headerDecoration: pw.BoxDecoration(color: PdfColor.fromHex('#E4EBDF')),
@@ -416,9 +418,10 @@ class EvidenceReportService {
       cellAlignment: pw.Alignment.centerLeft,
       border: pw.TableBorder.all(color: PdfColors.grey700, width: 0.5),
       columnWidths: const {
-        0: pw.FlexColumnWidth(1.35),
-        1: pw.FlexColumnWidth(.75),
-        2: pw.FlexColumnWidth(1.9),
+        0: pw.FixedColumnWidth(30),
+        1: pw.FlexColumnWidth(1.35),
+        2: pw.FlexColumnWidth(.75),
+        3: pw.FlexColumnWidth(1.9),
       },
       cellPadding: const pw.EdgeInsets.all(6),
       // Only presentation differs from ZählerLog: reuse its table values and
@@ -426,6 +429,7 @@ class EvidenceReportService {
       data: [
         for (var index = 0; index < readings.length; index++)
           [
+            '${index + 1}',
             rows[index][0],
             progressValueLabel(
               readings[index].value.displayText,
@@ -529,6 +533,7 @@ class EvidenceReportService {
 
   static List<pw.Widget> _readingSection({
     required MeterReading reading,
+    required int number,
     required DateFormat date,
     required EvidencePhotoMode photoMode,
     required _PdfPhotoAssets photoAssets,
@@ -542,30 +547,17 @@ class EvidenceReportService {
     return [
       pw.NewPage(freeSpace: 100),
       _keepTogether([
-        if (currentMeter != null) ...[
-          pw.SizedBox(height: 18),
-          pw.Text(
-            progressValueLabel(reading.value.displayText, reading.meter.unit),
-            style: pw.TextStyle(
-              fontSize: 17,
-              fontWeight: pw.FontWeight.bold,
-              color: PdfColor.fromHex('#526B59'),
-            ),
+        if (currentMeter != null) pw.SizedBox(height: 18),
+        pw.Text(
+          'Projektstand $number',
+          style: pw.TextStyle(
+            fontSize: 17,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColor.fromHex('#526B59'),
           ),
-          pw.SizedBox(height: 8),
-        ],
-        if (showPhoto) ...[
-          pw.Text(
-            reading.currentPhotos.length == 1
-                ? 'Aktuelles Projektstandfoto'
-                : 'Aktuelle Fotos · Foto 1 von ${reading.currentPhotos.length}',
-            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 6),
-          _photo(reading.currentPhotos.first.path, photoAssets),
-          pw.SizedBox(height: 10),
-        ],
-        // Keep the confirmed value and its time with the photo/section title.
+        ),
+        pw.SizedBox(height: 8),
+        // Keep the heading, confirmed value and time above the first photo.
         _dataTable([
           [
             currentProgressLabel(reading.meter.unit),
@@ -573,16 +565,27 @@ class EvidenceReportService {
           ],
           ['Zeitpunkt des Projektstands', readingTimeText(reading, date)],
         ]),
+        if (showPhoto) ...[
+          pw.SizedBox(height: 10),
+          pw.Text(
+            'Foto 1 von ${reading.currentPhotos.length}',
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 6),
+          _photo(reading.currentPhotos.first.path, photoAssets),
+        ],
       ]),
       if (showPhoto)
         for (final (index, photo) in reading.currentPhotos.indexed.skip(1))
           _keepTogether([
             pw.SizedBox(height: 12),
             pw.Text(
-              'Foto ${index + 1} von ${reading.currentPhotos.length} · ${reading.value.displayText} ${reading.meter.unit}',
+              'Projektstand $number · Foto ${index + 1} von ${reading.currentPhotos.length}',
               style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
             ),
-            pw.Text(readingTimeText(reading, date)),
+            pw.Text(
+              '${progressValueLabel(reading.value.displayText, reading.meter.unit)} · ${readingTimeText(reading, date)}',
+            ),
             pw.SizedBox(height: 6),
             _photo(photo.path, photoAssets),
           ]),

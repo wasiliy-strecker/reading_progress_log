@@ -1,95 +1,228 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:universal_io/io.dart';
 
 import '../domain/meter_reading.dart';
 
-class ReadingPhotoGallery extends StatelessWidget {
+class ReadingPhotoGallery extends StatefulWidget {
   const ReadingPhotoGallery({
     super.key,
     required this.photos,
     this.onReplace,
     this.onRemove,
+    this.onReorder,
     this.enabled = true,
   });
   final List<ReadingPhotoVersion> photos;
   final ValueChanged<ReadingPhotoVersion>? onReplace;
   final ValueChanged<ReadingPhotoVersion>? onRemove;
+  final ValueChanged<List<String>>? onReorder;
   final bool enabled;
 
   @override
+  State<ReadingPhotoGallery> createState() => _ReadingPhotoGalleryState();
+}
+
+class _ReadingPhotoGalleryState extends State<ReadingPhotoGallery> {
+  String? _draggingId;
+  Offset? _pointer;
+  Timer? _scrollTimer;
+
+  bool get _sortable => widget.onReorder != null && widget.photos.length > 1;
+
+  @override
+  void dispose() {
+    _scrollTimer?.cancel();
+    super.dispose();
+  }
+
+  void _finishDrag() {
+    _scrollTimer?.cancel();
+    _scrollTimer = null;
+    _pointer = null;
+    if (mounted && _draggingId != null) setState(() => _draggingId = null);
+  }
+
+  void _scrollAtEdge() {
+    if (!mounted || !widget.enabled || _pointer == null) return;
+    final scrollable = Scrollable.maybeOf(context);
+    final box = scrollable?.context.findRenderObject();
+    if (scrollable == null || box is! RenderBox || !box.hasSize) return;
+    final position = scrollable.position;
+    final local = box.globalToLocal(_pointer!);
+    const edge = 72.0;
+    final double delta;
+    if (local.dy < edge) {
+      delta = -12 * ((edge - local.dy) / edge).clamp(0, 1);
+    } else if (local.dy > box.size.height - edge) {
+      delta = 12 * ((local.dy - box.size.height + edge) / edge).clamp(0, 1);
+    } else {
+      return;
+    }
+    final next = (position.pixels + delta).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if (next != position.pixels) position.jumpTo(next);
+  }
+
+  void _move(String id, int target) {
+    if (!widget.enabled || !_sortable) return;
+    final ids = widget.photos.map((photo) => photo.id).toList();
+    final from = ids.indexOf(id);
+    if (from < 0 || target < 0 || target >= ids.length || from == target) {
+      return;
+    }
+    ids.insert(target, ids.removeAt(from));
+    widget.onReorder!(ids);
+  }
+
+  Widget _tile(ReadingPhotoVersion photo, int index) => Column(
+    children: [
+      Semantics(
+        label: 'Foto ${index + 1} von ${widget.photos.length} ansehen',
+        button: true,
+        child: InkWell(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ReadingPhotoViewer(
+                photos: List.of(widget.photos),
+                initialIndex: index,
+              ),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: AspectRatio(
+              aspectRatio: 4 / 3,
+              child: ReadingPhotoImage(photo: photo, thumbnail: true),
+            ),
+          ),
+        ),
+      ),
+      Row(
+        children: [
+          Expanded(
+            child: Text('Foto ${index + 1}', textAlign: TextAlign.center),
+          ),
+          if (widget.onReplace != null || widget.onRemove != null || _sortable)
+            PopupMenuButton<String>(
+              key: ValueKey('photo-menu-${photo.id}'),
+              enabled: widget.enabled,
+              tooltip: 'Foto ${index + 1} bearbeiten',
+              onSelected: (action) {
+                switch (action) {
+                  case 'replace':
+                    widget.onReplace?.call(photo);
+                  case 'remove':
+                    widget.onRemove?.call(photo);
+                  case 'earlier':
+                    _move(photo.id, index - 1);
+                  case 'later':
+                    _move(photo.id, index + 1);
+                }
+              },
+              itemBuilder: (_) => [
+                if (_sortable) ...[
+                  PopupMenuItem(
+                    value: 'earlier',
+                    enabled: index > 0,
+                    child: const Text('Nach vorne'),
+                  ),
+                  PopupMenuItem(
+                    value: 'later',
+                    enabled: index + 1 < widget.photos.length,
+                    child: const Text('Nach hinten'),
+                  ),
+                ],
+                if (widget.onReplace != null)
+                  const PopupMenuItem(
+                    value: 'replace',
+                    child: Text('Foto ersetzen'),
+                  ),
+                if (widget.onRemove != null)
+                  const PopupMenuItem(
+                    value: 'remove',
+                    child: Text('Foto entfernen'),
+                  ),
+              ],
+            ),
+        ],
+      ),
+    ],
+  );
+
+  Widget _draggable(ReadingPhotoVersion photo, int index, double width) =>
+      DragTarget<String>(
+        onWillAcceptWithDetails: (details) =>
+            widget.enabled &&
+            details.data == _draggingId &&
+            details.data != photo.id,
+        onAcceptWithDetails: (details) => _move(details.data, index),
+        builder: (context, candidates, rejected) => AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              width: 2,
+              color: candidates.isEmpty
+                  ? Colors.transparent
+                  : Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: LongPressDraggable<String>(
+            key: ValueKey('photo-drag-${photo.id}'),
+            data: photo.id,
+            maxSimultaneousDrags: widget.enabled && _draggingId == null ? 1 : 0,
+            dragAnchorStrategy: pointerDragAnchorStrategy,
+            onDragStarted: () {
+              setState(() => _draggingId = photo.id);
+              _scrollTimer = Timer.periodic(
+                const Duration(milliseconds: 16),
+                (_) => _scrollAtEdge(),
+              );
+            },
+            onDragUpdate: (details) => _pointer = details.globalPosition,
+            onDragEnd: (_) => _finishDrag(),
+            feedback: Transform.translate(
+              offset: Offset(-width / 2, -width * 3 / 8),
+              child: Material(
+                elevation: 8,
+                borderRadius: BorderRadius.circular(14),
+                clipBehavior: Clip.antiAlias,
+                child: SizedBox(
+                  width: width,
+                  height: width * 3 / 4,
+                  child: ReadingPhotoImage(photo: photo, thumbnail: true),
+                ),
+              ),
+            ),
+            childWhenDragging: Opacity(opacity: .3, child: _tile(photo, index)),
+            child: _tile(photo, index),
+          ),
+        ),
+      );
+
+  @override
   Widget build(BuildContext context) {
-    if (photos.isEmpty) return const Text('Keine aktuellen Fotos');
+    if (widget.photos.isEmpty) return const Text('Keine aktuellen Fotos');
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = photos.length == 1
+        final width = widget.photos.length == 1
             ? constraints.maxWidth
             : (constraints.maxWidth - 12) / 2;
         return Wrap(
           spacing: 12,
           runSpacing: 12,
           children: [
-            for (final (index, photo) in photos.indexed)
+            for (final (index, photo) in widget.photos.indexed)
               SizedBox(
+                key: _sortable ? ValueKey(photo.id) : null,
                 width: width,
-                child: Column(
-                  children: [
-                    Semantics(
-                      label: 'Foto ${index + 1} von ${photos.length} ansehen',
-                      button: true,
-                      child: InkWell(
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => ReadingPhotoViewer(
-                              photos: photos,
-                              initialIndex: index,
-                            ),
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: AspectRatio(
-                            aspectRatio: 4 / 3,
-                            child: ReadingPhotoImage(
-                              photo: photo,
-                              thumbnail: true,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Foto ${index + 1}',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        if (onReplace != null || onRemove != null)
-                          PopupMenuButton<String>(
-                            key: ValueKey('photo-menu-${photo.id}'),
-                            enabled: enabled,
-                            tooltip: 'Foto ${index + 1} bearbeiten',
-                            onSelected: (action) => action == 'replace'
-                                ? onReplace?.call(photo)
-                                : onRemove?.call(photo),
-                            itemBuilder: (_) => [
-                              if (onReplace != null)
-                                const PopupMenuItem(
-                                  value: 'replace',
-                                  child: Text('Foto ersetzen'),
-                                ),
-                              if (onRemove != null)
-                                const PopupMenuItem(
-                                  value: 'remove',
-                                  child: Text('Foto entfernen'),
-                                ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
+                child: _sortable
+                    ? _draggable(photo, index, width)
+                    : _tile(photo, index),
               ),
           ],
         );
@@ -207,6 +340,7 @@ class ReadingPhotoEditor extends StatelessWidget {
     required this.onGallery,
     required this.onReplace,
     required this.onRemove,
+    this.onReorder,
     this.progress = '',
     this.correction = false,
   });
@@ -216,6 +350,7 @@ class ReadingPhotoEditor extends StatelessWidget {
   final VoidCallback onGallery;
   final ValueChanged<ReadingPhotoVersion> onReplace;
   final ValueChanged<ReadingPhotoVersion> onRemove;
+  final ValueChanged<List<String>>? onReorder;
   final String progress;
   final bool correction;
 
@@ -232,12 +367,19 @@ class ReadingPhotoEditor extends StatelessWidget {
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
+          if (photos.length > 1 && onReorder != null) ...[
+            const SizedBox(height: 6),
+            const Text(
+              'Zum Sortieren ein Foto länger gedrückt halten und verschieben.',
+            ),
+          ],
           const SizedBox(height: 10),
           ReadingPhotoGallery(
             photos: photos,
             enabled: !busy,
             onReplace: onReplace,
             onRemove: onRemove,
+            onReorder: onReorder,
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(

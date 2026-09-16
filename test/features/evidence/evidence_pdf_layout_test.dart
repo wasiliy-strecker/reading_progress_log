@@ -87,6 +87,27 @@ void main() {
           final image = _attributes(
             RegExp(r'<image\s+([^>]+)>').firstMatch(xml)!.group(1)!,
           );
+          for (final field in [
+            'Projektstand 1',
+            'Aktuelle Reihe',
+            'Zeitpunkt des Projektstands',
+          ]) {
+            final node = RegExp(r'<text\s+([^>]+)>(.*?)</text>', dotAll: true)
+                .allMatches(xml)
+                .firstWhere(
+                  (match) => match
+                      .group(2)!
+                      .replaceAll(RegExp(r'<[^>]+>'), '')
+                      .contains(field),
+                );
+            final attributes = _attributes(node.group(1)!);
+            expect(
+              double.parse(attributes['top']!) +
+                  double.parse(attributes['height']!),
+              lessThan(double.parse(image['top']!)),
+              reason: '$field must precede the first photo',
+            );
+          }
           final width = double.parse(image['width']!);
           final height = double.parse(image['height']!);
           expect(
@@ -287,8 +308,8 @@ void main() {
         for (final row in images) {
           final page = pages[int.parse(row[0]) - 1];
           final title = switch (row[3]) {
-            '300' => 'Reihe 150',
-            '640' => 'Reihe 85',
+            '300' => 'Projektstand 1',
+            '640' => 'Projektstand 3',
             '420' => 'Früheres Foto 1',
             _ => throw StateError('Unexpected image dimensions: $row'),
           };

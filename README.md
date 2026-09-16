@@ -38,8 +38,12 @@ nicht verändert. Architektur: Feature-first Clean MVVM, Riverpod, Drift/SQLite
 und austauschbare Foto-, Reminder-, Export- und Backup-Implementierungen.
 Keine Runtime-Abhängigkeit auf eine andere App.
 
-Fotos werden in der Reihenfolge des Hinzufügens angezeigt. Beim Ersetzen bleibt
-die Position erhalten. Entfernte oder ersetzte gespeicherte Bilder sind nur noch
+Fotos lassen sich beim Erfassen und Korrigieren direkt im Raster sortieren:
+länger drücken und an die gewünschte Position ziehen. Am Bildschirmrand scrollt
+das Formular mit. Das Fotomenü bietet außerdem „Nach vorne“ und „Nach hinten“.
+Neue Fotos werden angehängt. Beim Ersetzen bleibt die Position erhalten.
+Eine reine Umsortierung wird als „Fotoreihenfolge geändert“ protokolliert.
+Entfernte oder ersetzte gespeicherte Bilder sind nur noch
 im Korrekturverlauf sichtbar und werden nicht in neue PDFs übernommen. Erst
 „Korrektur protokollieren“ übernimmt Änderungen. Der Grund bleibt optional.
 
@@ -52,6 +56,12 @@ bis zur Löschung des Projektstands oder Projekts erhalten.
 Datenbankschema 5 liest alte Einzelfotos ohne Verlust. Neue Backups verwenden
 Version 4. Backups der Versionen 1–3 bleiben importierbar, inklusive bestehender
 Fotokorrekturen und gespeicherter PDFs.
+
+Neue PDFs zeigen je Abschnitt „Projektstand 1“, „Projektstand 2“ usw. mit Reihe
+oder Runde und Zeitpunkt über dem ersten Foto. Die Bilder folgen der gespeicherten
+Reihenfolge. Im Verlaufs-PDF verweisen die Nummern der Übersicht auf die passenden
+Detailabschnitte. Die neuesten Stände stehen weiterhin zuerst. Die Nummern gelten
+nur innerhalb des jeweiligen Dokuments.
 
 Projekte zeigen die zehn neuesten Stände; vollständige Verläufe und gespeicherte
 Verlaufs-PDFs sind paginiert. Korrekturgründe sind optional. Beim Löschen eines

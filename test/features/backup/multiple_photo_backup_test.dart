@@ -37,10 +37,11 @@ void main() {
       final meters = MemoryMeterRepository()..items['book'] = sampleBook();
       final readings = MemoryReadingRepository();
       final exports = MemoryEvidenceExportRepository();
-      var reading = sampleReading(
-        path: photos[0].path,
-        hash: photos[0].sha256,
-      ).copyWith(photos: photos.take(3).toList(), photoHistory: [photos[3]]);
+      var reading = sampleReading(path: photos[0].path, hash: photos[0].sha256)
+          .copyWith(
+            photos: [photos[2], photos[0], photos[1]],
+            photoHistory: [photos[3]],
+          );
       reading = reading.copyWith(
         manifestSha256: await integrity.readingManifestHash(reading),
       );
@@ -53,7 +54,7 @@ void main() {
         changes: {},
         photoChange: const ReadingPhotoChange(
           beforeIds: ['p0', 'p3'],
-          afterIds: ['p0', 'p1', 'p2'],
+          afterIds: ['p2', 'p0', 'p1'],
         ),
       );
       await readings.saveRevision(revision);
@@ -74,7 +75,7 @@ void main() {
       final target = MemoryReadingRepository();
       await backupService(target).restore(backup.path, 'fixture-only');
       var restored = target.items.values.single;
-      expect(restored.currentPhotos.map((p) => p.id), ['p0', 'p1', 'p2']);
+      expect(restored.currentPhotos.map((p) => p.id), ['p2', 'p0', 'p1']);
       expect(restored.photoHistory.single.id, 'p3');
       expect(
         await integrity.readingManifestHash(restored),
@@ -104,7 +105,7 @@ void main() {
       final latest = target.items.values.single;
       expect(latest.note, 'Neuere Notiz');
       expect(await File(latest.currentPhotos[1].path).readAsBytes(), [
-        1,
+        0,
         10,
         20,
       ]);

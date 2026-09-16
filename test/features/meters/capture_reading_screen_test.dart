@@ -723,7 +723,7 @@ void main() {
     );
     expect(find.text('Projektprotokoll · Projektverlauf'), findsOneWidget);
     expect(
-      find.textContaining('kompakt ohne Fotos oder mit dem aktuellen'),
+      find.textContaining('kompakt ohne Fotos oder mit allen aktuellen Fotos'),
       findsOneWidget,
     );
     final readingCard = find.byKey(const ValueKey('reading-card-reading_pdf'));

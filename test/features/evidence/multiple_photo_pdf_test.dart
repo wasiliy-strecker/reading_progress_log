@@ -85,11 +85,11 @@ void main() {
         );
         assets.paths.clear();
         reading = reading.copyWith(
-          photos: [photos[1], photos[2]],
+          photos: [photos[2], photos[1]],
           photoHistory: [photos[3], photos[0]],
         );
         final next = await export(reading, EvidencePhotoMode.currentPhotos);
-        expect(assets.paths, photos.skip(1).take(2).map((p) => p.path));
+        expect(assets.paths, [photos[2].path, photos[1].path]);
         expect(
           RegExp(
             r'/Subtype\s*/Image',

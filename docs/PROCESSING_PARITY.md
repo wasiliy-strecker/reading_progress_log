@@ -169,3 +169,22 @@ Historische Bilder werden nicht neu eingebettet. Vorhandene PDFs bleiben erhalte
 Die autorisierten Abweichungen sind in `processing_exceptions.json` mit
 unveränderten Quell-Hashes und gezielten Regressionstests dokumentiert. Der
 ursprüngliche Verarbeitungsvergleich wird nicht neu eingefroren.
+
+## Fotoreihenfolge und PDF-Gliederung
+
+Die vorhandenen geordneten Fotolisten werden jetzt im Erfassen- und Korrekturformular
+per langem Drücken und Ziehen oder über das Fotomenü umgeordnet. Die Entwurfssicherung
+übernimmt ausschließlich vollständige Permutationen der bestehenden Foto-IDs und
+setzt bei Schreibfehlern die bisherige Reihenfolge zurück. Neue Foto-Dateien oder
+Fotoversionen entstehen dabei nicht. Eine gespeicherte Umsortierung verwendet die
+bestehenden Vorher-/Nachher-IDs und wird im Korrekturverlauf ausdrücklich benannt.
+
+Neue PDFs zeigen eine nummerierte Projektstand-Überschrift und die Wert-/Zeittabelle
+oberhalb des ersten Fotos. Weitere Fotos tragen die gleiche Projektstandnummer.
+Die Verlaufsübersicht und Detailabschnitte nutzen dieselbe Nummerierung in der
+bisherigen Reihenfolge, neuester Stand zuerst. Kompakte Einträge bleiben in der
+Übersicht. Gespeicherte PDF-Dateien werden nicht nachträglich geändert.
+
+Schema 5, Backup-Version 4, Verschlüsselung und eingefrorene Paritätsdateien bleiben
+unverändert. Sortierung, Rücknahme, Entwurfswiederherstellung, Backup-Reihenfolge
+und PDF-Positionen sind durch gezielte Tests abgesichert.
