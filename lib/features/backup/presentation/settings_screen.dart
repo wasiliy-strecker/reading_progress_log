@@ -450,8 +450,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
       if (mounted) {
         _showMessage(
-          '${_countLabel(result.meters, 'Projekt', 'Projekte')} und ${_countLabel(result.readings, 'Projektstand', 'Projektstände')} wiederhergestellt; ${result.skipped} unveränderte oder neuere Einträge übersprungen.'
-          '${result.repairedPhotos > 0 ? ' ${_countLabel(result.repairedPhotos, 'Foto', 'Fotos')} repariert.' : ''}',
+          '${_countLabel(result.meters, 'Projekt', 'Projekte')} und ${_countLabel(result.readings, 'Projektstand', 'Projektstände')} wiederhergestellt. ${result.skipped} unveränderte oder neuere Einträge übersprungen.'
+          '${result.repairedPhotos > 0 ? ' ${_countLabel(result.repairedPhotos, 'Foto', 'Fotos')} repariert.' : ''}'
+          '${result.reminderIssues > 0 ? ' Bei ${result.reminderIssues} Einträgen konnte die Erinnerung nicht bestätigt werden. Bitte prüfe die Erinnerungen in der Übersicht.' : ''}',
         );
       }
     } on BackupException catch (error) {

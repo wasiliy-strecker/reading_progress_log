@@ -157,7 +157,7 @@ void main() {
       expect(
         find.text(
           availability == ReminderAvailability.unknown
-              ? 'Geplanter Termin'
+              ? 'Planungsstatus unbekannt'
               : 'Erinnerungen nicht unterstützt',
         ),
         findsOneWidget,

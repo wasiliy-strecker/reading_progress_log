@@ -66,6 +66,11 @@ class MeterService {
   }
 
   Future<void> delete(String meterId) async {
+    if (await reminders.cancel(meterId) == ReminderOperationResult.failed) {
+      throw StateError(
+        'Die Erinnerung konnte nicht ausgeschaltet werden. Bitte erneut versuchen.',
+      );
+    }
     final meterReadings = await readings.loadForMeter(meterId);
     final evidenceExports = await exports.loadForMeter(meterId);
     for (final reading in meterReadings) {
@@ -85,7 +90,6 @@ class MeterService {
       }
       await exports.delete(export.id);
     }
-    await reminders.cancel(meterId);
     await meters.delete(meterId);
   }
 }

@@ -49,16 +49,39 @@ enum ReminderTestResult {
   };
 }
 
+enum ReminderOperationResult {
+  scheduled,
+  cancelled,
+  blocked,
+  failed,
+  unsupported,
+}
+
+enum ReminderPlanningState { unknown, scheduled, none, failed, cancelFailed }
+
 class ReminderStatus {
   const ReminderStatus({
     required this.meterId,
     required this.isNotificationActive,
     this.lastTriggeredAt,
+    this.nextTriggerAt,
+    this.planningState = ReminderPlanningState.unknown,
+    this.isExact,
+    this.deliveryFailed = false,
   });
 
   final String meterId;
   final bool isNotificationActive;
   final DateTime? lastTriggeredAt;
+  final DateTime? nextTriggerAt;
+  final ReminderPlanningState planningState;
+  final bool? isExact;
+  final bool deliveryFailed;
+
+  bool get needsRepair =>
+      planningState == ReminderPlanningState.failed ||
+      planningState == ReminderPlanningState.cancelFailed ||
+      planningState == ReminderPlanningState.none;
 }
 
 class MeterReminderTestRequest {
@@ -104,9 +127,12 @@ abstract interface class MeterReminderRepository {
 
   Future<bool> openNotificationSettings({ReminderDeliveryMode? mode});
 
-  Future<void> schedule(Meter meter, {MeterReading? latestReading});
+  Future<ReminderOperationResult> schedule(
+    Meter meter, {
+    MeterReading? latestReading,
+  });
 
-  Future<void> cancel(String meterId);
+  Future<ReminderOperationResult> cancel(String meterId);
 
   Future<void> acknowledge(String meterId);
 
@@ -131,6 +157,7 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
   final _notificationOpened = StreamController<String>.broadcast();
   int _statusRevision = 0;
   bool _initialized = false;
+  final _operationFailures = <String, ReminderPlanningState>{};
 
   @override
   Stream<int> get statusChanges => _statusChanges.stream;
@@ -293,21 +320,22 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
   }
 
   @override
-  Future<void> schedule(Meter meter, {MeterReading? latestReading}) async {
+  Future<ReminderOperationResult> schedule(
+    Meter meter, {
+    MeterReading? latestReading,
+  }) async {
     await initialize();
     final schedule = meter.reminder;
-    if (schedule == null) {
-      await cancel(meter.id);
-      return;
-    }
-    if (!_supportsNotifications) return;
+    if (schedule == null) return cancel(meter.id);
+    if (!_supportsNotifications) return ReminderOperationResult.unsupported;
     var permission = await permissionStatus();
-    if (permission != ReminderPermissionStatus.granted) {
+    if (permission == ReminderPermissionStatus.denied) {
       permission = await requestPermission();
     }
-    if (permission != ReminderPermissionStatus.granted) return;
+    // Keep the saved schedule current even while notifications are blocked.
+    // Android checks delivery permission again when the alarm actually fires.
     try {
-      await _channel.invokeMethod<void>('schedule', {
+      final result = await _channel.invokeMethod<String>('schedule', {
         'meterId': meter.id,
         'label': meter.label,
         'meterType': meter.type.wireName,
@@ -323,22 +351,44 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
         'minute': schedule.minute,
         'deliveryMode': schedule.deliveryMode.name,
       });
+      if (result != 'scheduled') {
+        return _failed(meter.id, ReminderPlanningState.failed);
+      }
+      _operationFailures.remove(meter.id);
       refreshStatuses();
+      final available = await availability(schedule.deliveryMode);
+      return permission == ReminderPermissionStatus.denied ||
+              available.isBlocked
+          ? ReminderOperationResult.blocked
+          : ReminderOperationResult.scheduled;
     } on Object {
-      return;
+      return _failed(meter.id, ReminderPlanningState.failed);
     }
   }
 
   @override
-  Future<void> cancel(String meterId) async {
+  Future<ReminderOperationResult> cancel(String meterId) async {
     await initialize();
-    if (!_supportsNotifications) return;
+    if (!_supportsNotifications) return ReminderOperationResult.unsupported;
     try {
-      await _channel.invokeMethod<void>('cancel', {'meterId': meterId});
+      final result = await _channel.invokeMethod<String>('cancel', {
+        'meterId': meterId,
+      });
+      if (result != 'cancelled') {
+        return _failed(meterId, ReminderPlanningState.cancelFailed);
+      }
+      _operationFailures.remove(meterId);
       refreshStatuses();
+      return ReminderOperationResult.cancelled;
     } on Object {
-      return;
+      return _failed(meterId, ReminderPlanningState.cancelFailed);
     }
+  }
+
+  ReminderOperationResult _failed(String meterId, ReminderPlanningState state) {
+    _operationFailures[meterId] = state;
+    refreshStatuses();
+    return ReminderOperationResult.failed;
   }
 
   @override
@@ -360,21 +410,37 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
     await initialize();
     final ids = meterIds.toList(growable: false);
     if (!_supportsNotifications || ids.isEmpty) return const {};
+    final statuses = <String, ReminderStatus>{};
     try {
       final result = await _channel.invokeListMethod<Object?>('getStatuses', {
         'meterIds': ids,
       });
-      final statuses = <String, ReminderStatus>{};
       for (final raw in result ?? const []) {
         if (raw is! Map) continue;
         final values = Map<Object?, Object?>.from(raw);
         final meterId = values['meterId'] as String?;
         if (meterId == null) continue;
         final lastTriggeredMillis = values['lastTriggeredAtMillis'] as int?;
+        final nextTriggerMillis = values['nextTriggerAtMillis'] as int?;
         statuses[meterId] = ReminderStatus(
           meterId: meterId,
           isNotificationActive:
               values['isNotificationActive'] as bool? ?? false,
+          planningState: switch (values['planningState']) {
+            'scheduled' => ReminderPlanningState.scheduled,
+            'none' => ReminderPlanningState.none,
+            'failed' => ReminderPlanningState.failed,
+            'cancelFailed' => ReminderPlanningState.cancelFailed,
+            _ => ReminderPlanningState.unknown,
+          },
+          nextTriggerAt: nextTriggerMillis == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(
+                  nextTriggerMillis,
+                  isUtc: true,
+                ),
+          isExact: values['isExact'] as bool?,
+          deliveryFailed: values['deliveryFailed'] == true,
           lastTriggeredAt: lastTriggeredMillis == null
               ? null
               : DateTime.fromMillisecondsSinceEpoch(
@@ -383,10 +449,21 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
                 ),
         );
       }
-      return statuses;
     } on Object {
-      return const {};
+      // A failed query is unknown. Preserve separately observed operation errors.
     }
+    for (final id in ids) {
+      final failure = _operationFailures[id];
+      if (failure == null) continue;
+      final previous = statuses[id];
+      statuses[id] = ReminderStatus(
+        meterId: id,
+        isNotificationActive: previous?.isNotificationActive ?? false,
+        lastTriggeredAt: previous?.lastTriggeredAt,
+        planningState: failure,
+      );
+    }
+    return statuses;
   }
 
   @override

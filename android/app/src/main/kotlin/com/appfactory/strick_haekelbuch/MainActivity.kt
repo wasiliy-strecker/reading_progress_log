@@ -432,9 +432,13 @@ class MainActivity : FlutterActivity() {
             deliveryMode = deliveryMode,
             startsAtMillis = startsAtMillis,
         )
-        ReminderScheduler.update(this, reminder)
-        ReminderNotifier.migrateLegacyNotification(this, reminder)
-        result.success(null)
+        val scheduled = ReminderScheduler.update(this, reminder)
+        if (scheduled) {
+            try { ReminderNotifier.migrateLegacyNotification(this, reminder) } catch (_: Exception) {
+                // A legacy notification cannot invalidate an accepted new alarm.
+            }
+        }
+        result.success(if (scheduled) "scheduled" else "failed")
     }
 
     private fun cancel(call: MethodCall, result: MethodChannel.Result) {
@@ -443,10 +447,7 @@ class MainActivity : FlutterActivity() {
             result.error("missing_meter", "Projekt-ID fehlt.", null)
             return
         }
-        ReminderScheduler.cancelPending(this, meterId)
-        ReminderNotifier.acknowledge(this, meterId)
-        ReminderStore.remove(this, meterId)
-        result.success(null)
+        result.success(if (ReminderScheduler.cancel(this, meterId)) "cancelled" else "failed")
     }
 
     private fun acknowledge(call: MethodCall, result: MethodChannel.Result) {
@@ -465,13 +466,7 @@ class MainActivity : FlutterActivity() {
             ?.filterIsInstance<String>()
             .orEmpty()
         val activeIds = ReminderNotifier.activeMeterIds(this)
-        val statuses = meterIds.map { meterId ->
-            mapOf(
-                "meterId" to meterId,
-                "isNotificationActive" to activeIds.contains(meterId),
-                "lastTriggeredAtMillis" to ReminderStore.lastTriggered(this, meterId),
-            )
-        }
+        val statuses = meterIds.map { meterId -> ReminderScheduler.status(this, meterId, activeIds) }
         result.success(statuses)
     }
 

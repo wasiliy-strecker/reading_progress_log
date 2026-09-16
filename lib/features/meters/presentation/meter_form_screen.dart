@@ -9,6 +9,7 @@ import '../../../app/app_providers.dart';
 import '../../../app/widgets/app_snack_bar.dart';
 import '../../../app/widgets/confirm_dialog.dart';
 import '../../../core/reminders/local_notification_reminder_repository.dart';
+import '../../../core/reminders/reminder_save_feedback.dart';
 import '../../../core/reminders/reminder_delivery_state.dart';
 import '../../../core/utils/formatters.dart';
 import '../domain/meter.dart';
@@ -87,6 +88,35 @@ class _MeterFormState extends ConsumerState<_MeterForm>
   late ReminderDeliveryMode _deliveryMode;
   late final _MeterFormSnapshot _initialSnapshot;
   bool _saving = false;
+  ReminderStatus? _planningStatus;
+  bool _planningStatusLoaded = false;
+  int _planningStatusQuery = 0;
+
+  bool get _needsReminderRepair =>
+      _planningStatusLoaded &&
+      (_planningStatus?.planningState == ReminderPlanningState.cancelFailed ||
+          (widget.meter?.reminder != null &&
+              (_planningStatus?.planningState !=
+                      ReminderPlanningState.scheduled ||
+                  _planningStatus?.nextTriggerAt == null ||
+                  (widget.meter?.reminder?.deliveryMode ==
+                          ReminderDeliveryMode.punctualWithSound &&
+                      _planningStatus?.isExact == false))));
+
+  Future<void> _refreshPlanningStatus() async {
+    final id = widget.meter?.id;
+    if (id == null) return;
+    final query = ++_planningStatusQuery;
+    final statuses = await ref
+        .read(meterReminderRepositoryProvider)
+        .loadStatuses([id]);
+    if (!mounted || query != _planningStatusQuery) return;
+    setState(() {
+      _planningStatus = statuses[id];
+      _planningStatusLoaded = true;
+    });
+  }
+
   bool _testingReminder = false;
   bool _awaitingExactAlarmSettings = false;
   bool? _exactAlarmAvailable;
@@ -577,8 +607,17 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                 ),
                 const SizedBox(height: 12),
               ],
+              if (_needsReminderRepair) ...[
+                const Text(
+                  'Die Erinnerung ist nicht bestätigt. Mit Speichern wird sie erneut eingerichtet.',
+                ),
+                const SizedBox(height: 8),
+              ],
               FilledButton.icon(
-                onPressed: _saving || !hasUnsavedChanges ? null : _save,
+                onPressed:
+                    _saving || (!hasUnsavedChanges && !_needsReminderRepair)
+                    ? null
+                    : _save,
                 icon: _saving
                     ? const SizedBox.square(
                         dimension: 18,
@@ -592,8 +631,10 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                 label: Text(
                   _saving
                       ? 'Wird gespeichert …'
-                      : editing && !hasUnsavedChanges
+                      : editing && !hasUnsavedChanges && !_needsReminderRepair
                       ? 'Alles gespeichert'
+                      : _needsReminderRepair && !hasUnsavedChanges
+                      ? 'Erinnerung erneut speichern'
                       : editing
                       ? 'Änderungen speichern'
                       : 'Projekt speichern',
@@ -688,7 +729,8 @@ class _MeterFormState extends ConsumerState<_MeterForm>
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_saving || !_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
     if (_reminderEnabled &&
         _deliveryMode == ReminderDeliveryMode.punctualWithSound &&
         !await ref
@@ -696,6 +738,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
             .canScheduleExactAlarms()) {
       if (!mounted) return;
       setState(() {
+        _saving = false;
         _exactAlarmAvailable = false;
         _awaitingExactAlarmSettings = false;
       });
@@ -707,7 +750,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
       );
       return;
     }
-    setState(() => _saving = true);
+    if (!mounted) return;
     final reminder = _reminderEnabled
         ? ReadingReminderSchedule(
             interval: _interval,
@@ -758,26 +801,36 @@ class _MeterFormState extends ConsumerState<_MeterForm>
         await service.update(meter);
       }
       if (!mounted) return;
+      final warning = await reminderSaveWarning(
+        ref.read(meterReminderRepositoryProvider),
+        meter,
+      );
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
       final reminders = ref.read(meterReminderRepositoryProvider);
       final delivery = reminder == null
           ? const ReminderDeliveryState()
           : await ReminderDeliveryState.read(reminders, reminder.deliveryMode);
       if (!mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      final blockedNotice = delivery.blocked
-          ? AppSnackBar(
-              message:
-                  'Projekt gespeichert. Erinnerungen sind in Android blockiert.',
-              action: SnackBarAction(
-                label: 'Einstellungen',
-                onPressed: () => openReminderSettings(
-                  messenger: messenger,
-                  reminders: reminders,
-                  mode: delivery.appBlocked ? null : reminder!.deliveryMode,
-                ),
-              ),
-            )
-          : null;
+      final blockedNotice = warning == null
+          ? null
+          : AppSnackBar(
+              message: delivery.blocked
+                  ? 'Projekt gespeichert. Erinnerungen sind in Android blockiert.'
+                  : warning,
+              action: delivery.blocked
+                  ? SnackBarAction(
+                      label: 'Einstellungen',
+                      onPressed: () => openReminderSettings(
+                        messenger: messenger,
+                        reminders: reminders,
+                        mode: delivery.appBlocked
+                            ? null
+                            : reminder!.deliveryMode,
+                      ),
+                    )
+                  : null,
+            );
       if (existing == null) {
         setState(() => _allowPop = true);
         context.pushReplacementNamed(
@@ -935,6 +988,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
   }
 
   Future<void> _refreshDeliveryState() async {
+    unawaited(_refreshPlanningStatus());
     final query = ++_deliveryQuery;
     final mode = _deliveryMode;
     final state = await ReminderDeliveryState.read(

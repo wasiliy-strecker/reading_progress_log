@@ -9,6 +9,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.media.AudioManager
+import android.os.SystemClock
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
@@ -19,44 +21,51 @@ internal object ReminderScheduler {
     private const val fireAction =
         "com.appfactory.strick_haekelbuch.FIRE_METER_REMINDER"
 
-    fun update(context: Context, reminder: StoredReminder) {
+    fun update(context: Context, reminder: StoredReminder): Boolean {
         val triggerAt = reminder.nextTriggerForUpdate(
             ReminderStore.find(context, reminder.meterId),
             ReminderStore.nextTrigger(context, reminder.meterId),
             System.currentTimeMillis(),
         )
-        scheduleAt(context, reminder, triggerAt)
+        return scheduleAt(context, reminder, triggerAt)
     }
 
-    fun scheduleNext(context: Context, reminder: StoredReminder) {
+    fun scheduleNext(context: Context, reminder: StoredReminder): Boolean =
         scheduleAt(context, reminder, reminder.nextTriggerAfter(System.currentTimeMillis()))
-    }
 
-    private fun scheduleAt(context: Context, reminder: StoredReminder, triggerAt: Long) {
-        val alarmManager = context.getSystemService(AlarmManager::class.java)
-        val operation = firePendingIntent(context, reminder.meterId, false) ?: return
-        if (reminder.isPunctual && canScheduleExact(context)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
+    private fun scheduleAt(context: Context, reminder: StoredReminder, triggerAt: Long): Boolean {
+        return try {
+            val alarmManager = context.getSystemService(AlarmManager::class.java)
+            val operation = requireNotNull(firePendingIntent(context, reminder.meterId, false))
+            val exact = reminder.isPunctual && canScheduleExact(context)
+            if (exact) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        triggerAt,
+                        operation,
+                    )
+                } else {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAt, operation)
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     triggerAt,
                     operation,
                 )
             } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAt, operation)
+                alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAt, operation)
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerAt,
-                operation,
-            )
-        } else {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAt, operation)
+            // Persist only after Android accepts the alarm. Reusing the PendingIntent
+            // replaces its alarm without losing a due but delayed occurrence.
+            ReminderStore.save(context, reminder, triggerAt, exact)
+            true
+        } catch (_: Exception) {
+            // A queued old alarm must not deliver a new, unaccepted schedule.
+            ReminderStore.planningFailed(context, reminder, triggerAt)
+            false
         }
-        // Persist only after Android accepts the alarm. Reusing the PendingIntent
-        // replaces its alarm without losing a due but delayed occurrence.
-        ReminderStore.save(context, reminder, triggerAt)
     }
 
     fun cancelPending(context: Context, meterId: String) {
@@ -64,6 +73,28 @@ internal object ReminderScheduler {
         context.getSystemService(AlarmManager::class.java).cancel(operation)
         operation.cancel()
     }
+
+    fun cancel(context: Context, meterId: String): Boolean {
+        ReminderStore.remove(context, meterId)
+        return try {
+            cancelPending(context, meterId)
+            ReminderNotifier.acknowledge(context, meterId)
+            true
+        } catch (_: Exception) {
+            ReminderStore.cancelFailed(context, meterId)
+            false
+        }
+    }
+
+    fun status(context: Context, meterId: String, activeIds: Set<String> = ReminderNotifier.activeMeterIds(context)): Map<String, Any?> = mapOf(
+        "meterId" to meterId,
+        "isNotificationActive" to activeIds.contains(meterId),
+        "lastTriggeredAtMillis" to ReminderStore.lastTriggered(context, meterId),
+        "nextTriggerAtMillis" to ReminderStore.nextTrigger(context, meterId),
+        "planningState" to ReminderStore.planningState(context, meterId),
+        "isExact" to ReminderStore.isExact(context, meterId),
+        "deliveryFailed" to ReminderStore.deliveryFailed(context, meterId),
+    )
 
     fun rescheduleAll(context: Context, clockChanged: Boolean = false) {
         ReminderStore.all(context).forEach { reminder ->
@@ -210,6 +241,7 @@ internal object ReminderNotifier {
                     "$latestReading\nHalte deine aktuelle Reihe oder Runde fest und mache später entspannt weiter.",
                 ),
             )
+            .apply { configureLegacySound(this, reminder.isPunctual) }
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(category)
             .setAutoCancel(true)
@@ -283,6 +315,7 @@ internal object ReminderNotifier {
                     "$latestReading\nDas ist eine Test-Erinnerung. Tippen öffnet $target.",
                 ),
             )
+            .apply { configureLegacySound(this, punctual) }
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(
                 if (punctual) {
@@ -302,6 +335,7 @@ internal object ReminderNotifier {
             )
             .build()
         return try {
+            scheduleLegacyTestExpiry(context)
             context.getSystemService(NotificationManager::class.java).notify(
                 testTag,
                 testNotificationId,
@@ -328,6 +362,33 @@ internal object ReminderNotifier {
                     ?.removePrefix(meterTagPrefix)
             }
             .toSet()
+    }
+
+    private fun configureLegacySound(builder: NotificationCompat.Builder, punctual: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) return
+        val sound = RingtoneManager.getDefaultUri(if (punctual) RingtoneManager.TYPE_ALARM else RingtoneManager.TYPE_NOTIFICATION)
+            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        builder.setSound(sound, if (punctual) AudioManager.STREAM_ALARM else AudioManager.STREAM_NOTIFICATION)
+            .setVibrate(longArrayOf(0L, 200L, 100L, 200L))
+    }
+
+    internal const val expireTestAction = "com.appfactory.strick_haekelbuch.EXPIRE_REMINDER_TEST"
+
+    private fun scheduleLegacyTestExpiry(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) return
+        val deadline = SystemClock.elapsedRealtime() + 60_000L
+        val operation = PendingIntent.getBroadcast(context, 2002,
+            Intent(context, MeterReminderReceiver::class.java).setAction(expireTestAction)
+                .putExtra("deadline", deadline),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        context.getSystemService(AlarmManager::class.java).setExactAndAllowWhileIdle(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP, deadline, operation)
+    }
+
+    fun expireTest(context: Context, intent: Intent) {
+        // A previously queued expiration must not remove a newer test early.
+        if (SystemClock.elapsedRealtime() < intent.getLongExtra("deadline", Long.MAX_VALUE)) return
+        context.getSystemService(NotificationManager::class.java).cancel(testTag, testNotificationId)
     }
 
     private fun ensureChannels(context: Context) {

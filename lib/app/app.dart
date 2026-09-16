@@ -71,9 +71,15 @@ class _MeterReadingLogAppState extends ConsumerState<MeterReadingLogApp>
         await reminders.cancel(meter.id);
         continue;
       }
-      final readings = await ref
-          .read(meterReadingRepositoryProvider)
-          .loadForMeter(meter.id);
+      List<MeterReading> readings;
+      try {
+        readings = await ref
+            .read(meterReadingRepositoryProvider)
+            .loadForMeter(meter.id);
+      } on Object {
+        // A missing summary must not prevent this or subsequent schedules.
+        readings = const [];
+      }
       await reminders.schedule(meter, latestReading: _latestReading(readings));
     }
   }

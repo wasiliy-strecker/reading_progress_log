@@ -280,9 +280,6 @@ class _MeterCard extends StatelessWidget {
       brightness: Theme.of(context).brightness,
     );
     final reminder = meter.reminder;
-    final nextReminder = reminder == null
-        ? null
-        : nextReminderDate(reminder, DateTime.now());
     return Card(
       key: ValueKey('dashboard-meter-${meter.id}'),
       margin: const EdgeInsets.only(bottom: 12),
@@ -342,7 +339,18 @@ class _MeterCard extends StatelessWidget {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    if (reminder != null && nextReminder != null) ...[
+                    if (reminder == null &&
+                        reminderStatus?.planningState ==
+                            ReminderPlanningState.cancelFailed) ...[
+                      const SizedBox(height: 8),
+                      ReminderScheduleStatus(
+                        meterId: meter.id,
+                        deliveryMode: ReminderDeliveryMode.normal,
+                        status: reminderStatus,
+                        accentColor: color,
+                      ),
+                    ],
+                    if (reminder != null) ...[
                       const SizedBox(height: 8),
                       Text(
                         'Erinnern: ${_reminderSummary(reminder)}',
@@ -354,7 +362,7 @@ class _MeterCard extends StatelessWidget {
                       ReminderScheduleStatus(
                         meterId: meter.id,
                         deliveryMode: reminder.deliveryMode,
-                        nextReminder: nextReminder,
+                        status: reminderStatus,
                         accentColor: color,
                       ),
                       const SizedBox(height: 6),

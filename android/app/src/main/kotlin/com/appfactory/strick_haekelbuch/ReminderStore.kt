@@ -207,15 +207,49 @@ internal object ReminderStore {
     private const val schedulePrefix = "schedule:"
     private const val lastTriggeredPrefix = "last_triggered:"
     private const val nextTriggerPrefix = "next_trigger:"
+    private const val planningStatePrefix = "planning_state:"
+    private const val exactPrefix = "exact:"
+    private const val deliveryFailurePrefix = "delivery_failure:"
 
     private fun preferences(context: Context) =
         context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
 
-    fun save(context: Context, reminder: StoredReminder, nextTriggerAtMillis: Long) {
+    fun save(context: Context, reminder: StoredReminder, nextTriggerAtMillis: Long, exact: Boolean) {
         preferences(context).edit()
             .putString(schedulePrefix + reminder.meterId, reminder.toJson())
             .putLong(nextTriggerPrefix + reminder.meterId, nextTriggerAtMillis)
+            .putString(planningStatePrefix + reminder.meterId, "scheduled")
+            .putBoolean(exactPrefix + reminder.meterId, exact)
             .apply()
+    }
+
+    fun planningFailed(context: Context, reminder: StoredReminder, triggerAt: Long) {
+        // Keep the desired schedule for retries, but never report it as accepted.
+        preferences(context).edit()
+            .putString(schedulePrefix + reminder.meterId, reminder.toJson())
+            .putLong(nextTriggerPrefix + reminder.meterId, triggerAt)
+            .putString(planningStatePrefix + reminder.meterId, "failed")
+            .remove(exactPrefix + reminder.meterId)
+            .apply()
+    }
+
+    fun cancelFailed(context: Context, meterId: String) {
+        preferences(context).edit().putString(planningStatePrefix + meterId, "cancelFailed").apply()
+    }
+
+    fun planningState(context: Context, meterId: String): String =
+        preferences(context).getString(planningStatePrefix + meterId, null)
+            ?: if (find(context, meterId) == null) "none" else "unknown"
+
+    fun isExact(context: Context, meterId: String): Boolean? =
+        if (preferences(context).contains(exactPrefix + meterId))
+            preferences(context).getBoolean(exactPrefix + meterId, false) else null
+
+    fun deliveryFailed(context: Context, meterId: String): Boolean =
+        preferences(context).getBoolean(deliveryFailurePrefix + meterId, false)
+
+    fun setDeliveryFailed(context: Context, meterId: String, failed: Boolean) {
+        preferences(context).edit().putBoolean(deliveryFailurePrefix + meterId, failed).apply()
     }
 
     fun nextTrigger(context: Context, meterId: String): Long? {
@@ -240,6 +274,9 @@ internal object ReminderStore {
             .remove(schedulePrefix + meterId)
             .remove(lastTriggeredPrefix + meterId)
             .remove(nextTriggerPrefix + meterId)
+            .remove(planningStatePrefix + meterId)
+            .remove(exactPrefix + meterId)
+            .remove(deliveryFailurePrefix + meterId)
             .apply()
     }
 

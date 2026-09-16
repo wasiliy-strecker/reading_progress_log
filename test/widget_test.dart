@@ -967,6 +967,13 @@ void main() {
             meterId: meter.id,
             isNotificationActive: true,
             lastTriggeredAt: DateTime(2026, 9, 5, 6, 1),
+            planningState: ReminderPlanningState.scheduled,
+            nextTriggerAt: DateTime(
+              DateTime.now().year,
+              DateTime.now().month,
+              DateTime.now().day + 1,
+              6,
+            ),
           ),
         },
       );

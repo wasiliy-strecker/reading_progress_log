@@ -118,6 +118,7 @@ class BackupImportResult {
     required this.exports,
     required this.skipped,
     this.repairedPhotos = 0,
+    this.reminderIssues = 0,
   });
 
   final int meters;
@@ -125,6 +126,7 @@ class BackupImportResult {
   final int exports;
   final int skipped;
   final int repairedPhotos;
+  final int reminderIssues;
 }
 
 typedef BackupDirectoryProvider = Future<Directory> Function();
@@ -443,19 +445,30 @@ class EncryptedBackupService {
       exportCount += 1;
     }
 
+    var reminderIssues = 0;
     for (final meter in await meters.loadAll()) {
-      if (meter.reminder == null) {
-        await reminders.cancel(meter.id);
-        continue;
+      try {
+        final meterReadings = meter.reminder == null
+            ? const <MeterReading>[]
+            : await readings.loadForMeter(meter.id);
+        final latestReading = meterReadings.isEmpty
+            ? null
+            : meterReadings.reduce(
+                (left, right) =>
+                    left.capturedAt.isAfter(right.capturedAt) ? left : right,
+              );
+        final result = await reminders.schedule(
+          meter,
+          latestReading: latestReading,
+        );
+        if (result != ReminderOperationResult.scheduled &&
+            result != ReminderOperationResult.cancelled) {
+          reminderIssues++;
+        }
+      } on Object {
+        // Restored data is valid even if a single reminder cannot be reconciled.
+        reminderIssues++;
       }
-      final meterReadings = await readings.loadForMeter(meter.id);
-      final latestReading = meterReadings.isEmpty
-          ? null
-          : meterReadings.reduce(
-              (left, right) =>
-                  left.capturedAt.isAfter(right.capturedAt) ? left : right,
-            );
-      await reminders.schedule(meter, latestReading: latestReading);
     }
     return BackupImportResult(
       meters: meterCount,
@@ -463,6 +476,7 @@ class EncryptedBackupService {
       exports: exportCount,
       skipped: skipped,
       repairedPhotos: repairedPhotos,
+      reminderIssues: reminderIssues,
     );
   }
 

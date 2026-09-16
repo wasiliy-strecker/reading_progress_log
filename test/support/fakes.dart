@@ -55,6 +55,10 @@ class NoopMeterReminderRepository implements MeterReminderRepository {
         meterId: meterId,
         isNotificationActive: false,
         lastTriggeredAt: status.lastTriggeredAt,
+        nextTriggerAt: status.nextTriggerAt,
+        planningState: status.planningState,
+        isExact: status.isExact,
+        deliveryFailed: status.deliveryFailed,
       );
     }
   }
@@ -86,8 +90,9 @@ class NoopMeterReminderRepository implements MeterReminderRepository {
   }
 
   @override
-  Future<void> cancel(String meterId) async {
+  Future<ReminderOperationResult> cancel(String meterId) async {
     cancelledMeterIds.add(meterId);
+    return ReminderOperationResult.cancelled;
   }
 
   @override
@@ -107,7 +112,28 @@ class NoopMeterReminderRepository implements MeterReminderRepository {
     final result = <String, ReminderStatus>{};
     for (final meterId in meterIds) {
       final status = statuses[meterId];
-      if (status != null) result[meterId] = status;
+      final scheduled = scheduledMeters
+          .where((meter) => meter.id == meterId)
+          .lastOrNull;
+      result[meterId] = ReminderStatus(
+        meterId: meterId,
+        isNotificationActive: status?.isNotificationActive ?? false,
+        lastTriggeredAt: status?.lastTriggeredAt,
+        nextTriggerAt:
+            status?.nextTriggerAt ??
+            (scheduled?.reminder == null
+                ? null
+                : nextReminderDate(scheduled!.reminder!, DateTime.now())),
+        planningState:
+            status?.planningState != ReminderPlanningState.unknown &&
+                status != null
+            ? status.planningState
+            : scheduled?.reminder == null
+            ? ReminderPlanningState.none
+            : ReminderPlanningState.scheduled,
+        isExact: status?.isExact ?? exactAlarmPermissionGranted,
+        deliveryFailed: status?.deliveryFailed ?? false,
+      );
     }
     return result;
   }
@@ -134,9 +160,15 @@ class NoopMeterReminderRepository implements MeterReminderRepository {
   Future<ReminderPermissionStatus> requestPermission() async => permission;
 
   @override
-  Future<void> schedule(Meter meter, {MeterReading? latestReading}) async {
+  Future<ReminderOperationResult> schedule(
+    Meter meter, {
+    MeterReading? latestReading,
+  }) async {
+    if (meter.reminder == null) return cancel(meter.id);
     scheduledMeters.add(meter);
     scheduledLatestReadings.add(latestReading);
+    refreshStatuses();
+    return ReminderOperationResult.scheduled;
   }
 
   @override
