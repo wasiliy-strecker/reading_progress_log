@@ -8,6 +8,9 @@ class MeterReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val meterId = intent.getStringExtra("meter_id") ?: return
         val reminder = ReminderStore.find(context, meterId) ?: return
+        val nextTrigger = ReminderStore.nextTrigger(context, meterId)
+        // A previously queued broadcast may arrive after an edit or delivery.
+        if (nextTrigger != null && nextTrigger > System.currentTimeMillis()) return
         val postedAt = ReminderNotifier.showMeter(context, reminder)
         if (postedAt != null) {
             ReminderStore.setLastTriggered(context, meterId, postedAt)
@@ -21,6 +24,10 @@ class MeterReminderReceiver : BroadcastReceiver() {
 
 class ReminderRescheduleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        ReminderScheduler.rescheduleAll(context)
+        ReminderScheduler.rescheduleAll(
+            context,
+            clockChanged = intent.action == Intent.ACTION_TIME_CHANGED ||
+                intent.action == Intent.ACTION_TIMEZONE_CHANGED,
+        )
     }
 }

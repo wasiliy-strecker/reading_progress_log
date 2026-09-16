@@ -432,10 +432,8 @@ class MainActivity : FlutterActivity() {
             deliveryMode = deliveryMode,
             startsAtMillis = startsAtMillis,
         )
-        ReminderScheduler.cancelPending(this, meterId)
-        ReminderStore.save(this, reminder)
+        ReminderScheduler.update(this, reminder)
         ReminderNotifier.migrateLegacyNotification(this, reminder)
-        ReminderScheduler.scheduleNext(this, reminder)
         result.success(null)
     }
 

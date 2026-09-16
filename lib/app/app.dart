@@ -86,9 +86,15 @@ class _MeterReadingLogAppState extends ConsumerState<MeterReadingLogApp>
   }
 
   void _openMeter(String meterId) {
-    ref
-        .read(appRouterProvider)
-        .goNamed('meterDetail', pathParameters: {'id': meterId});
+    final router = ref.read(appRouterProvider);
+    if (router.state.name == 'meterDetail' &&
+        router.state.pathParameters['id'] == meterId) {
+      return;
+    }
+    // Keep open forms and their unsaved input on the navigation stack.
+    unawaited(
+      router.pushNamed<void>('meterDetail', pathParameters: {'id': meterId}),
+    );
   }
 
   @override

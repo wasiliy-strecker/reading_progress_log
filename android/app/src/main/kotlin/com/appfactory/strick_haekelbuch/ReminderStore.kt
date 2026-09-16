@@ -48,6 +48,31 @@ internal data class StoredReminder(
         .put("startsAtMillis", startsAtMillis)
         .toString()
 
+    // Content and delivery-mode changes must not skip an outstanding occurrence.
+    fun nextTriggerForUpdate(
+        previous: StoredReminder?,
+        pendingTriggerAtMillis: Long?,
+        nowMillis: Long,
+        zoneId: ZoneId = ZoneId.systemDefault(),
+    ): Long {
+        if (previous != null && pendingTriggerAtMillis != null && sameTiming(previous)) {
+            return pendingTriggerAtMillis
+        }
+        return nextTriggerAfter(nowMillis, zoneId)
+    }
+
+    private fun sameTiming(other: StoredReminder): Boolean {
+        if (meterId != other.meterId || interval != other.interval) return false
+        if (interval == "hourly") return startsAtMillis == other.startsAtMillis
+        if (interval == "minutely" && BuildConfig.DEBUG) return true
+        if (hour != other.hour || minute != other.minute) return false
+        return when (interval) {
+            "daily", "minutely" -> true
+            "weekly", "monthly" -> day == other.day
+            else -> day == other.day && month == other.month
+        }
+    }
+
     fun nextTriggerAfter(
         nowMillis: Long,
         zoneId: ZoneId = ZoneId.systemDefault(),
@@ -181,14 +206,22 @@ internal object ReminderStore {
     private const val preferencesName = "meter_reminder_state"
     private const val schedulePrefix = "schedule:"
     private const val lastTriggeredPrefix = "last_triggered:"
+    private const val nextTriggerPrefix = "next_trigger:"
 
     private fun preferences(context: Context) =
         context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
 
-    fun save(context: Context, reminder: StoredReminder) {
+    fun save(context: Context, reminder: StoredReminder, nextTriggerAtMillis: Long) {
         preferences(context).edit()
             .putString(schedulePrefix + reminder.meterId, reminder.toJson())
+            .putLong(nextTriggerPrefix + reminder.meterId, nextTriggerAtMillis)
             .apply()
+    }
+
+    fun nextTrigger(context: Context, meterId: String): Long? {
+        val key = nextTriggerPrefix + meterId
+        val values = preferences(context)
+        return if (values.contains(key)) values.getLong(key, 0L) else null
     }
 
     fun find(context: Context, meterId: String): StoredReminder? {
@@ -206,6 +239,7 @@ internal object ReminderStore {
         preferences(context).edit()
             .remove(schedulePrefix + meterId)
             .remove(lastTriggeredPrefix + meterId)
+            .remove(nextTriggerPrefix + meterId)
             .apply()
     }
 

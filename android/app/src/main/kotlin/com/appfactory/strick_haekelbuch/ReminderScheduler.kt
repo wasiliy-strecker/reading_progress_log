@@ -19,9 +19,21 @@ internal object ReminderScheduler {
     private const val fireAction =
         "com.appfactory.strick_haekelbuch.FIRE_METER_REMINDER"
 
+    fun update(context: Context, reminder: StoredReminder) {
+        val triggerAt = reminder.nextTriggerForUpdate(
+            ReminderStore.find(context, reminder.meterId),
+            ReminderStore.nextTrigger(context, reminder.meterId),
+            System.currentTimeMillis(),
+        )
+        scheduleAt(context, reminder, triggerAt)
+    }
+
     fun scheduleNext(context: Context, reminder: StoredReminder) {
+        scheduleAt(context, reminder, reminder.nextTriggerAfter(System.currentTimeMillis()))
+    }
+
+    private fun scheduleAt(context: Context, reminder: StoredReminder, triggerAt: Long) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
-        val triggerAt = reminder.nextTriggerAfter(System.currentTimeMillis())
         val operation = firePendingIntent(context, reminder.meterId, false) ?: return
         if (reminder.isPunctual && canScheduleExact(context)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -42,6 +54,9 @@ internal object ReminderScheduler {
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAt, operation)
         }
+        // Persist only after Android accepts the alarm. Reusing the PendingIntent
+        // replaces its alarm without losing a due but delayed occurrence.
+        ReminderStore.save(context, reminder, triggerAt)
     }
 
     fun cancelPending(context: Context, meterId: String) {
@@ -50,10 +65,13 @@ internal object ReminderScheduler {
         operation.cancel()
     }
 
-    fun rescheduleAll(context: Context) {
+    fun rescheduleAll(context: Context, clockChanged: Boolean = false) {
         ReminderStore.all(context).forEach { reminder ->
-            cancelPending(context, reminder.meterId)
-            scheduleNext(context, reminder)
+            if (clockChanged) {
+                scheduleNext(context, reminder)
+            } else {
+                update(context, reminder)
+            }
         }
     }
 

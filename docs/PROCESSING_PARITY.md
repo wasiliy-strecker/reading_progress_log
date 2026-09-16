@@ -111,3 +111,27 @@ wieder her. Die Bearbeitungsseite erhält dieselbe Datensatz-ID und lädt die
 bereits gespeicherten Daten. Das führt keine dauerhafte Speicherung ungesicherter
 Eingaben ein. Prüfungen erstellen ausdrücklich einen neuen Router, prüfen den
 aktuellen Berechtigungsstatus sowie den Zurück-Weg und laufen ohne Smartphone.
+
+## Erinnerungskorrekturen vom 16.09.2026
+
+Die Korrekturen für Benachrichtigungsnavigation, Dashboard-Sperrstatus und
+Android-Neuplanung werden in allen drei Apps mit derselben app-lokalen Logik
+geführt. App-Kennungen, fachliche Texte und die jeweiligen Themes bleiben lokal.
+
+- Das Antippen einer Erinnerung öffnet die Detailkarte über der aktuellen Seite.
+  Zurück führt zum offenen Formular mit seinen ungespeicherten Eingaben.
+- Das Dashboard prüft die Benachrichtigungsfreigabe je Erinnerungsart. Bei einer
+  Sperre zeigt es den Grund und den passenden Zugang zu Android-Einstellungen.
+  Nach Rückkehr wird der Zustand aktualisiert. Ein unbekannter Zustand wird
+  nicht als bestätigte Zustellung dargestellt.
+- Android speichert zusätzlich den ausstehenden Auslösezeitpunkt in den lokalen
+  Erinnerungsmetadaten. Unveränderte Zeitpläne behalten diesen Termin auch bei
+  verspäteter Zustellung, App-Start, Neustart oder erneuter Alarmfreigabe.
+  Geänderte Zeitpläne und Änderungen der Systemzeit oder Zeitzone werden neu
+  berechnet. Nach einem verarbeiteten Alarm wird die nächste Wiederholung geplant.
+  Vorhandene Zeitpläne ohne diese Zusatzmetadaten bleiben lesbar.
+
+Datenbank, Backup-Format und eingefrorene Verarbeitungs-Hashes bleiben unverändert.
+Identische Ablaufprüfungen unter `test/app/reminder_flow_regression_test.dart`
+und JVM-Prüfungen unter `test/native/ReminderScheduleUpdateCheck.java` sichern
+das Verhalten app-lokal ab.

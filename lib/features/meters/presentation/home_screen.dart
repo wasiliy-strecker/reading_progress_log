@@ -9,6 +9,7 @@ import '../../../core/utils/formatters.dart';
 import '../domain/meter.dart';
 import '../domain/meter_dashboard_item.dart';
 import 'meter_visuals.dart';
+import 'reminder_schedule_status.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -350,52 +351,11 @@ class _MeterCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Container(
-                        key: ValueKey('next-reminder-${meter.id}'),
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 9,
-                        ),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: color.withValues(alpha: 0.35),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.schedule_outlined,
-                              size: 20,
-                              color: color,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Nächste Erinnerung',
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(
-                                          color: color,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                  ),
-                                  Text(
-                                    '${formatDateTime(nextReminder)} Uhr',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(fontWeight: FontWeight.w900),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                      ReminderScheduleStatus(
+                        meterId: meter.id,
+                        deliveryMode: reminder.deliveryMode,
+                        nextReminder: nextReminder,
+                        accentColor: color,
                       ),
                       const SizedBox(height: 6),
                       Container(
