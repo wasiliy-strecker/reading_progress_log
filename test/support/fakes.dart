@@ -11,22 +11,22 @@ import 'package:strick_haekelbuch/core/reminders/local_notification_reminder_rep
 class NoopMeterReminderRepository implements MeterReminderRepository {
   NoopMeterReminderRepository({
     this.statuses = const {},
-    this.reminderTestResult = true,
+    this.reminderTestResult = ReminderTestResult.posted,
     this.permission = ReminderPermissionStatus.granted,
     this.exactAlarmPermissionGranted = true,
     this.doNotDisturb = DoNotDisturbStatus.disabled,
-    this.normalChannel = ReminderChannelStatus.enabled,
-    this.alarmChannel = ReminderChannelStatus.enabled,
+    this.normalAvailability = ReminderAvailability.available,
+    this.punctualAvailability = ReminderAvailability.available,
     this.settingsOpenResult = true,
     String? initialMeterId,
   }) : _initialMeterId = initialMeterId;
 
   final Map<String, ReminderStatus> statuses;
-  final bool reminderTestResult;
+  final ReminderTestResult reminderTestResult;
   ReminderPermissionStatus permission;
   DoNotDisturbStatus doNotDisturb;
-  ReminderChannelStatus normalChannel;
-  ReminderChannelStatus alarmChannel;
+  ReminderAvailability normalAvailability;
+  ReminderAvailability punctualAvailability;
   bool settingsOpenResult;
   int doNotDisturbSettingsOpenCount = 0;
   final List<ReminderDeliveryMode?> notificationSettingsOpened = [];
@@ -66,9 +66,12 @@ class NoopMeterReminderRepository implements MeterReminderRepository {
   Future<DoNotDisturbStatus> doNotDisturbStatus() async => doNotDisturb;
 
   @override
-  Future<ReminderChannelStatus> channelStatus(
-    ReminderDeliveryMode mode,
-  ) async => mode == ReminderDeliveryMode.normal ? normalChannel : alarmChannel;
+  Future<ReminderAvailability> availability(ReminderDeliveryMode mode) async =>
+      permission == ReminderPermissionStatus.denied
+      ? ReminderAvailability.appBlocked
+      : mode == ReminderDeliveryMode.normal
+      ? normalAvailability
+      : punctualAvailability;
 
   @override
   Future<bool> openDoNotDisturbSettings() async {
@@ -137,8 +140,20 @@ class NoopMeterReminderRepository implements MeterReminderRepository {
   }
 
   @override
-  Future<bool> showReminderTest(MeterReminderTestRequest request) async {
+  Future<ReminderTestResult> showReminderTest(
+    MeterReminderTestRequest request,
+  ) async {
     reminderTests.add(request);
+    if (permission == ReminderPermissionStatus.denied) {
+      return ReminderTestResult.appBlocked;
+    }
+    final status = await availability(request.deliveryMode);
+    if (status == ReminderAvailability.appBlocked) {
+      return ReminderTestResult.appBlocked;
+    }
+    if (status == ReminderAvailability.channelBlocked) {
+      return ReminderTestResult.channelBlocked;
+    }
     return reminderTestResult;
   }
 }

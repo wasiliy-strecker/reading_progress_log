@@ -19,7 +19,7 @@ const _normalHint =
 const _alarmHint =
     'Ob ein Alarmton oder Banner erscheint, hängt von deinen „Nicht stören“-Einstellungen und der Alarmlautstärke ab.';
 const _testFeedback =
-    'Test-Erinnerung wurde an Android übergeben. „Nicht stören“ ist aktiv. Ton und Banner können unterdrückt werden.';
+    'Test-Erinnerung wurde an Android übergeben. Ziehe die Benachrichtigungsleiste herunter. Die Test-Erinnerung verschwindet nach einer Minute. „Nicht stören“ ist aktiv. Ton und Banner können unterdrückt werden.';
 
 void main() {
   testWidgets(
@@ -27,7 +27,7 @@ void main() {
     (tester) async {
       final reminders = NoopMeterReminderRepository(
         permission: ReminderPermissionStatus.denied,
-        normalChannel: ReminderChannelStatus.blocked,
+        normalAvailability: ReminderAvailability.channelBlocked,
         doNotDisturb: DoNotDisturbStatus.enabled,
       );
       await _pump(tester, reminders);
@@ -47,7 +47,7 @@ void main() {
         find.text('Diese Erinnerungsart ist ausgeschaltet'),
         findsOneWidget,
       );
-      reminders.normalChannel = ReminderChannelStatus.enabled;
+      reminders.normalAvailability = ReminderAvailability.available;
       await _resume(tester);
       expect(find.text(_title), findsOneWidget);
     },
@@ -58,12 +58,12 @@ void main() {
       'blocked $mode opens its settings and cannot report test success',
       (tester) async {
         final reminders = NoopMeterReminderRepository(
-          normalChannel: mode == ReminderDeliveryMode.normal
-              ? ReminderChannelStatus.blocked
-              : ReminderChannelStatus.enabled,
-          alarmChannel: mode == ReminderDeliveryMode.punctualWithSound
-              ? ReminderChannelStatus.blocked
-              : ReminderChannelStatus.enabled,
+          normalAvailability: mode == ReminderDeliveryMode.normal
+              ? ReminderAvailability.channelBlocked
+              : ReminderAvailability.available,
+          punctualAvailability: mode == ReminderDeliveryMode.punctualWithSound
+              ? ReminderAvailability.channelBlocked
+              : ReminderAvailability.available,
           doNotDisturb: DoNotDisturbStatus.enabled,
         );
         await _pump(tester, reminders, mode: mode);
@@ -75,7 +75,7 @@ void main() {
         await tester.tap(find.text('Erinnerung jetzt testen'));
         await tester.pumpAndSettle();
         expect(
-          find.text('Diese Erinnerungsart ist in Android ausgeschaltet.'),
+          find.text('Diese Erinnerungsart ist in Android gesperrt.'),
           findsOneWidget,
         );
         expect(
@@ -94,7 +94,7 @@ void main() {
     await _pump(
       tester,
       NoopMeterReminderRepository(
-        normalChannel: ReminderChannelStatus.blocked,
+        normalAvailability: ReminderAvailability.channelBlocked,
         settingsOpenResult: false,
       ),
     );
@@ -117,7 +117,7 @@ void main() {
     await tester.pumpAndSettle();
     await _reveal(tester, find.text('Erinnerung jetzt testen'));
     expect(find.text('Diese Erinnerungsart ist ausgeschaltet'), findsNothing);
-    reminders.pending.complete(ReminderChannelStatus.blocked);
+    reminders.pending.complete(ReminderAvailability.channelBlocked);
     await tester.pumpAndSettle();
     expect(find.text('Diese Erinnerungsart ist ausgeschaltet'), findsNothing);
     expect(tester.takeException(), isNull);
@@ -233,7 +233,7 @@ void main() {
         tester,
         NoopMeterReminderRepository(
           doNotDisturb: DoNotDisturbStatus.enabled,
-          reminderTestResult: false,
+          reminderTestResult: ReminderTestResult.failed,
           permission: ReminderPermissionStatus.denied,
         ),
       );
@@ -289,12 +289,12 @@ Future<void> _reveal(
 }
 
 class _DelayedChannel extends NoopMeterReminderRepository {
-  final pending = Completer<ReminderChannelStatus>();
+  final pending = Completer<ReminderAvailability>();
   @override
-  Future<ReminderChannelStatus> channelStatus(ReminderDeliveryMode mode) =>
+  Future<ReminderAvailability> availability(ReminderDeliveryMode mode) =>
       mode == ReminderDeliveryMode.normal
       ? pending.future
-      : super.channelStatus(mode);
+      : super.availability(mode);
 }
 
 Future<void> _resume(WidgetTester tester) async {

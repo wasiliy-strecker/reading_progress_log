@@ -3,17 +3,16 @@ import 'local_notification_reminder_repository.dart';
 
 class ReminderDeliveryState {
   const ReminderDeliveryState({
-    this.permission = ReminderPermissionStatus.unknown,
-    this.channel = ReminderChannelStatus.unknown,
+    this.availability = ReminderAvailability.unknown,
     this.doNotDisturb = DoNotDisturbStatus.unknown,
   });
 
-  final ReminderPermissionStatus permission;
-  final ReminderChannelStatus channel;
+  final ReminderAvailability availability;
   final DoNotDisturbStatus doNotDisturb;
 
-  bool get appBlocked => permission == ReminderPermissionStatus.denied;
-  bool get channelBlocked => channel == ReminderChannelStatus.blocked;
+  bool get appBlocked => availability == ReminderAvailability.appBlocked;
+  bool get channelBlocked =>
+      availability == ReminderAvailability.channelBlocked;
   bool get blocked => appBlocked || channelBlocked;
   bool get hasHint => blocked || doNotDisturb == DoNotDisturbStatus.enabled;
 
@@ -22,17 +21,15 @@ class ReminderDeliveryState {
     ReminderDeliveryMode mode,
   ) async {
     final values = await Future.wait<Object>([
-      _readOr(repository.permissionStatus, ReminderPermissionStatus.unknown),
       _readOr(
-        () => repository.channelStatus(mode),
-        ReminderChannelStatus.unknown,
+        () => repository.availability(mode),
+        ReminderAvailability.unknown,
       ),
       _readOr(repository.doNotDisturbStatus, DoNotDisturbStatus.unknown),
     ]);
     return ReminderDeliveryState(
-      permission: values[0] as ReminderPermissionStatus,
-      channel: values[1] as ReminderChannelStatus,
-      doNotDisturb: values[2] as DoNotDisturbStatus,
+      availability: values[0] as ReminderAvailability,
+      doNotDisturb: values[1] as DoNotDisturbStatus,
     );
   }
 

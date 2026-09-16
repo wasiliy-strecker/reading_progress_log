@@ -93,6 +93,13 @@ internal object ReminderScheduler {
     }
 }
 
+internal enum class ReminderAvailability(val wireValue: String) {
+    AVAILABLE("available"),
+    APP_BLOCKED("appBlocked"),
+    CHANNEL_BLOCKED("channelBlocked"),
+    UNKNOWN("unknown"),
+}
+
 internal object ReminderNotifier {
     private const val normalChannelId = "reading_progress_reminders"
     private const val alarmChannelId = "reading_progress_alarm_reminders_v1"
@@ -100,6 +107,34 @@ internal object ReminderNotifier {
     private const val testNotificationId = 2001
     private const val meterTagPrefix = "meter:"
     private const val testTag = "reminder:test"
+
+    fun channelId(punctual: Boolean): String = if (punctual) alarmChannelId else normalChannelId
+
+    fun availability(context: Context, punctual: Boolean): ReminderAvailability = try {
+        if (!notificationsEnabled(context)) {
+            ReminderAvailability.APP_BLOCKED
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Reusing the same IDs preserves the user's channel preferences.
+            ensureChannels(context)
+            val manager = context.getSystemService(NotificationManager::class.java)
+            val channel = manager.getNotificationChannel(channelId(punctual))
+            val groupBlocked = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && channel?.group != null) {
+                manager.getNotificationChannelGroup(channel.group)?.isBlocked == true
+            } else {
+                false
+            }
+            when {
+                channel == null -> ReminderAvailability.UNKNOWN
+                channel.importance == NotificationManager.IMPORTANCE_NONE || groupBlocked ->
+                    ReminderAvailability.CHANNEL_BLOCKED
+                else -> ReminderAvailability.AVAILABLE
+            }
+        } else {
+            ReminderAvailability.AVAILABLE
+        }
+    } catch (_: Exception) {
+        ReminderAvailability.UNKNOWN
+    }
 
     fun doNotDisturbEnabled(context: Context): Boolean? = try {
         when (context.getSystemService(NotificationManager::class.java).currentInterruptionFilter) {
@@ -111,19 +146,6 @@ internal object ReminderNotifier {
         }
     } catch (_: Exception) {
         null
-    }
-
-    fun channelId(punctual: Boolean): String = if (punctual) alarmChannelId else normalChannelId
-
-    fun channelEnabled(context: Context, punctual: Boolean): Boolean? {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return true
-        return try {
-            val manager = context.getSystemService(NotificationManager::class.java)
-            val channel = manager.getNotificationChannel(channelId(punctual)) ?: return null
-            channel.importance != NotificationManager.IMPORTANCE_NONE
-        } catch (_: Exception) {
-            null
-        }
     }
 
     fun notificationsEnabled(context: Context): Boolean {
@@ -144,9 +166,7 @@ internal object ReminderNotifier {
         reminder: StoredReminder,
         postedAt: Long = System.currentTimeMillis(),
     ): Long? {
-        if (!notificationsEnabled(context)) return null
-        ensureChannels(context)
-        if (channelEnabled(context, reminder.isPunctual) == false) return null
+        if (availability(context, reminder.isPunctual) != ReminderAvailability.AVAILABLE) return null
         val channelId = if (reminder.isPunctual) alarmChannelId else normalChannelId
         val category = if (reminder.isPunctual) {
             NotificationCompat.CATEGORY_ALARM
@@ -223,10 +243,9 @@ internal object ReminderNotifier {
         latestValue: String?,
         latestUnit: String?,
         punctual: Boolean,
-    ): Boolean {
-        if (!notificationsEnabled(context)) return false
-        ensureChannels(context)
-        if (channelEnabled(context, punctual) == false) return false
+    ): String {
+        val availability = availability(context, punctual)
+        if (availability != ReminderAvailability.AVAILABLE) return availability.wireValue
         val latestReading = if (!latestValue.isNullOrBlank() && !latestUnit.isNullOrBlank()) {
             "Letzter Projektstand: $latestValue $latestUnit"
         } else {
@@ -235,7 +254,7 @@ internal object ReminderNotifier {
         val target = if (meterId.isNullOrBlank()) "die App" else "die Projektkarte"
         val notification = NotificationCompat.Builder(
             context,
-            if (punctual) alarmChannelId else normalChannelId,
+            channelId(punctual),
         )
             .setSmallIcon(notificationIcon(meterType))
             .setColor(notificationColor(meterType))
@@ -264,12 +283,16 @@ internal object ReminderNotifier {
                 },
             )
             .build()
-        context.getSystemService(NotificationManager::class.java).notify(
-            testTag,
-            testNotificationId,
-            notification,
-        )
-        return true
+        return try {
+            context.getSystemService(NotificationManager::class.java).notify(
+                testTag,
+                testNotificationId,
+                notification,
+            )
+            "posted"
+        } catch (_: Exception) {
+            "failed"
+        }
     }
 
     fun acknowledge(context: Context, meterId: String) {

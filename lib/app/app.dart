@@ -94,6 +94,7 @@ class _MeterReadingLogAppState extends ConsumerState<MeterReadingLogApp>
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      restorationScopeId: 'app',
       title: 'Strick & Häkelbuch',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),

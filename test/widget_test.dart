@@ -76,9 +76,9 @@ void main() {
             permission: appBlocked
                 ? ReminderPermissionStatus.denied
                 : ReminderPermissionStatus.granted,
-            normalChannel: appBlocked
-                ? ReminderChannelStatus.enabled
-                : ReminderChannelStatus.blocked,
+            normalAvailability: appBlocked
+                ? ReminderAvailability.available
+                : ReminderAvailability.channelBlocked,
           );
           final existing = Meter(
             id: 'blocked-project',
@@ -425,10 +425,12 @@ void main() {
     );
     expect(tester.widget<OutlinedButton>(button).onPressed, isNull);
 
-    reminders.completeTest(true);
+    reminders.completeTest(ReminderTestResult.posted);
     await tester.pumpAndSettle();
     expect(
-      find.text('Test-Erinnerung wurde an Android übergeben.'),
+      find.text(
+        'Test-Erinnerung wurde an Android übergeben. Ziehe die Benachrichtigungsleiste herunter. Die Test-Erinnerung verschwindet nach einer Minute.',
+      ),
       findsOneWidget,
     );
   });
@@ -439,7 +441,7 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(430, 1800));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       final reminders = NoopMeterReminderRepository(
-        reminderTestResult: false,
+        reminderTestResult: ReminderTestResult.failed,
         permission: ReminderPermissionStatus.denied,
         exactAlarmPermissionGranted: false,
       );
@@ -1092,13 +1094,15 @@ MeterReading _reading({required Meter meter, required DateTime updatedAt}) {
 }
 
 class _PendingReminderTestRepository extends NoopMeterReminderRepository {
-  final Completer<bool> _test = Completer<bool>();
+  final Completer<ReminderTestResult> _test = Completer<ReminderTestResult>();
 
   @override
-  Future<bool> showReminderTest(MeterReminderTestRequest request) {
+  Future<ReminderTestResult> showReminderTest(
+    MeterReminderTestRequest request,
+  ) {
     reminderTests.add(request);
     return _test.future;
   }
 
-  void completeTest(bool result) => _test.complete(result);
+  void completeTest(ReminderTestResult result) => _test.complete(result);
 }

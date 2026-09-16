@@ -949,7 +949,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
     if (_testingReminder) return;
     setState(() => _testingReminder = true);
     final reminders = ref.read(meterReminderRepositoryProvider);
-    var displayed = false;
+    var result = ReminderTestResult.failed;
     try {
       await _refreshDeliveryState();
       if (!mounted) return;
@@ -966,7 +966,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
               (left, right) =>
                   left.capturedAt.isAfter(right.capturedAt) ? left : right,
             );
-      displayed = await reminders.showReminderTest(
+      result = await reminders.showReminderTest(
         MeterReminderTestRequest(
           meterId: meter?.id,
           label: _label.text.trim().isEmpty ? _type.label : _label.text.trim(),
@@ -977,30 +977,25 @@ class _MeterFormState extends ConsumerState<_MeterForm>
         ),
       );
     } on Object {
-      displayed = false;
+      result = ReminderTestResult.failed;
     }
     if (!mounted) return;
-    await _refreshDeliveryState();
-    if (!mounted) return;
-    setState(() => _testingReminder = false);
-    final message = _deliveryState.appBlocked
-        ? 'Benachrichtigungen sind nicht erlaubt.'
-        : _deliveryState.channelBlocked
-        ? 'Diese Erinnerungsart ist in Android ausgeschaltet.'
-        : displayed
-        ? _deliveryState.doNotDisturb == DoNotDisturbStatus.enabled
-              ? 'Test-Erinnerung wurde an Android übergeben. „Nicht stören“ ist aktiv. Ton und Banner können unterdrückt werden.'
-              : 'Test-Erinnerung wurde an Android übergeben.'
-        : switch (_deliveryState.permission) {
-            ReminderPermissionStatus.denied =>
-              'Benachrichtigungen sind nicht erlaubt.',
-            ReminderPermissionStatus.unsupported =>
-              'Test-Erinnerungen werden auf diesem Gerät nicht unterstützt.',
-            ReminderPermissionStatus.granted ||
-            ReminderPermissionStatus.unknown =>
-              'Test-Erinnerung konnte nicht angezeigt werden.',
-          };
-    ScaffoldMessenger.of(context).showSnackBar(AppSnackBar(message: message));
+    setState(() {
+      _testingReminder = false;
+      _deliveryState = ReminderDeliveryState(
+        availability: result.availability,
+        doNotDisturb: _deliveryState.doNotDisturb,
+      );
+    });
+    final message = result.message(_deliveryState.doNotDisturb);
+    ScaffoldMessenger.of(context).showSnackBar(
+      AppSnackBar(
+        message: message,
+        duration: Duration(
+          seconds: result == ReminderTestResult.posted ? 8 : 4,
+        ),
+      ),
+    );
   }
 }
 

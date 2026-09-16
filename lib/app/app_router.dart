@@ -14,6 +14,7 @@ import '../features/meters/presentation/reading_detail_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
+    restorationScopeId: 'router',
     routes: [
       GoRoute(path: '/', name: 'home', builder: (_, _) => const HomeScreen()),
       GoRoute(

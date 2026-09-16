@@ -91,3 +91,23 @@ JVM-Check gegen die gebauten Kotlin-Klassen geprüft. Android-Identität und
 Manifest werden am erzeugten Dev-APK kontrolliert. iOS wird in dieser
 Linux-Umgebung konfiguriert, aber nicht gebaut. Web bleibt eine flüchtige
 Oberflächenvorschau wie in der Vorlage.
+
+## Einheitliche Erinnerungen und Rückkehr aus Android-Einstellungen
+
+Die Erinnerungs-Schnittstelle und Wiederplanung entsprechen nun in LeseLog,
+ZählerstandLog und Strick & Häkelbuch demselben Verhalten. App- und Kanalsperren
+werden getrennt ausgewertet, auch unmittelbar vor einer nativen Zustellung.
+Testergebnisse unterscheiden Übergabe, Sperren, Fehler und nicht unterstützte
+Plattformen. „Nicht stören“ bleibt ein unabhängiger Status. Fehlende Ergebnisse
+werden nicht als erteilte Freigabe oder bekannte Sperre ausgegeben.
+
+Nach erneuter Benachrichtigungsfreigabe werden ausschließlich gespeicherte
+Zeitpläne abgeglichen. Native Kanal-IDs, Paketkennungen und Datenformate bleiben
+unverändert. Testbenachrichtigungen verschwinden nach einer Minute, und die
+Erfolgsrückmeldung erklärt den Zugang über die Benachrichtigungsleiste.
+
+Flutter und GoRouter stellen die Navigation nach einer Android-Prozessbeendigung
+wieder her. Die Bearbeitungsseite erhält dieselbe Datensatz-ID und lädt die
+bereits gespeicherten Daten. Das führt keine dauerhafte Speicherung ungesicherter
+Eingaben ein. Prüfungen erstellen ausdrücklich einen neuen Router, prüfen den
+aktuellen Berechtigungsstatus sowie den Zurück-Weg und laufen ohne Smartphone.

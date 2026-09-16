@@ -10,7 +10,44 @@ enum ReminderPermissionStatus { granted, denied, unknown, unsupported }
 
 enum DoNotDisturbStatus { enabled, disabled, unknown }
 
-enum ReminderChannelStatus { enabled, blocked, unknown, unsupported }
+enum ReminderAvailability {
+  available,
+  appBlocked,
+  channelBlocked,
+  unknown,
+  unsupported;
+
+  bool get isBlocked => this == appBlocked || this == channelBlocked;
+}
+
+enum ReminderTestResult {
+  posted,
+  appBlocked,
+  channelBlocked,
+  failed,
+  unsupported;
+
+  ReminderAvailability get availability => switch (this) {
+    posted => ReminderAvailability.available,
+    appBlocked => ReminderAvailability.appBlocked,
+    channelBlocked => ReminderAvailability.channelBlocked,
+    unsupported => ReminderAvailability.unsupported,
+    failed => ReminderAvailability.unknown,
+  };
+
+  String message(DoNotDisturbStatus quietMode) => switch (this) {
+    posted =>
+      'Test-Erinnerung wurde an Android übergeben. '
+          'Ziehe die Benachrichtigungsleiste herunter. '
+          'Die Test-Erinnerung verschwindet nach einer Minute.'
+          '${quietMode == DoNotDisturbStatus.enabled ? ' „Nicht stören“ ist aktiv. Ton und Banner können unterdrückt werden.' : ''}',
+    appBlocked => 'Benachrichtigungen sind nicht erlaubt.',
+    channelBlocked => 'Diese Erinnerungsart ist in Android gesperrt.',
+    failed => 'Test-Erinnerung konnte nicht angezeigt werden.',
+    unsupported =>
+      'Test-Erinnerungen werden auf diesem Gerät nicht unterstützt.',
+  };
+}
 
 class ReminderStatus {
   const ReminderStatus({
@@ -61,9 +98,9 @@ abstract interface class MeterReminderRepository {
 
   Future<DoNotDisturbStatus> doNotDisturbStatus();
 
-  Future<ReminderChannelStatus> channelStatus(ReminderDeliveryMode mode);
-
   Future<bool> openDoNotDisturbSettings();
+
+  Future<ReminderAvailability> availability(ReminderDeliveryMode mode);
 
   Future<bool> openNotificationSettings({ReminderDeliveryMode? mode});
 
@@ -75,7 +112,7 @@ abstract interface class MeterReminderRepository {
 
   Future<Map<String, ReminderStatus>> loadStatuses(Iterable<String> meterIds);
 
-  Future<bool> showReminderTest(MeterReminderTestRequest request);
+  Future<ReminderTestResult> showReminderTest(MeterReminderTestRequest request);
 
   Future<String?> consumeInitialMeterId();
 
@@ -145,9 +182,11 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
       final granted = await _channel.invokeMethod<bool>(
         'requestNotificationPermission',
       );
-      return granted == true
-          ? ReminderPermissionStatus.granted
-          : ReminderPermissionStatus.denied;
+      return switch (granted) {
+        true => ReminderPermissionStatus.granted,
+        false => ReminderPermissionStatus.denied,
+        null => ReminderPermissionStatus.unknown,
+      };
     } on Object {
       return ReminderPermissionStatus.unknown;
     }
@@ -194,9 +233,10 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
     await initialize();
     if (!_supportsNotifications) return DoNotDisturbStatus.unknown;
     try {
-      return switch (await _channel.invokeMethod<bool>(
+      final enabled = await _channel.invokeMethod<bool>(
         'getDoNotDisturbStatus',
-      )) {
+      );
+      return switch (enabled) {
         true => DoNotDisturbStatus.enabled,
         false => DoNotDisturbStatus.disabled,
         null => DoNotDisturbStatus.unknown,
@@ -207,41 +247,46 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
   }
 
   @override
-  Future<ReminderChannelStatus> channelStatus(ReminderDeliveryMode mode) async {
+  Future<bool> openDoNotDisturbSettings() async {
     await initialize();
-    if (!_supportsNotifications) return ReminderChannelStatus.unsupported;
+    if (!_supportsNotifications) return false;
     try {
-      return switch (await _channel.invokeMethod<bool>(
-        'isReminderChannelEnabled',
-        {'deliveryMode': mode.name},
-      )) {
-        true => ReminderChannelStatus.enabled,
-        false => ReminderChannelStatus.blocked,
-        null => ReminderChannelStatus.unknown,
-      };
+      return await _channel.invokeMethod<bool>('openDoNotDisturbSettings') ??
+          false;
     } on Object {
-      return ReminderChannelStatus.unknown;
+      return false;
     }
   }
 
   @override
-  Future<bool> openDoNotDisturbSettings() =>
-      _openSettings('openDoNotDisturbSettings');
+  Future<ReminderAvailability> availability(ReminderDeliveryMode mode) async {
+    await initialize();
+    if (!_supportsNotifications) return ReminderAvailability.unsupported;
+    try {
+      final status = await _channel.invokeMethod<String>(
+        'getNotificationAvailability',
+        {'deliveryMode': mode.name},
+      );
+      return switch (status) {
+        'available' => ReminderAvailability.available,
+        'appBlocked' => ReminderAvailability.appBlocked,
+        'channelBlocked' => ReminderAvailability.channelBlocked,
+        _ => ReminderAvailability.unknown,
+      };
+    } on Object {
+      return ReminderAvailability.unknown;
+    }
+  }
 
   @override
-  Future<bool> openNotificationSettings({ReminderDeliveryMode? mode}) =>
-      _openSettings('openNotificationSettings', {
-        if (mode != null) 'deliveryMode': mode.name,
-      });
-
-  Future<bool> _openSettings(
-    String method, [
-    Map<String, Object>? arguments,
-  ]) async {
+  Future<bool> openNotificationSettings({ReminderDeliveryMode? mode}) async {
     await initialize();
     if (!_supportsNotifications) return false;
     try {
-      return await _channel.invokeMethod<bool>(method, arguments) ?? false;
+      return await _channel.invokeMethod<bool>('openNotificationSettings', {
+            if (mode != null) 'deliveryMode': mode.name,
+          }) ??
+          false;
     } on Object {
       return false;
     }
@@ -345,27 +390,40 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
   }
 
   @override
-  Future<bool> showReminderTest(MeterReminderTestRequest request) async {
+  Future<ReminderTestResult> showReminderTest(
+    MeterReminderTestRequest request,
+  ) async {
     await initialize();
-    if (!_supportsNotifications) return false;
+    if (!_supportsNotifications) return ReminderTestResult.unsupported;
     var permission = await permissionStatus();
     if (permission != ReminderPermissionStatus.granted) {
       permission = await requestPermission();
     }
-    if (permission != ReminderPermissionStatus.granted) return false;
+    if (permission != ReminderPermissionStatus.granted) {
+      return switch (permission) {
+        ReminderPermissionStatus.denied => ReminderTestResult.appBlocked,
+        ReminderPermissionStatus.unsupported => ReminderTestResult.unsupported,
+        _ => ReminderTestResult.failed,
+      };
+    }
     try {
-      return await _channel.invokeMethod<bool>('showReminderTest', {
-            'meterId': request.meterId,
-            'label': request.label,
-            'meterType': request.meterType.wireName,
-            'meterTypeLabel': request.meterType.label,
-            'latestValue': request.latestValue,
-            'latestUnit': request.latestUnit,
-            'deliveryMode': request.deliveryMode.name,
-          }) ??
-          false;
+      final result = await _channel.invokeMethod<String>('showReminderTest', {
+        'meterId': request.meterId,
+        'label': request.label,
+        'meterType': request.meterType.wireName,
+        'meterTypeLabel': request.meterType.label,
+        'latestValue': request.latestValue,
+        'latestUnit': request.latestUnit,
+        'deliveryMode': request.deliveryMode.name,
+      });
+      return switch (result) {
+        'posted' => ReminderTestResult.posted,
+        'appBlocked' => ReminderTestResult.appBlocked,
+        'channelBlocked' => ReminderTestResult.channelBlocked,
+        _ => ReminderTestResult.failed,
+      };
     } on Object {
-      return false;
+      return ReminderTestResult.failed;
     }
   }
 

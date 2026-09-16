@@ -122,19 +122,25 @@ class MainActivity : FlutterActivity() {
                 result.success(ReminderScheduler.canScheduleExact(this))
             "requestExactAlarmPermission" -> requestExactAlarmPermission(result)
             "openExactAlarmSettings" -> result.success(openExactAlarmSettings())
-            "getDoNotDisturbStatus" -> result.success(ReminderNotifier.doNotDisturbEnabled(this))
-            "isReminderChannelEnabled" -> result.success(
-                ReminderNotifier.channelEnabled(
-                    this,
-                    call.argument<String>("deliveryMode") == "punctualWithSound",
-                ),
-            )
-            "openDoNotDisturbSettings" -> result.success(openFirstAvailableSettings(
-                listOf(Intent("android.settings.ZEN_MODE_SETTINGS"), Intent(Settings.ACTION_SOUND_SETTINGS)),
-            ))
-            "openNotificationSettings" -> result.success(
-                openNotificationSettings(call.argument<String>("deliveryMode")),
-            )
+            "getDoNotDisturbStatus" ->
+                result.success(ReminderNotifier.doNotDisturbEnabled(this))
+            "openDoNotDisturbSettings" -> result.success(openDoNotDisturbSettings())
+            "getNotificationAvailability" -> {
+                val mode = call.argument<String>("deliveryMode")
+                if (mode != "normal" && mode != "punctualWithSound") {
+                    result.error("invalid_mode", "Erinnerungsart fehlt.", null)
+                } else {
+                    result.success(ReminderNotifier.availability(this, mode == "punctualWithSound").wireValue)
+                }
+            }
+            "openNotificationSettings" -> {
+                val mode = call.argument<String>("deliveryMode")
+                if (mode != null && mode != "normal" && mode != "punctualWithSound") {
+                    result.error("invalid_mode", "Erinnerungsart ist ungültig.", null)
+                } else {
+                    result.success(openNotificationSettings(mode))
+                }
+            }
             "schedule" -> schedule(call, result)
             "cancel" -> cancel(call, result)
             "acknowledge" -> acknowledge(call, result)
@@ -348,29 +354,41 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun openNotificationSettings(deliveryMode: String?): Boolean {
-        val intents = mutableListOf<Intent>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (deliveryMode != null) {
-                intents.add(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                    .putExtra(Settings.EXTRA_CHANNEL_ID,
-                        ReminderNotifier.channelId(deliveryMode == "punctualWithSound")))
+    private fun openDoNotDisturbSettings(): Boolean {
+        // The direct settings action is not available on every Android skin.
+        for (action in listOf("android.settings.ZEN_MODE_SETTINGS", Settings.ACTION_SOUND_SETTINGS)) {
+            try {
+                startActivity(Intent(action))
+                return true
+            } catch (_: Exception) {
+                // Fall back to sound settings without changing the user's quiet mode.
             }
-            intents.add(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                .putExtra(Settings.EXTRA_APP_PACKAGE, packageName))
         }
-        intents.add(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
-        return openFirstAvailableSettings(intents)
+        return false
     }
 
-    private fun openFirstAvailableSettings(intents: List<Intent>): Boolean {
+    private fun openNotificationSettings(mode: String?): Boolean {
+        val intents = mutableListOf<Intent>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (mode != null) {
+                intents.add(
+                    Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                        .putExtra(Settings.EXTRA_CHANNEL_ID, ReminderNotifier.channelId(mode == "punctualWithSound")),
+                )
+            }
+            intents.add(
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName),
+            )
+        }
+        intents.add(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
         for (intent in intents) {
             try {
                 startActivity(intent)
                 return true
             } catch (_: Exception) {
-                // OEM settings pages can be missing. Try the less specific destination.
+                // Android variants may only expose the app's main settings page.
             }
         }
         return false
