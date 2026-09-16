@@ -188,3 +188,18 @@ bisherigen Reihenfolge, neuester Stand zuerst. Kompakte Einträge bleiben in der
 Schema 5, Backup-Version 4, Verschlüsselung und eingefrorene Paritätsdateien bleiben
 unverändert. Sortierung, Rücknahme, Entwurfswiederherstellung, Backup-Reihenfolge
 und PDF-Positionen sind durch gezielte Tests abgesichert.
+
+## Kompakte PDF-Fotozeilen und sichtbarer Sortierzugang
+
+Neue Einzel- und Verlaufs-PDFs ordnen aktuelle Fotos in Zeilen mit zwei gleich
+breiten Bildfeldern an. Ein letztes unpaariges Foto, auch ein einziges Foto,
+wird mit derselben Feldgröße zentriert. Das Seitenverhältnis bleibt erhalten,
+es wird nichts abgeschnitten. Nummerierung und gespeicherte Reihenfolge bleiben
+maßgeblich. Fotozeilen werden nicht über Seiten getrennt. Die erste Zeile bleibt
+mit Überschrift und Wert-/Zeittabelle zusammen. Fehlende Fotos behalten ihren
+beschrifteten Platz. Gespeicherte PDFs bleiben unverändert.
+
+Die Projektstand-Detailseite zeigt bei mehreren aktuellen Fotos jetzt direkt
+über der Galerie „Fotos sortieren“. Die Aktion öffnet den bestehenden
+Korrektureditor. Erst dessen Speichern übernimmt die Reihenfolge und schreibt
+die Revision. Die Anzeige allein verändert keine Daten.

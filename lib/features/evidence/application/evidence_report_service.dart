@@ -557,7 +557,7 @@ class EvidenceReportService {
           ),
         ),
         pw.SizedBox(height: 8),
-        // Keep the heading, confirmed value and time above the first photo.
+        // Keep the heading, confirmed value and time with the first photo row.
         _dataTable([
           [
             currentProgressLabel(reading.meter.unit),
@@ -567,27 +567,19 @@ class EvidenceReportService {
         ]),
         if (showPhoto) ...[
           pw.SizedBox(height: 10),
-          pw.Text(
-            'Foto 1 von ${reading.currentPhotos.length}',
-            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 6),
-          _photo(reading.currentPhotos.first.path, photoAssets),
+          _photoRow(reading, 0, photoAssets),
         ],
       ]),
       if (showPhoto)
-        for (final (index, photo) in reading.currentPhotos.indexed.skip(1))
+        for (var index = 2; index < reading.currentPhotos.length; index += 2)
           _keepTogether([
             pw.SizedBox(height: 12),
             pw.Text(
-              'Projektstand $number · Foto ${index + 1} von ${reading.currentPhotos.length}',
-              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.Text(
-              '${progressValueLabel(reading.value.displayText, reading.meter.unit)} · ${readingTimeText(reading, date)}',
+              'Projektstand $number · ${progressValueLabel(reading.value.displayText, reading.meter.unit)} · ${readingTimeText(reading, date)}',
+              style: const pw.TextStyle(fontSize: 10),
             ),
             pw.SizedBox(height: 6),
-            _photo(photo.path, photoAssets),
+            _photoRow(reading, index, photoAssets),
           ]),
       if (historicalData.isNotEmpty) ...[
         pw.NewPage(freeSpace: 80),
@@ -628,6 +620,48 @@ class EvidenceReportService {
     ];
   }
 
+  static pw.Widget _photoRow(
+    MeterReading reading,
+    int start,
+    _PdfPhotoAssets photoAssets,
+  ) => pw.LayoutBuilder(
+    builder: (context, constraints) {
+      const gap = 12.0;
+      final width = (constraints!.maxWidth - gap) / 2;
+      final photos = reading.currentPhotos;
+      return pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.center,
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          for (
+            var index = start;
+            index < photos.length && index < start + 2;
+            index++
+          ) ...[
+            if (index > start) pw.SizedBox(width: gap),
+            pw.SizedBox(
+              width: width,
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                children: [
+                  pw.Text(
+                    'Foto ${index + 1} von ${photos.length}',
+                    style: pw.TextStyle(
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(height: 6),
+                  _photo(photos[index].path, photoAssets, height: 170),
+                ],
+              ),
+            ),
+          ],
+        ],
+      );
+    },
+  );
+
   static pw.Widget _keepTogether(List<pw.Widget> children) => pw.Inseparable(
     child: pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -648,11 +682,15 @@ class EvidenceReportService {
     overflow: pw.TextOverflow.span,
   );
 
-  static pw.Widget _photo(String path, _PdfPhotoAssets photoAssets) {
+  static pw.Widget _photo(
+    String path,
+    _PdfPhotoAssets photoAssets, {
+    double height = 280,
+  }) {
     try {
       return pw.Container(
         width: double.infinity,
-        height: 280,
+        height: height,
         alignment: pw.Alignment.center,
         decoration: pw.BoxDecoration(
           border: pw.Border.all(color: PdfColors.grey400, width: .5),
@@ -660,7 +698,9 @@ class EvidenceReportService {
         child: pw.Image(photoAssets.image(path), fit: pw.BoxFit.contain),
       );
     } on Object {
-      return pw.Padding(
+      return pw.Container(
+        height: height,
+        alignment: pw.Alignment.center,
         padding: const pw.EdgeInsets.symmetric(vertical: 12),
         child: pw.Text(
           'Projektstandfoto konnte nicht eingebettet werden.',

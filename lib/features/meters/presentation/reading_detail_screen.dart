@@ -82,6 +82,20 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
+            if (reading.currentPhotos.length > 1) ...[
+              OutlinedButton.icon(
+                onPressed: () => context.pushNamed(
+                  'readingEdit',
+                  pathParameters: {'id': reading.id},
+                ),
+                icon: const Icon(Icons.swap_horiz),
+                label: const Text(
+                  'Fotos sortieren',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             ReadingPhotoGallery(photos: reading.currentPhotos),
             const SizedBox(height: 16),
           ],

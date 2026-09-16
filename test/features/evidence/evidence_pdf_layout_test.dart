@@ -114,7 +114,19 @@ void main() {
             double.parse(image['left']!) + width / 2,
             closeTo(double.parse(page['width']!) / 2, 1),
           );
-          expect(height, closeTo(280, 1));
+          // A lone photo uses the same half-page cell as a paired photo.
+          expect(height, lessThanOrEqualTo(171));
+          expect(
+            width,
+            lessThanOrEqualTo((double.parse(page['width']!) - 80 - 12) / 2 + 1),
+          );
+          expect(
+            portrait ? height : width,
+            closeTo(
+              portrait ? 170 : (double.parse(page['width']!) - 80 - 12) / 2,
+              1,
+            ),
+          );
           expect(
             width / height,
             closeTo(portrait ? 300 / 600 : 640 / 420, .01),

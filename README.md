@@ -41,6 +41,9 @@ Keine Runtime-Abhängigkeit auf eine andere App.
 Fotos lassen sich beim Erfassen und Korrigieren direkt im Raster sortieren:
 länger drücken und an die gewünschte Position ziehen. Am Bildschirmrand scrollt
 das Formular mit. Das Fotomenü bietet außerdem „Nach vorne“ und „Nach hinten“.
+Bei gespeicherten Projektständen mit mehreren Bildern führt „Fotos sortieren“
+direkt oberhalb der Galerie in diesen Editor. „Korrektur protokollieren“ speichert
+die neue Reihenfolge.
 Neue Fotos werden angehängt. Beim Ersetzen bleibt die Position erhalten.
 Eine reine Umsortierung wird als „Fotoreihenfolge geändert“ protokolliert.
 Entfernte oder ersetzte gespeicherte Bilder sind nur noch
@@ -58,8 +61,11 @@ Version 4. Backups der Versionen 1–3 bleiben importierbar, inklusive bestehend
 Fotokorrekturen und gespeicherter PDFs.
 
 Neue PDFs zeigen je Abschnitt „Projektstand 1“, „Projektstand 2“ usw. mit Reihe
-oder Runde und Zeitpunkt über dem ersten Foto. Die Bilder folgen der gespeicherten
-Reihenfolge. Im Verlaufs-PDF verweisen die Nummern der Übersicht auf die passenden
+oder Runde und Zeitpunkt über der ersten Fotozeile. Pro Zeile stehen zwei Fotos
+nebeneinander. Ein einzelnes beziehungsweise letztes unpaariges Foto steht zentriert
+in derselben Größe. Bilder werden vollständig und ohne Beschnitt angezeigt.
+Die Bilder folgen der gespeicherten Reihenfolge, von links nach rechts und dann
+von oben nach unten. Im Verlaufs-PDF verweisen die Nummern der Übersicht auf die passenden
 Detailabschnitte. Die neuesten Stände stehen weiterhin zuerst. Die Nummern gelten
 nur innerhalb des jeweiligen Dokuments.
 
