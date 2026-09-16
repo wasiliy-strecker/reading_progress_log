@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'app_providers.dart';
+
 import '../features/backup/presentation/settings_screen.dart';
 import '../features/evidence/application/evidence_report_service.dart';
 import '../features/evidence/presentation/evidence_preview_screen.dart';
@@ -14,6 +16,7 @@ import '../features/meters/presentation/reading_detail_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
+    initialLocation: ref.watch(initialPhotoDraftRouteProvider) ?? '/',
     restorationScopeId: 'router',
     routes: [
       GoRoute(path: '/', name: 'home', builder: (_, _) => const HomeScreen()),

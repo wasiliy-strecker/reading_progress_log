@@ -134,7 +134,7 @@ void main() {
         lessThan(
           tester
               .getTopLeft(
-                find.widgetWithText(OutlinedButton, 'Foto aus Galerie'),
+                find.widgetWithText(OutlinedButton, 'Fotos aus Galerie'),
               )
               .dy,
         ),
@@ -169,7 +169,7 @@ void main() {
 
       await _press(tester, 'Korrigieren');
       expect(find.byType(Image), findsNothing);
-      expect(find.text('Foto ergänzen'), findsOneWidget);
+      expect(find.text('Foto aufnehmen'), findsOneWidget);
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Aktuelle Reihe *'),
         '135',
@@ -184,8 +184,7 @@ void main() {
       expect((await readings.loadRevisions(saved.id)).single.reason, '');
 
       await _press(tester, 'Korrigieren');
-      await _press(tester, 'Foto ergänzen');
-      await _press(tester, 'Aus Galerie wählen');
+      await _press(tester, 'Fotos aus Galerie hinzufügen');
       expect(
         find.text('Das bisherige Foto bleibt als frühere Version erhalten.'),
         findsNothing,
@@ -250,7 +249,7 @@ void main() {
       },
     );
 
-    for (final source in ['Projekt fotografieren', 'Foto aus Galerie']) {
+    for (final source in ['Projekt fotografieren', 'Fotos aus Galerie']) {
       testWidgets(
         '$source back discards only the draft photo, systemBack=$systemBack',
         (tester) async {
@@ -440,7 +439,7 @@ Future<void> _back(WidgetTester tester, {required bool systemBack}) async {
 void _expectCaptureOptions() {
   expect(find.text('Stand eintragen'), findsOneWidget);
   expect(find.text('Projekt fotografieren'), findsOneWidget);
-  expect(find.text('Foto aus Galerie'), findsOneWidget);
+  expect(find.text('Fotos aus Galerie'), findsOneWidget);
   expect(find.byType(TextFormField), findsNothing);
   expect(find.text('Projektübersicht'), findsNothing);
 }

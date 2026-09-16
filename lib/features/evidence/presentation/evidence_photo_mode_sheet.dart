@@ -44,8 +44,8 @@ Future<EvidencePhotoMode?> showEvidencePhotoModeSheet(
               kind: kind,
               icon: Icons.photo_outlined,
               description: kind == EvidenceExportKind.singleReading
-                  ? 'Enthält das aktuell zugeordnete Projektstandfoto.'
-                  : 'Enthält pro Projektstand das aktuell zugeordnete Projektstandfoto.',
+                  ? 'Enthält alle aktuell zugeordneten Fotos dieses Projektstands.'
+                  : 'Enthält alle aktuell zugeordneten Fotos jedes Projektstands.',
             ),
           ],
         ),

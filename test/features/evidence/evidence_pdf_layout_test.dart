@@ -254,7 +254,6 @@ void main() {
             portrait.path,
             landscape.path,
           ],
-          if (mode == EvidencePhotoMode.allPhotos) archive.path,
         ]),
       );
       if (_audit) {
@@ -270,10 +269,7 @@ void main() {
         }
         expect(text, isNot(contains('OLD_OCR')));
         expect(text, isNot(contains('OLD_CANDIDATE')));
-        expect(
-          text.contains('Früheres Foto 1'),
-          mode == EvidencePhotoMode.allPhotos,
-        );
+        expect(text.contains('Früheres Foto 1'), false);
         final result = await Process.run('pdfimages', [
           '-list',
           report.record.filePath,
@@ -286,13 +282,7 @@ void main() {
             .toList();
         expect(
           images,
-          hasLength(
-            mode == EvidencePhotoMode.withoutPhotos
-                ? 0
-                : mode == EvidencePhotoMode.allPhotos
-                ? 3
-                : 2,
-          ),
+          hasLength(mode == EvidencePhotoMode.withoutPhotos ? 0 : 2),
         );
         for (final row in images) {
           final page = pages[int.parse(row[0]) - 1];

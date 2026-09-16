@@ -180,15 +180,15 @@ class EncryptedBackupService {
     final files = <Map<String, dynamic>>[];
     final assets = <Map<String, dynamic>>[];
     for (final reading in allReadings) {
-      if (reading.hasPhoto) {
+      for (final photo in reading.currentPhotos) {
         final portable = await _portableFileReference(
           kind: 'photo',
-          ownerId: reading.id,
-          path: reading.photoPath,
-          expectedSha256: reading.photoSha256,
+          ownerId: reading.photos == null ? reading.id : photo.id,
+          path: photo.path,
+          expectedSha256: photo.sha256,
         );
         files.add(portable);
-        assets.add({'sha256': reading.photoSha256, 'path': reading.photoPath});
+        assets.add({'sha256': photo.sha256, 'path': photo.path});
       }
       for (final version in reading.photoHistory) {
         final archived = await _portableFileReference(
@@ -269,7 +269,7 @@ class EncryptedBackupService {
     BinaryBackupReader? reader;
     try {
       reader = await BinaryBackupReader.open(path, password);
-      _validatePayload(reader.payload, expectedVersion: _version);
+      _validatePayload(reader.payload, expectedVersion: reader.version);
       return _preview(reader.payload);
     } on BinaryBackupCodecException catch (error) {
       throw _translateBinaryError(error);
@@ -288,7 +288,7 @@ class EncryptedBackupService {
       if (await isBinaryBackup(path)) {
         reader = await BinaryBackupReader.open(path, password);
         payload = reader.payload;
-        _validatePayload(payload, expectedVersion: _version);
+        _validatePayload(payload, expectedVersion: reader.version);
         stagingDirectory = Directory(
           p.join(
             (await _temporaryDirectoryProvider()).path,
@@ -362,19 +362,24 @@ class EncryptedBackupService {
         skipped += 1;
         continue;
       }
-      var restoredPath = reading.photoPath;
-      if (reading.hasPhoto) {
-        final portable = files['photo:${reading.id}'];
+      final restoredPhotos = <ReadingPhotoVersion>[];
+      for (final photo in reading.currentPhotos) {
+        final ownerId = reading.photos == null ? reading.id : photo.id;
+        final portable = files['photo:$ownerId'];
         if (portable == null) {
-          throw BackupException(BackupFailure.invalidFormat, reading.id);
+          throw BackupException(BackupFailure.invalidFormat, ownerId);
         }
-        if (portable['sha256'] != reading.photoSha256) {
-          throw BackupException(BackupFailure.integrityMismatch, reading.id);
+        if (portable['sha256'] != photo.sha256) {
+          throw BackupException(BackupFailure.integrityMismatch, ownerId);
         }
-        restoredPath = await _restoreFile(
-          portable,
-          Directory(p.join(documents.path, 'meter_photos')),
-          stagedAssets: stagedAssets,
+        restoredPhotos.add(
+          photo.copyWith(
+            path: await _restoreFile(
+              portable,
+              Directory(p.join(documents.path, 'meter_photos')),
+              stagedAssets: stagedAssets,
+            ),
+          ),
         );
       }
       final restoredHistory = <ReadingPhotoVersion>[];
@@ -397,7 +402,8 @@ class EncryptedBackupService {
         );
       }
       reading = reading.copyWith(
-        photoPath: restoredPath,
+        photoPath: restoredPhotos.firstOrNull?.path ?? '',
+        photos: reading.photos == null ? null : restoredPhotos,
         photoHistory: restoredHistory,
       );
       await readings.save(reading);
@@ -510,6 +516,14 @@ class EncryptedBackupService {
       await readings.save(
         reading.copyWith(
           photoPath: replacements[reading.photoPath] ?? reading.photoPath,
+          photos: reading.photos == null
+              ? null
+              : [
+                  for (final photo in reading.currentPhotos)
+                    photo.copyWith(
+                      path: replacements[photo.path] ?? photo.path,
+                    ),
+                ],
           photoHistory: [
             for (final photo in reading.photoHistory)
               photo.copyWith(path: replacements[photo.path] ?? photo.path),

@@ -5,10 +5,10 @@ Referenz: `reading_progress_log` / LeseLog-Commit
 Die Vorlage bleibt unverändert. Die neue App hat keine Abhängigkeit auf das
 Nachbarverzeichnis; Testreferenzen sind app-lokal eingefroren.
 
-## Unverändert übernommene Verarbeitung
+## Beibehaltene Grundlagen der Verarbeitung
 
-Exakte Zahlendarstellung, Drift-Schema 4 mit Migrationen und Indizes,
-Repository-Implementierungen, Fotooptimierung und Dateispeicherung,
+Exakte Zahlendarstellung, bestehende Drift-Migrationen und Indizes,
+Repository-Verträge, Fotooptimierung und Dateispeicherung,
 SHA-256-Integrität, Backup-Verschlüsselung und Konflikt-/Reparaturregeln,
 PDF-Fotoaufbereitung, Zeitzonen, Suche und Pagination bleiben erhalten.
 Korrekturen, historische Projekt-Snapshots, Fotoversionen und Löschregeln werden
@@ -17,13 +17,15 @@ weitergeführt. Manuelle Stände erzeugen keine leeren Fotoversionen.
 `test/parity/processing_baseline.json` enthält SHA-256-Hashes der vorhandenen
 Verarbeitungsreferenz-Dateien, neu eingefroren aus dem genannten LeseLog-Commit
 vor Änderungen an der neuen App. Die zwei OCR-Dateien sind bewusst nicht Teil
-der übernommenen Runtime. Von den übrigen Dateien weichen nur diese ab:
+der übernommenen Runtime. Die ursprünglichen Identitätsanpassungen betreffen
+diese Dateien:
 
 - `app_database.dart`: ausschließlich eigener Datenbankname und Temp-Präfix.
 - `binary_backup_codec.dart`: ausschließlich eigene Formatkennung; dadurch sind
   auch die authentifizierten Header-/Asset-Daten app-spezifisch.
 
-Diese Diffs wurden gegen die Quelle geprüft. Die Ausnahmedatei enthält den
+Zusätzliche beauftragte Änderungen sind in den folgenden Abschnitten beschrieben.
+Die Ausnahmedatei enthält für jede betroffene Referenzdatei den
 unveränderten Quell-Hash, lokalen Hash, Grund und zugehörige Regressionstests.
 Quell-Hashes dürfen nicht zur Reparatur fehlgeschlagener Prüfungen geändert werden.
 
@@ -137,3 +139,33 @@ Datenbank, Backup-Format und eingefrorene Verarbeitungs-Hashes bleiben unveränd
 Identische Ablaufprüfungen unter `test/app/reminder_flow_regression_test.dart`
 und JVM-Prüfungen unter `test/native/ReminderScheduleUpdateCheck.java` sichern
 das Verhalten app-lokal ab.
+
+## Mehrere Fotos pro Projektstand
+
+Die beauftragte Erweiterung führt Datenbankschema 5 mit nullable Fotolisten und
+Fotoänderungen ein. Ein fehlendes Fotolistenfeld liest weiterhin das alte
+Einzelfoto und erhält dessen bisherige Manifestdarstellung. Eine explizite leere
+Liste kennzeichnet einen Stand ohne aktuelle Fotos. Historische Foto-IDs bleiben
+erhalten. Neue Korrekturen speichern die geordneten IDs vor und nach der Änderung.
+
+Kamera und Galerie ergänzen denselben Fotoentwurf. Galerieauswahl und
+Android-Wiederherstellung übernehmen alle Bilder. Die vorhandene Optimierung
+läuft nacheinander. Einzelne fehlerhafte Dateien verhindern die übrigen Importe
+nicht. Der interne Entwurf sichert vor externen Picker-Aufrufen die Zuordnung,
+die bisherigen Fotos und Formulareingaben. Neue verworfene Dateien werden
+entfernt. Bereits gespeicherte aktuelle oder historische Dateien bleiben geschützt.
+
+Backup-Version 4 sichert alle aktuellen und historischen Fotozuordnungen.
+Version 3 wird mit ihren ursprünglichen authentifizierten Verschlüsselungsdaten
+gelesen, die alten Versionen 1–2 bleiben unterstützt. Reparatur ordnet Dateien
+weiterhin anhand ihrer Prüfsumme zu und überschreibt keine neueren Datensätze.
+Die synthetische Version-3-Fixture stammt aus dem unveränderten bisherigen Codec.
+
+Neue Einzel- und Verlaufs-PDFs enthalten alle aktuellen Fotos in gespeicherter
+Reihenfolge. Das frühere Exportmerkmal `allPhotos` bleibt auf gespeicherten
+Dokumenten lesbar, wird bei neuer Erzeugung aber zu `currentPhotos` normalisiert.
+Historische Bilder werden nicht neu eingebettet. Vorhandene PDFs bleiben erhalten.
+
+Die autorisierten Abweichungen sind in `processing_exceptions.json` mit
+unveränderten Quell-Hashes und gezielten Regressionstests dokumentiert. Der
+ursprüngliche Verarbeitungsvergleich wird nicht neu eingefroren.

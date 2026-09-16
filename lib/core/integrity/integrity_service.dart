@@ -34,15 +34,17 @@ class IntegrityService {
     final json = reading.toJson()
       ..remove('manifestSha256')
       ..remove('photoPath');
-    final history = json['photoHistory'];
-    if (history is List) {
-      json['photoHistory'] = history
-          .map((item) {
-            final normalized = Map<String, dynamic>.from(item as Map)
-              ..remove('path');
-            return normalized;
-          })
-          .toList(growable: false);
+    for (final key in ['photos', 'photoHistory']) {
+      final history = json[key];
+      if (history is List) {
+        json[key] = history
+            .map((item) {
+              final normalized = Map<String, dynamic>.from(item as Map)
+                ..remove('path');
+              return normalized;
+            })
+            .toList(growable: false);
+      }
     }
     return json;
   }

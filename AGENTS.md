@@ -16,9 +16,15 @@ hinzufügen. Bestehende OCR-Felder in gespeicherten Datensätzen bleiben aus Gr�
 der minimalen Übernahme erhalten, für neue Einträge aber leer beziehungsweise null.
 Zahlen werden weiterhin exakt als Ziffern und Dezimalskala gespeichert.
 
-Korrekturen erzeugen `ReadingRevision`; Gründe sind optional. Manuelle Einträge
-haben keine Fotoversion. Später ergänzte Fotos dürfen keine leere Fotoversion
-archivieren. Ein Fotowechsel verändert den eingegebenen Projektstand nicht.
+Korrekturen erzeugen `ReadingRevision`. Gründe sind optional. Einträge ohne jemals
+gespeicherte Fotos haben keine Fotoversion. Aktuelle Fotos sind eine geordnete Liste. Ersetzte oder
+entfernte Fotos bleiben mit stabilen IDs im Korrekturverlauf. Eine leere aktuelle
+Liste kann deshalb weiterhin historische Fotos besitzen. Später ergänzte Fotos
+dürfen keine leere Fotoversion archivieren. Ein Fotowechsel verändert den
+eingegebenen Projektstand nicht.
+Datenbankschema 5 und Backup-Version 4 behalten die Lesbarkeit alter Einzelfotos
+und Backups der Versionen 1–3. Neue PDFs enthalten nur aktuelle Fotos. Gespeicherte
+PDFs werden durch Fotokorrekturen nicht verändert.
 Foto-, Manifest- und PDF-Prüfsummen, Verschlüsselung, Revisionen, Löschregeln und
 Wiederherstellungsverhalten nicht als Stylingänderung vereinfachen.
 

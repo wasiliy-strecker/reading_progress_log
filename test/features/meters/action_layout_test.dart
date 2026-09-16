@@ -113,7 +113,7 @@ void main() {
         await tester.pumpAndSettle();
         await _checkAction(tester, 'Beispiele ansehen');
         await _checkAction(tester, 'Projekt fotografieren');
-        await _checkAction(tester, 'Foto aus Galerie');
+        await _checkAction(tester, 'Fotos aus Galerie');
         await _checkAction(tester, 'Stand eintragen', tap: true);
         expect(find.text('Aktuelle Reihe *'), findsOneWidget);
         FocusManager.instance.primaryFocus?.unfocus();
@@ -122,7 +122,7 @@ void main() {
         await _checkAction(tester, 'Projektstand speichern');
         router.goNamed('readingEdit', pathParameters: {'id': reading.id});
         await tester.pumpAndSettle();
-        await _checkAction(tester, 'Foto ergänzen');
+        await _checkAction(tester, 'Foto aufnehmen');
         await _checkAction(tester, 'Datum & Uhrzeit ändern');
         await _checkAction(tester, 'Korrektur protokollieren');
         expect(tester.takeException(), isNull);

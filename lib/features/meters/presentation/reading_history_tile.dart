@@ -182,7 +182,7 @@ class _ReadingPhotoThumbnail extends StatelessWidget {
     final fallbackColor = Theme.of(context).colorScheme.primaryContainer;
     return Semantics(
       label: reading.hasPhoto
-          ? 'Foto zum Projektstand ${reading.value.displayText}'
+          ? '${reading.currentPhotos.length} Fotos zum Projektstand ${reading.value.displayText}'
           : 'Manuell erfasst: ${reading.value.displayText}',
       image: reading.hasPhoto,
       child: ClipRRect(
@@ -195,14 +195,46 @@ class _ReadingPhotoThumbnail extends StatelessWidget {
                   color: fallbackColor,
                   child: const Icon(Icons.edit_note_outlined, size: 30),
                 )
-              : Image.file(
-                  File(reading.photoPath),
-                  fit: BoxFit.cover,
-                  cacheWidth: 240,
-                  errorBuilder: (_, _, _) => ColoredBox(
-                    color: fallbackColor,
-                    child: const Icon(Icons.broken_image_outlined, size: 30),
-                  ),
+              : Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.file(
+                      File(reading.currentPhotos.first.path),
+                      fit: BoxFit.cover,
+                      cacheWidth: 240,
+                      errorBuilder: (_, _, _) => ColoredBox(
+                        color: fallbackColor,
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                    if (reading.currentPhotos.length > 1)
+                      Positioned(
+                        right: 4,
+                        bottom: 4,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 3,
+                            ),
+                            child: Text(
+                              '${reading.currentPhotos.length} Fotos',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
         ),
       ),

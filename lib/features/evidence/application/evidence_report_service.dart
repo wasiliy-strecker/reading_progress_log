@@ -53,7 +53,7 @@ class EvidenceReportService {
   Future<GeneratedEvidenceReport> createSingle({
     required MeterReading reading,
     required List<ReadingRevision> revisions,
-    EvidencePhotoMode photoMode = EvidencePhotoMode.allPhotos,
+    EvidencePhotoMode photoMode = EvidencePhotoMode.currentPhotos,
   }) async {
     final reportMeter = reading.meter;
     final manifestSha = await _reportManifestHash(
@@ -74,7 +74,7 @@ class EvidenceReportService {
     required Meter meter,
     required List<MeterReading> readings,
     required Map<String, List<ReadingRevision>> revisions,
-    EvidencePhotoMode photoMode = EvidencePhotoMode.allPhotos,
+    EvidencePhotoMode photoMode = EvidencePhotoMode.currentPhotos,
   }) async {
     if (readings.isEmpty) {
       throw StateError('Für dieses Projekt gibt es noch keine Projektstände.');
@@ -110,6 +110,10 @@ class EvidenceReportService {
   }) async {
     final createdAt = DateTime.now();
     final fonts = await _loadFontBytes();
+    // Historical "allPhotos" remains readable on saved export records only.
+    if (photoMode == EvidencePhotoMode.allPhotos) {
+      photoMode = EvidencePhotoMode.currentPhotos;
+    }
     final preparedPhotoPaths = await _preparePhotos(
       readings: readings,
       photoMode: photoMode,
@@ -172,7 +176,7 @@ class EvidenceReportService {
     final versions = <ReadingPhotoVersion>[
       for (final reading in readings)
         if (photoMode == EvidencePhotoMode.currentPhotos) ...[
-          ?reading.currentPhotoVersion,
+          ...reading.currentPhotos,
         ] else
           ...reading.allPhotoVersions,
     ];
@@ -245,7 +249,16 @@ class EvidenceReportService {
         // This debug guard counts pages of one spanning table. Larger text can
         // take a year-long history beyond the default 20; each row still fits
         // on a page, so retain a finite guard based on the number of readings.
-        maxPages: readings.length > 20 ? readings.length + 1 : 20,
+        maxPages:
+            20 +
+            readings.fold<int>(
+              0,
+              (total, reading) =>
+                  total +
+                  3 +
+                  reading.currentPhotos.length * 2 +
+                  (reading.note.length / 500).ceil(),
+            ),
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(40),
         theme: pw.ThemeData.withFont(base: fonts.regular, bold: fonts.bold),
@@ -543,11 +556,13 @@ class EvidenceReportService {
         ],
         if (showPhoto) ...[
           pw.Text(
-            'Aktuelles Projektstandfoto',
+            reading.currentPhotos.length == 1
+                ? 'Aktuelles Projektstandfoto'
+                : 'Aktuelle Fotos · Foto 1 von ${reading.currentPhotos.length}',
             style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 6),
-          _photo(reading.photoPath, photoAssets),
+          _photo(reading.currentPhotos.first.path, photoAssets),
           pw.SizedBox(height: 10),
         ],
         // Keep the confirmed value and its time with the photo/section title.
@@ -559,6 +574,18 @@ class EvidenceReportService {
           ['Zeitpunkt des Projektstands', readingTimeText(reading, date)],
         ]),
       ]),
+      if (showPhoto)
+        for (final (index, photo) in reading.currentPhotos.indexed.skip(1))
+          _keepTogether([
+            pw.SizedBox(height: 12),
+            pw.Text(
+              'Foto ${index + 1} von ${reading.currentPhotos.length} · ${reading.value.displayText} ${reading.meter.unit}',
+              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.Text(readingTimeText(reading, date)),
+            pw.SizedBox(height: 6),
+            _photo(photo.path, photoAssets),
+          ]),
       if (historicalData.isNotEmpty) ...[
         pw.NewPage(freeSpace: 80),
         pw.SizedBox(height: 10),

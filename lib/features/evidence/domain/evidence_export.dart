@@ -7,8 +7,6 @@ enum EvidencePhotoMode {
 
   String labelFor(EvidenceExportKind kind) => switch (this) {
     withoutPhotos => 'Kompakt ohne Fotos',
-    currentPhotos when kind == EvidenceExportKind.singleReading =>
-      'Mit aktuellem Foto',
     currentPhotos => 'Mit aktuellen Fotos',
     allPhotos => 'Mit allen Fotos (ältere Version)',
   };

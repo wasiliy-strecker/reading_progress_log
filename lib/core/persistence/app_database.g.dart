@@ -765,6 +765,17 @@ class $ReadingRecordsTable extends ReadingRecords
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _photosJsonMeta = const VerificationMeta(
+    'photosJson',
+  );
+  @override
+  late final GeneratedColumn<String> photosJson = GeneratedColumn<String>(
+    'photos_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _photoHistoryJsonMeta = const VerificationMeta(
     'photoHistoryJson',
   );
@@ -828,6 +839,7 @@ class $ReadingRecordsTable extends ReadingRecords
     ocrCandidate,
     ocrConfidence,
     photoAddedAtMillis,
+    photosJson,
     photoHistoryJson,
     lowerReadingReason,
     note,
@@ -1006,6 +1018,12 @@ class $ReadingRecordsTable extends ReadingRecords
         ),
       );
     }
+    if (data.containsKey('photos_json')) {
+      context.handle(
+        _photosJsonMeta,
+        photosJson.isAcceptableOrUnknown(data['photos_json']!, _photosJsonMeta),
+      );
+    }
     if (data.containsKey('photo_history_json')) {
       context.handle(
         _photoHistoryJsonMeta,
@@ -1118,6 +1136,10 @@ class $ReadingRecordsTable extends ReadingRecords
         DriftSqlType.int,
         data['${effectivePrefix}photo_added_at_millis'],
       ),
+      photosJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photos_json'],
+      ),
       photoHistoryJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}photo_history_json'],
@@ -1162,6 +1184,7 @@ class StoredReadingRecord extends DataClass
   final String ocrCandidate;
   final double? ocrConfidence;
   final int? photoAddedAtMillis;
+  final String? photosJson;
   final String photoHistoryJson;
   final String? lowerReadingReason;
   final String note;
@@ -1184,6 +1207,7 @@ class StoredReadingRecord extends DataClass
     required this.ocrCandidate,
     this.ocrConfidence,
     this.photoAddedAtMillis,
+    this.photosJson,
     required this.photoHistoryJson,
     this.lowerReadingReason,
     required this.note,
@@ -1212,6 +1236,9 @@ class StoredReadingRecord extends DataClass
     }
     if (!nullToAbsent || photoAddedAtMillis != null) {
       map['photo_added_at_millis'] = Variable<int>(photoAddedAtMillis);
+    }
+    if (!nullToAbsent || photosJson != null) {
+      map['photos_json'] = Variable<String>(photosJson);
     }
     map['photo_history_json'] = Variable<String>(photoHistoryJson);
     if (!nullToAbsent || lowerReadingReason != null) {
@@ -1245,6 +1272,9 @@ class StoredReadingRecord extends DataClass
       photoAddedAtMillis: photoAddedAtMillis == null && nullToAbsent
           ? const Value.absent()
           : Value(photoAddedAtMillis),
+      photosJson: photosJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photosJson),
       photoHistoryJson: Value(photoHistoryJson),
       lowerReadingReason: lowerReadingReason == null && nullToAbsent
           ? const Value.absent()
@@ -1279,6 +1309,7 @@ class StoredReadingRecord extends DataClass
       ocrCandidate: serializer.fromJson<String>(json['ocrCandidate']),
       ocrConfidence: serializer.fromJson<double?>(json['ocrConfidence']),
       photoAddedAtMillis: serializer.fromJson<int?>(json['photoAddedAtMillis']),
+      photosJson: serializer.fromJson<String?>(json['photosJson']),
       photoHistoryJson: serializer.fromJson<String>(json['photoHistoryJson']),
       lowerReadingReason: serializer.fromJson<String?>(
         json['lowerReadingReason'],
@@ -1308,6 +1339,7 @@ class StoredReadingRecord extends DataClass
       'ocrCandidate': serializer.toJson<String>(ocrCandidate),
       'ocrConfidence': serializer.toJson<double?>(ocrConfidence),
       'photoAddedAtMillis': serializer.toJson<int?>(photoAddedAtMillis),
+      'photosJson': serializer.toJson<String?>(photosJson),
       'photoHistoryJson': serializer.toJson<String>(photoHistoryJson),
       'lowerReadingReason': serializer.toJson<String?>(lowerReadingReason),
       'note': serializer.toJson<String>(note),
@@ -1333,6 +1365,7 @@ class StoredReadingRecord extends DataClass
     String? ocrCandidate,
     Value<double?> ocrConfidence = const Value.absent(),
     Value<int?> photoAddedAtMillis = const Value.absent(),
+    Value<String?> photosJson = const Value.absent(),
     String? photoHistoryJson,
     Value<String?> lowerReadingReason = const Value.absent(),
     String? note,
@@ -1359,6 +1392,7 @@ class StoredReadingRecord extends DataClass
     photoAddedAtMillis: photoAddedAtMillis.present
         ? photoAddedAtMillis.value
         : this.photoAddedAtMillis,
+    photosJson: photosJson.present ? photosJson.value : this.photosJson,
     photoHistoryJson: photoHistoryJson ?? this.photoHistoryJson,
     lowerReadingReason: lowerReadingReason.present
         ? lowerReadingReason.value
@@ -1411,6 +1445,9 @@ class StoredReadingRecord extends DataClass
       photoAddedAtMillis: data.photoAddedAtMillis.present
           ? data.photoAddedAtMillis.value
           : this.photoAddedAtMillis,
+      photosJson: data.photosJson.present
+          ? data.photosJson.value
+          : this.photosJson,
       photoHistoryJson: data.photoHistoryJson.present
           ? data.photoHistoryJson.value
           : this.photoHistoryJson,
@@ -1444,6 +1481,7 @@ class StoredReadingRecord extends DataClass
           ..write('ocrCandidate: $ocrCandidate, ')
           ..write('ocrConfidence: $ocrConfidence, ')
           ..write('photoAddedAtMillis: $photoAddedAtMillis, ')
+          ..write('photosJson: $photosJson, ')
           ..write('photoHistoryJson: $photoHistoryJson, ')
           ..write('lowerReadingReason: $lowerReadingReason, ')
           ..write('note: $note, ')
@@ -1471,6 +1509,7 @@ class StoredReadingRecord extends DataClass
     ocrCandidate,
     ocrConfidence,
     photoAddedAtMillis,
+    photosJson,
     photoHistoryJson,
     lowerReadingReason,
     note,
@@ -1497,6 +1536,7 @@ class StoredReadingRecord extends DataClass
           other.ocrCandidate == this.ocrCandidate &&
           other.ocrConfidence == this.ocrConfidence &&
           other.photoAddedAtMillis == this.photoAddedAtMillis &&
+          other.photosJson == this.photosJson &&
           other.photoHistoryJson == this.photoHistoryJson &&
           other.lowerReadingReason == this.lowerReadingReason &&
           other.note == this.note &&
@@ -1521,6 +1561,7 @@ class ReadingRecordsCompanion extends UpdateCompanion<StoredReadingRecord> {
   final Value<String> ocrCandidate;
   final Value<double?> ocrConfidence;
   final Value<int?> photoAddedAtMillis;
+  final Value<String?> photosJson;
   final Value<String> photoHistoryJson;
   final Value<String?> lowerReadingReason;
   final Value<String> note;
@@ -1544,6 +1585,7 @@ class ReadingRecordsCompanion extends UpdateCompanion<StoredReadingRecord> {
     this.ocrCandidate = const Value.absent(),
     this.ocrConfidence = const Value.absent(),
     this.photoAddedAtMillis = const Value.absent(),
+    this.photosJson = const Value.absent(),
     this.photoHistoryJson = const Value.absent(),
     this.lowerReadingReason = const Value.absent(),
     this.note = const Value.absent(),
@@ -1568,6 +1610,7 @@ class ReadingRecordsCompanion extends UpdateCompanion<StoredReadingRecord> {
     this.ocrCandidate = const Value.absent(),
     this.ocrConfidence = const Value.absent(),
     this.photoAddedAtMillis = const Value.absent(),
+    this.photosJson = const Value.absent(),
     this.photoHistoryJson = const Value.absent(),
     this.lowerReadingReason = const Value.absent(),
     this.note = const Value.absent(),
@@ -1605,6 +1648,7 @@ class ReadingRecordsCompanion extends UpdateCompanion<StoredReadingRecord> {
     Expression<String>? ocrCandidate,
     Expression<double>? ocrConfidence,
     Expression<int>? photoAddedAtMillis,
+    Expression<String>? photosJson,
     Expression<String>? photoHistoryJson,
     Expression<String>? lowerReadingReason,
     Expression<String>? note,
@@ -1631,6 +1675,7 @@ class ReadingRecordsCompanion extends UpdateCompanion<StoredReadingRecord> {
       if (ocrConfidence != null) 'ocr_confidence': ocrConfidence,
       if (photoAddedAtMillis != null)
         'photo_added_at_millis': photoAddedAtMillis,
+      if (photosJson != null) 'photos_json': photosJson,
       if (photoHistoryJson != null) 'photo_history_json': photoHistoryJson,
       if (lowerReadingReason != null)
         'lower_reading_reason': lowerReadingReason,
@@ -1658,6 +1703,7 @@ class ReadingRecordsCompanion extends UpdateCompanion<StoredReadingRecord> {
     Value<String>? ocrCandidate,
     Value<double?>? ocrConfidence,
     Value<int?>? photoAddedAtMillis,
+    Value<String?>? photosJson,
     Value<String>? photoHistoryJson,
     Value<String?>? lowerReadingReason,
     Value<String>? note,
@@ -1683,6 +1729,7 @@ class ReadingRecordsCompanion extends UpdateCompanion<StoredReadingRecord> {
       ocrCandidate: ocrCandidate ?? this.ocrCandidate,
       ocrConfidence: ocrConfidence ?? this.ocrConfidence,
       photoAddedAtMillis: photoAddedAtMillis ?? this.photoAddedAtMillis,
+      photosJson: photosJson ?? this.photosJson,
       photoHistoryJson: photoHistoryJson ?? this.photoHistoryJson,
       lowerReadingReason: lowerReadingReason ?? this.lowerReadingReason,
       note: note ?? this.note,
@@ -1747,6 +1794,9 @@ class ReadingRecordsCompanion extends UpdateCompanion<StoredReadingRecord> {
     if (photoAddedAtMillis.present) {
       map['photo_added_at_millis'] = Variable<int>(photoAddedAtMillis.value);
     }
+    if (photosJson.present) {
+      map['photos_json'] = Variable<String>(photosJson.value);
+    }
     if (photoHistoryJson.present) {
       map['photo_history_json'] = Variable<String>(photoHistoryJson.value);
     }
@@ -1785,6 +1835,7 @@ class ReadingRecordsCompanion extends UpdateCompanion<StoredReadingRecord> {
           ..write('ocrCandidate: $ocrCandidate, ')
           ..write('ocrConfidence: $ocrConfidence, ')
           ..write('photoAddedAtMillis: $photoAddedAtMillis, ')
+          ..write('photosJson: $photosJson, ')
           ..write('photoHistoryJson: $photoHistoryJson, ')
           ..write('lowerReadingReason: $lowerReadingReason, ')
           ..write('note: $note, ')
@@ -1841,6 +1892,17 @@ class $RevisionRecordsTable extends RevisionRecords
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _photoChangeJsonMeta = const VerificationMeta(
+    'photoChangeJson',
+  );
+  @override
+  late final GeneratedColumn<String> photoChangeJson = GeneratedColumn<String>(
+    'photo_change_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _changesJsonMeta = const VerificationMeta(
     'changesJson',
   );
@@ -1858,6 +1920,7 @@ class $RevisionRecordsTable extends RevisionRecords
     readingId,
     changedAtMillis,
     reason,
+    photoChangeJson,
     changesJson,
   ];
   @override
@@ -1904,6 +1967,15 @@ class $RevisionRecordsTable extends RevisionRecords
     } else if (isInserting) {
       context.missing(_reasonMeta);
     }
+    if (data.containsKey('photo_change_json')) {
+      context.handle(
+        _photoChangeJsonMeta,
+        photoChangeJson.isAcceptableOrUnknown(
+          data['photo_change_json']!,
+          _photoChangeJsonMeta,
+        ),
+      );
+    }
     if (data.containsKey('changes_json')) {
       context.handle(
         _changesJsonMeta,
@@ -1940,6 +2012,10 @@ class $RevisionRecordsTable extends RevisionRecords
         DriftSqlType.string,
         data['${effectivePrefix}reason'],
       )!,
+      photoChangeJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_change_json'],
+      ),
       changesJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}changes_json'],
@@ -1959,12 +2035,14 @@ class StoredRevisionRecord extends DataClass
   final String readingId;
   final int changedAtMillis;
   final String reason;
+  final String? photoChangeJson;
   final String changesJson;
   const StoredRevisionRecord({
     required this.id,
     required this.readingId,
     required this.changedAtMillis,
     required this.reason,
+    this.photoChangeJson,
     required this.changesJson,
   });
   @override
@@ -1974,6 +2052,9 @@ class StoredRevisionRecord extends DataClass
     map['reading_id'] = Variable<String>(readingId);
     map['changed_at_millis'] = Variable<int>(changedAtMillis);
     map['reason'] = Variable<String>(reason);
+    if (!nullToAbsent || photoChangeJson != null) {
+      map['photo_change_json'] = Variable<String>(photoChangeJson);
+    }
     map['changes_json'] = Variable<String>(changesJson);
     return map;
   }
@@ -1984,6 +2065,9 @@ class StoredRevisionRecord extends DataClass
       readingId: Value(readingId),
       changedAtMillis: Value(changedAtMillis),
       reason: Value(reason),
+      photoChangeJson: photoChangeJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoChangeJson),
       changesJson: Value(changesJson),
     );
   }
@@ -1998,6 +2082,7 @@ class StoredRevisionRecord extends DataClass
       readingId: serializer.fromJson<String>(json['readingId']),
       changedAtMillis: serializer.fromJson<int>(json['changedAtMillis']),
       reason: serializer.fromJson<String>(json['reason']),
+      photoChangeJson: serializer.fromJson<String?>(json['photoChangeJson']),
       changesJson: serializer.fromJson<String>(json['changesJson']),
     );
   }
@@ -2009,6 +2094,7 @@ class StoredRevisionRecord extends DataClass
       'readingId': serializer.toJson<String>(readingId),
       'changedAtMillis': serializer.toJson<int>(changedAtMillis),
       'reason': serializer.toJson<String>(reason),
+      'photoChangeJson': serializer.toJson<String?>(photoChangeJson),
       'changesJson': serializer.toJson<String>(changesJson),
     };
   }
@@ -2018,12 +2104,16 @@ class StoredRevisionRecord extends DataClass
     String? readingId,
     int? changedAtMillis,
     String? reason,
+    Value<String?> photoChangeJson = const Value.absent(),
     String? changesJson,
   }) => StoredRevisionRecord(
     id: id ?? this.id,
     readingId: readingId ?? this.readingId,
     changedAtMillis: changedAtMillis ?? this.changedAtMillis,
     reason: reason ?? this.reason,
+    photoChangeJson: photoChangeJson.present
+        ? photoChangeJson.value
+        : this.photoChangeJson,
     changesJson: changesJson ?? this.changesJson,
   );
   StoredRevisionRecord copyWithCompanion(RevisionRecordsCompanion data) {
@@ -2034,6 +2124,9 @@ class StoredRevisionRecord extends DataClass
           ? data.changedAtMillis.value
           : this.changedAtMillis,
       reason: data.reason.present ? data.reason.value : this.reason,
+      photoChangeJson: data.photoChangeJson.present
+          ? data.photoChangeJson.value
+          : this.photoChangeJson,
       changesJson: data.changesJson.present
           ? data.changesJson.value
           : this.changesJson,
@@ -2047,14 +2140,21 @@ class StoredRevisionRecord extends DataClass
           ..write('readingId: $readingId, ')
           ..write('changedAtMillis: $changedAtMillis, ')
           ..write('reason: $reason, ')
+          ..write('photoChangeJson: $photoChangeJson, ')
           ..write('changesJson: $changesJson')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, readingId, changedAtMillis, reason, changesJson);
+  int get hashCode => Object.hash(
+    id,
+    readingId,
+    changedAtMillis,
+    reason,
+    photoChangeJson,
+    changesJson,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2063,6 +2163,7 @@ class StoredRevisionRecord extends DataClass
           other.readingId == this.readingId &&
           other.changedAtMillis == this.changedAtMillis &&
           other.reason == this.reason &&
+          other.photoChangeJson == this.photoChangeJson &&
           other.changesJson == this.changesJson);
 }
 
@@ -2071,6 +2172,7 @@ class RevisionRecordsCompanion extends UpdateCompanion<StoredRevisionRecord> {
   final Value<String> readingId;
   final Value<int> changedAtMillis;
   final Value<String> reason;
+  final Value<String?> photoChangeJson;
   final Value<String> changesJson;
   final Value<int> rowid;
   const RevisionRecordsCompanion({
@@ -2078,6 +2180,7 @@ class RevisionRecordsCompanion extends UpdateCompanion<StoredRevisionRecord> {
     this.readingId = const Value.absent(),
     this.changedAtMillis = const Value.absent(),
     this.reason = const Value.absent(),
+    this.photoChangeJson = const Value.absent(),
     this.changesJson = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -2086,6 +2189,7 @@ class RevisionRecordsCompanion extends UpdateCompanion<StoredRevisionRecord> {
     required String readingId,
     required int changedAtMillis,
     required String reason,
+    this.photoChangeJson = const Value.absent(),
     required String changesJson,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -2098,6 +2202,7 @@ class RevisionRecordsCompanion extends UpdateCompanion<StoredRevisionRecord> {
     Expression<String>? readingId,
     Expression<int>? changedAtMillis,
     Expression<String>? reason,
+    Expression<String>? photoChangeJson,
     Expression<String>? changesJson,
     Expression<int>? rowid,
   }) {
@@ -2106,6 +2211,7 @@ class RevisionRecordsCompanion extends UpdateCompanion<StoredRevisionRecord> {
       if (readingId != null) 'reading_id': readingId,
       if (changedAtMillis != null) 'changed_at_millis': changedAtMillis,
       if (reason != null) 'reason': reason,
+      if (photoChangeJson != null) 'photo_change_json': photoChangeJson,
       if (changesJson != null) 'changes_json': changesJson,
       if (rowid != null) 'rowid': rowid,
     });
@@ -2116,6 +2222,7 @@ class RevisionRecordsCompanion extends UpdateCompanion<StoredRevisionRecord> {
     Value<String>? readingId,
     Value<int>? changedAtMillis,
     Value<String>? reason,
+    Value<String?>? photoChangeJson,
     Value<String>? changesJson,
     Value<int>? rowid,
   }) {
@@ -2124,6 +2231,7 @@ class RevisionRecordsCompanion extends UpdateCompanion<StoredRevisionRecord> {
       readingId: readingId ?? this.readingId,
       changedAtMillis: changedAtMillis ?? this.changedAtMillis,
       reason: reason ?? this.reason,
+      photoChangeJson: photoChangeJson ?? this.photoChangeJson,
       changesJson: changesJson ?? this.changesJson,
       rowid: rowid ?? this.rowid,
     );
@@ -2144,6 +2252,9 @@ class RevisionRecordsCompanion extends UpdateCompanion<StoredRevisionRecord> {
     if (reason.present) {
       map['reason'] = Variable<String>(reason.value);
     }
+    if (photoChangeJson.present) {
+      map['photo_change_json'] = Variable<String>(photoChangeJson.value);
+    }
     if (changesJson.present) {
       map['changes_json'] = Variable<String>(changesJson.value);
     }
@@ -2160,6 +2271,7 @@ class RevisionRecordsCompanion extends UpdateCompanion<StoredRevisionRecord> {
           ..write('readingId: $readingId, ')
           ..write('changedAtMillis: $changedAtMillis, ')
           ..write('reason: $reason, ')
+          ..write('photoChangeJson: $photoChangeJson, ')
           ..write('changesJson: $changesJson, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -3132,6 +3244,7 @@ typedef $$ReadingRecordsTableCreateCompanionBuilder =
       Value<String> ocrCandidate,
       Value<double?> ocrConfidence,
       Value<int?> photoAddedAtMillis,
+      Value<String?> photosJson,
       Value<String> photoHistoryJson,
       Value<String?> lowerReadingReason,
       Value<String> note,
@@ -3157,6 +3270,7 @@ typedef $$ReadingRecordsTableUpdateCompanionBuilder =
       Value<String> ocrCandidate,
       Value<double?> ocrConfidence,
       Value<int?> photoAddedAtMillis,
+      Value<String?> photosJson,
       Value<String> photoHistoryJson,
       Value<String?> lowerReadingReason,
       Value<String> note,
@@ -3255,6 +3369,11 @@ class $$ReadingRecordsTableFilterComposer
 
   ColumnFilters<int> get photoAddedAtMillis => $composableBuilder(
     column: $table.photoAddedAtMillis,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photosJson => $composableBuilder(
+    column: $table.photosJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3373,6 +3492,11 @@ class $$ReadingRecordsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get photosJson => $composableBuilder(
+    column: $table.photosJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get photoHistoryJson => $composableBuilder(
     column: $table.photoHistoryJson,
     builder: (column) => ColumnOrderings(column),
@@ -3480,6 +3604,11 @@ class $$ReadingRecordsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get photosJson => $composableBuilder(
+    column: $table.photosJson,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get photoHistoryJson => $composableBuilder(
     column: $table.photoHistoryJson,
     builder: (column) => column,
@@ -3553,6 +3682,7 @@ class $$ReadingRecordsTableTableManager
                 Value<String> ocrCandidate = const Value.absent(),
                 Value<double?> ocrConfidence = const Value.absent(),
                 Value<int?> photoAddedAtMillis = const Value.absent(),
+                Value<String?> photosJson = const Value.absent(),
                 Value<String> photoHistoryJson = const Value.absent(),
                 Value<String?> lowerReadingReason = const Value.absent(),
                 Value<String> note = const Value.absent(),
@@ -3576,6 +3706,7 @@ class $$ReadingRecordsTableTableManager
                 ocrCandidate: ocrCandidate,
                 ocrConfidence: ocrConfidence,
                 photoAddedAtMillis: photoAddedAtMillis,
+                photosJson: photosJson,
                 photoHistoryJson: photoHistoryJson,
                 lowerReadingReason: lowerReadingReason,
                 note: note,
@@ -3601,6 +3732,7 @@ class $$ReadingRecordsTableTableManager
                 Value<String> ocrCandidate = const Value.absent(),
                 Value<double?> ocrConfidence = const Value.absent(),
                 Value<int?> photoAddedAtMillis = const Value.absent(),
+                Value<String?> photosJson = const Value.absent(),
                 Value<String> photoHistoryJson = const Value.absent(),
                 Value<String?> lowerReadingReason = const Value.absent(),
                 Value<String> note = const Value.absent(),
@@ -3624,6 +3756,7 @@ class $$ReadingRecordsTableTableManager
                 ocrCandidate: ocrCandidate,
                 ocrConfidence: ocrConfidence,
                 photoAddedAtMillis: photoAddedAtMillis,
+                photosJson: photosJson,
                 photoHistoryJson: photoHistoryJson,
                 lowerReadingReason: lowerReadingReason,
                 note: note,
@@ -3665,6 +3798,7 @@ typedef $$RevisionRecordsTableCreateCompanionBuilder =
       required String readingId,
       required int changedAtMillis,
       required String reason,
+      Value<String?> photoChangeJson,
       required String changesJson,
       Value<int> rowid,
     });
@@ -3674,6 +3808,7 @@ typedef $$RevisionRecordsTableUpdateCompanionBuilder =
       Value<String> readingId,
       Value<int> changedAtMillis,
       Value<String> reason,
+      Value<String?> photoChangeJson,
       Value<String> changesJson,
       Value<int> rowid,
     });
@@ -3704,6 +3839,11 @@ class $$RevisionRecordsTableFilterComposer
 
   ColumnFilters<String> get reason => $composableBuilder(
     column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoChangeJson => $composableBuilder(
+    column: $table.photoChangeJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3742,6 +3882,11 @@ class $$RevisionRecordsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get photoChangeJson => $composableBuilder(
+    column: $table.photoChangeJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get changesJson => $composableBuilder(
     column: $table.changesJson,
     builder: (column) => ColumnOrderings(column),
@@ -3770,6 +3915,11 @@ class $$RevisionRecordsTableAnnotationComposer
 
   GeneratedColumn<String> get reason =>
       $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get photoChangeJson => $composableBuilder(
+    column: $table.photoChangeJson,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get changesJson => $composableBuilder(
     column: $table.changesJson,
@@ -3818,6 +3968,7 @@ class $$RevisionRecordsTableTableManager
                 Value<String> readingId = const Value.absent(),
                 Value<int> changedAtMillis = const Value.absent(),
                 Value<String> reason = const Value.absent(),
+                Value<String?> photoChangeJson = const Value.absent(),
                 Value<String> changesJson = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RevisionRecordsCompanion(
@@ -3825,6 +3976,7 @@ class $$RevisionRecordsTableTableManager
                 readingId: readingId,
                 changedAtMillis: changedAtMillis,
                 reason: reason,
+                photoChangeJson: photoChangeJson,
                 changesJson: changesJson,
                 rowid: rowid,
               ),
@@ -3834,6 +3986,7 @@ class $$RevisionRecordsTableTableManager
                 required String readingId,
                 required int changedAtMillis,
                 required String reason,
+                Value<String?> photoChangeJson = const Value.absent(),
                 required String changesJson,
                 Value<int> rowid = const Value.absent(),
               }) => RevisionRecordsCompanion.insert(
@@ -3841,6 +3994,7 @@ class $$RevisionRecordsTableTableManager
                 readingId: readingId,
                 changedAtMillis: changedAtMillis,
                 reason: reason,
+                photoChangeJson: photoChangeJson,
                 changesJson: changesJson,
                 rowid: rowid,
               ),

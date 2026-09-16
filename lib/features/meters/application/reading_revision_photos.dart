@@ -7,13 +7,23 @@ const photoRevisionChangeKeys = {
 };
 
 class ReadingRevisionPhotos {
-  const ReadingRevisionPhotos({required this.before, required this.after});
+  const ReadingRevisionPhotos({
+    required this.before,
+    required this.after,
+    this.beforePhotos,
+    this.afterPhotos,
+  });
+  final List<ReadingPhotoVersion>? beforePhotos;
+  final List<ReadingPhotoVersion>? afterPhotos;
+  List<ReadingPhotoVersion> get beforeList => beforePhotos ?? [?before];
+  List<ReadingPhotoVersion> get afterList => afterPhotos ?? [?after];
 
   final ReadingPhotoVersion? before;
   final ReadingPhotoVersion? after;
 }
 
 bool revisionChangesPhoto(ReadingRevision revision) =>
+    revision.photoChange != null ||
     revision.changes.keys.any(photoRevisionChangeKeys.contains);
 
 Iterable<MapEntry<String, ReadingChange>> visibleRevisionChanges(
@@ -28,6 +38,25 @@ ReadingRevisionPhotos? photosForRevision({
 }) {
   if (!revisionChangesPhoto(revision)) return null;
 
+  if (revision.photoChange case final change?) {
+    final versions = {
+      for (final photo in reading.allPhotoVersions) photo.id: photo,
+    };
+    final before = [
+      for (final id in change.beforeIds)
+        if (versions[id] != null) versions[id]!,
+    ];
+    final after = [
+      for (final id in change.afterIds)
+        if (versions[id] != null) versions[id]!,
+    ];
+    return ReadingRevisionPhotos(
+      before: before.firstOrNull,
+      after: after.firstOrNull,
+      beforePhotos: before,
+      afterPhotos: after,
+    );
+  }
   final hashChange = revision.changes['Prüfwert des Fotos (SHA-256)'];
   if (hashChange == null) {
     return const ReadingRevisionPhotos(before: null, after: null);

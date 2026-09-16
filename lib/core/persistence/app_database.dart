@@ -51,6 +51,7 @@ class ReadingRecords extends Table {
   TextColumn get ocrCandidate => text().withDefault(const Constant(''))();
   RealColumn get ocrConfidence => real().nullable()();
   IntColumn get photoAddedAtMillis => integer().nullable()();
+  TextColumn get photosJson => text().nullable()();
   TextColumn get photoHistoryJson => text().withDefault(const Constant('[]'))();
   TextColumn get lowerReadingReason => text().nullable()();
   TextColumn get note => text().withDefault(const Constant(''))();
@@ -66,6 +67,7 @@ class RevisionRecords extends Table {
   TextColumn get readingId => text()();
   IntColumn get changedAtMillis => integer()();
   TextColumn get reason => text()();
+  TextColumn get photoChangeJson => text().nullable()();
   TextColumn get changesJson => text()();
 
   @override
@@ -105,7 +107,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -125,6 +127,13 @@ class AppDatabase extends _$AppDatabase {
         await migrator.addColumn(
           evidenceExportRecords,
           evidenceExportRecords.photoMode,
+        );
+      }
+      if (from < 5) {
+        await migrator.addColumn(readingRecords, readingRecords.photosJson);
+        await migrator.addColumn(
+          revisionRecords,
+          revisionRecords.photoChangeJson,
         );
       }
       if (from < 4) {

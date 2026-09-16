@@ -33,3 +33,47 @@ class UnsupportedMeterPhotoCaptureRepository
   @override
   Future<StoredMeterPhoto?> recoverLostCapture() async => null;
 }
+
+class PhotoImportResult {
+  const PhotoImportResult({this.photos = const [], this.failures = const []});
+  final List<StoredMeterPhoto> photos;
+  final List<String> failures;
+}
+
+typedef PhotoImportProgress = void Function(int completed, int total);
+
+abstract interface class MultiPhotoCaptureRepository
+    implements MeterPhotoCaptureRepository {
+  Future<PhotoImportResult> pickGalleryPhotos({
+    PhotoImportProgress? onProgress,
+  });
+  Future<PhotoImportResult> recoverPhotos({
+    required ReadingSource source,
+    PhotoImportProgress? onProgress,
+  });
+}
+
+extension MultiplePhotoCapture on MeterPhotoCaptureRepository {
+  Future<PhotoImportResult> pickGalleryPhotos({
+    PhotoImportProgress? onProgress,
+  }) async {
+    final repository = this;
+    if (repository is MultiPhotoCaptureRepository) {
+      return repository.pickGalleryPhotos(onProgress: onProgress);
+    }
+    final photo = await capture(ReadingSource.gallery);
+    return PhotoImportResult(photos: [?photo]);
+  }
+
+  Future<PhotoImportResult> recoverPhotos({
+    required ReadingSource source,
+    PhotoImportProgress? onProgress,
+  }) async {
+    final repository = this;
+    if (repository is MultiPhotoCaptureRepository) {
+      return repository.recoverPhotos(source: source, onProgress: onProgress);
+    }
+    final photo = await recoverLostCapture();
+    return PhotoImportResult(photos: [?photo]);
+  }
+}

@@ -7,7 +7,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:universal_io/io.dart';
 
 const binaryBackupFormat = 'strick_haekelbuch_backup';
-const binaryBackupVersion = 3;
+const binaryBackupVersion = 4;
 
 class BinaryBackupCodecException implements Exception {
   const BinaryBackupCodecException(this.code, [this.detail = '']);
@@ -156,7 +156,7 @@ Future<Map<String, dynamic>> createBinaryBackupArchive(
       utf8.encode(jsonEncode(payload)),
       secretKey: key,
       nonce: manifestNonce,
-      aad: _manifestAad,
+      aad: _manifestAad(binaryBackupVersion),
     );
     encoder.add(
       ArchiveFile.noCompress(
@@ -217,6 +217,7 @@ Future<Map<String, dynamic>> createBinaryBackupArchive(
 class BinaryBackupReader {
   BinaryBackupReader._({
     required this.payload,
+    required this.version,
     required Archive archive,
     required InputFileStream input,
     required SecretKey key,
@@ -225,6 +226,7 @@ class BinaryBackupReader {
        _key = key;
 
   final Map<String, dynamic> payload;
+  final int version;
   final Archive _archive;
   final InputFileStream _input;
   final SecretKey _key;
@@ -247,7 +249,7 @@ class BinaryBackupReader {
       if (header['format'] != binaryBackupFormat || version == null) {
         throw const BinaryBackupCodecException('invalidFormat');
       }
-      if (version != binaryBackupVersion) {
+      if (version != 3 && version != binaryBackupVersion) {
         throw const BinaryBackupCodecException('unsupportedVersion');
       }
       final crypto = Map<String, dynamic>.from(header['crypto'] as Map);
@@ -273,7 +275,7 @@ class BinaryBackupReader {
             mac: Mac(base64Decode(crypto['manifestMac'] as String)),
           ),
           secretKey: key,
-          aad: _manifestAad,
+          aad: _manifestAad(version),
         );
       } on SecretBoxAuthenticationError {
         throw const BinaryBackupCodecException('invalidPassword');
@@ -283,6 +285,7 @@ class BinaryBackupReader {
       );
       return BinaryBackupReader._(
         payload: payload,
+        version: version,
         archive: archive,
         input: input,
         key: key,
@@ -322,7 +325,7 @@ class BinaryBackupReader {
           mac: Mac(base64Decode(crypto['mac'] as String)),
         ),
         secretKey: _key,
-        aad: _assetAad(sha256),
+        aad: _assetAad(sha256, version),
       );
       if (_hex((await Sha256().hash(clearText)).bytes) != sha256) {
         throw const BinaryBackupCodecException('integrityMismatch');
@@ -351,10 +354,11 @@ class BinaryBackupReader {
   }
 }
 
-final _manifestAad = utf8.encode('$binaryBackupFormat:v3:manifest');
+List<int> _manifestAad(int version) =>
+    utf8.encode('$binaryBackupFormat:v$version:manifest');
 
-List<int> _assetAad(String sha256) =>
-    utf8.encode('$binaryBackupFormat:v$binaryBackupVersion:asset:$sha256');
+List<int> _assetAad(String sha256, [int version = binaryBackupVersion]) =>
+    utf8.encode('$binaryBackupFormat:v$version:asset:$sha256');
 
 Future<SecretKey> _deriveKey(String password, List<int> salt, int iterations) {
   return Pbkdf2(

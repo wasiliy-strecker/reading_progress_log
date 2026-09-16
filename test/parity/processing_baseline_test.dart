@@ -50,7 +50,7 @@ void main() {
             entry.value,
         reason:
             'Processing must match source ${baseline['sourceCommit']}. '
-            'Authorized bugfixes require a documented exception with regression tests; '
+            'Authorized changes require a documented exception with regression tests; '
             'the frozen source hashes must not be overwritten.',
       );
     });

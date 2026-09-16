@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +9,8 @@ import '../../../app/widgets/app_snack_bar.dart';
 import '../../../app/widgets/confirm_dialog.dart';
 import '../../../core/files/meter_photo_repository.dart';
 import '../domain/meter.dart';
+import '../application/reading_photo_session.dart';
+import 'reading_photo_gallery.dart';
 import '../domain/meter_reading.dart';
 import '../domain/reading_value.dart';
 import 'editable_reading_time_card.dart';
@@ -29,12 +30,12 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _value = TextEditingController();
   final _note = TextEditingController();
-  late final MeterPhotoCaptureRepository _photos;
-  StoredMeterPhoto? _photo;
+  late final ReadingPhotoSession _photoSession;
+  bool _photoEntry = false;
   late DateTime _initialCapturedAt;
   late DateTime _capturedAt;
-  bool _working = false;
-  bool _saved = false;
+  bool _saving = false;
+  bool get _working => _saving || _photoSession.busy;
   bool _discardDialogOpen = false;
   bool _allowPop = false;
   bool _manual = false;
@@ -44,15 +45,19 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
     super.initState();
     _initialCapturedAt = DateTime.now();
     _capturedAt = _initialCapturedAt;
-    _photos = ref.read(meterPhotoCaptureRepositoryProvider);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _recoverLostCapture());
+    _photoSession = ReadingPhotoSession(
+      route: '/meter/${widget.meterId}/capture',
+      repository: ref.read(meterPhotoCaptureRepositoryProvider),
+      store: ref.read(photoDraftStoreProvider),
+      readings: ref.read(meterReadingRepositoryProvider),
+    )..addListener(_photosChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _restorePhotoDraft());
   }
 
   @override
   void dispose() {
-    if (!_saved && _photo != null) {
-      unawaited(_photos.delete(_photo!.path));
-    }
+    _photoSession.removeListener(_photosChanged);
+    unawaited(_photoSession.close().catchError((Object _) {}));
     _value.dispose();
     _note.dispose();
     super.dispose();
@@ -120,7 +125,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
                     ? null
                     : () => _capture(ReadingSource.gallery),
                 icon: const Icon(Icons.photo_library_outlined),
-                label: const Text('Foto aus Galerie'),
+                label: const Text('Fotos aus Galerie'),
               ),
               const SizedBox(height: 12),
               if (_working) ...[
@@ -130,37 +135,16 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
                 const Center(child: Text('Foto wird vorbereitet …')),
               ],
             ] else ...[
-              if (_photo != null) ...[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: AspectRatio(
-                    aspectRatio: 4 / 3,
-                    child: Image.file(
-                      File(_photo!.path),
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const ColoredBox(
-                        color: Colors.black12,
-                        child: Center(child: Icon(Icons.broken_image_outlined)),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${_photo!.source.label} · Foto lokal gespeichert',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _working ? null : _replacePhoto,
-                    icon: const Icon(Icons.change_circle_outlined),
-                    label: const Text('Neues Foto aufnehmen oder auswählen'),
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
+              ReadingPhotoEditor(
+                photos: _photoSession.photos,
+                busy: _working,
+                progress: _photoSession.progress,
+                onCamera: () => _capture(ReadingSource.camera),
+                onGallery: () => _capture(ReadingSource.gallery),
+                onReplace: _replacePhoto,
+                onRemove: _removePhoto,
+              ),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _value,
                 decoration: InputDecoration(
@@ -225,10 +209,11 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
     );
   }
 
-  bool get _isEnteringReading => _manual || _photo != null;
+  bool get _isEnteringReading =>
+      _manual || _photoEntry || _photoSession.photos.isNotEmpty;
 
   bool get _hasUnsavedChanges =>
-      _photo != null ||
+      _photoSession.photos.isNotEmpty ||
       _value.text.trim().isNotEmpty ||
       _note.text.trim().isNotEmpty ||
       _capturedAt != _initialCapturedAt;
@@ -250,7 +235,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
       context,
       title: 'Projektstand verwerfen?',
       message:
-          'Dein Projektstand und das ausgewählte Foto wurden noch nicht gespeichert.',
+          'Dein Projektstand und die ausgewählten Fotos wurden noch nicht gespeichert.',
       discardLabel: 'Projektstand verwerfen',
     );
     _discardDialogOpen = false;
@@ -259,15 +244,14 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
   }
 
   Future<void> _returnToCaptureOptions() async {
-    final photo = _photo;
-    setState(() => _working = true);
+    setState(() => _saving = true);
     try {
-      if (photo != null) await _photos.delete(photo.path);
+      await _photoSession.discard();
       if (!mounted) return;
       _formKey.currentState?.reset();
       setState(() {
         _manual = false;
-        _photo = null;
+        _photoEntry = false;
         _value.clear();
         _note.clear();
         _initialCapturedAt = DateTime.now();
@@ -278,13 +262,13 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
             message:
-                'Das ungespeicherte Foto konnte nicht entfernt werden. '
+                'Die ungespeicherten Fotos konnten nicht entfernt werden. '
                 'Bitte versuche es erneut.',
           ),
         );
       }
     } finally {
-      if (mounted) setState(() => _working = false);
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -296,83 +280,107 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
     }
   }
 
-  Future<void> _capture(ReadingSource source) async {
+  void _photosChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Map<String, dynamic> get _draftFields => {
+    'value': _value.text,
+    'note': _note.text,
+    'capturedAt': _capturedAt.toIso8601String(),
+    'initialCapturedAt': _initialCapturedAt.toIso8601String(),
+    'manual': _manual,
+    'photoEntry': _photoEntry,
+  };
+
+  void _showPhotoFailures(PhotoImportResult result) {
+    if (!mounted || result.failures.isEmpty) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      AppSnackBar(
+        message:
+            '${result.photos.length} Fotos hinzugefügt. Nicht verarbeitet: ${result.failures.join(', ')}',
+      ),
+    );
+  }
+
+  Future<void> _capture(ReadingSource source, {String? replacementId}) async {
     if (!mounted || _working) return;
-    setState(() => _working = true);
+    FocusScope.of(context).unfocus();
+    final wasEntering = _isEnteringReading;
     try {
-      final photo = await _photos.capture(source);
-      if (photo == null) return;
-      if (!mounted) {
-        await _photos.delete(photo.path);
-        return;
+      final result = await _photoSession.capture(
+        source,
+        formFields: _draftFields,
+        replacementId: replacementId,
+      );
+      if (!mounted) return;
+      if (result.photos.isNotEmpty) {
+        setState(() {
+          _photoEntry = true;
+          if (!wasEntering) _capturedAt = result.photos.first.capturedAt;
+        });
+        await _photoSession.rememberFields(_draftFields);
       }
-      await _processPhoto(photo);
+      _showPhotoFailures(result);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'Foto konnte nicht verarbeitet werden: $error'),
+          AppSnackBar(
+            message: 'Fotos konnten nicht hinzugefügt werden: $error',
+          ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _working = false);
     }
   }
 
-  Future<void> _recoverLostCapture() async {
-    if (!mounted || _working) return;
-    setState(() => _working = true);
+  Future<void> _restorePhotoDraft() async {
     try {
-      final photo = await _photos.recoverLostCapture();
-      if (photo == null) return;
-      if (!mounted) {
-        await _photos.delete(photo.path);
-        return;
+      final result = await _photoSession.restore();
+      if (!mounted) return;
+      final fields = _photoSession.fields;
+      if (fields.isNotEmpty) {
+        setState(() {
+          _value.text = fields['value'] as String;
+          _note.text = fields['note'] as String;
+          _capturedAt = DateTime.parse(fields['capturedAt'] as String);
+          _initialCapturedAt = DateTime.parse(
+            fields['initialCapturedAt'] as String,
+          );
+          _manual = fields['manual'] as bool;
+          _photoEntry =
+              (fields['photoEntry'] as bool) || _photoSession.photos.isNotEmpty;
+        });
       }
-      await _processPhoto(photo);
-    } on Object {
-      return;
-    } finally {
-      if (mounted) setState(() => _working = false);
+      _showPhotoFailures(result);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(
+            message:
+                'Foto-Zwischenstand konnte nicht wiederhergestellt werden: $error',
+          ),
+        );
+      }
     }
   }
 
-  Future<void> _processPhoto(StoredMeterPhoto photo) async {
-    final old = _photo;
-    if (!mounted) {
-      await _photos.delete(photo.path);
-      return;
+  Future<void> _replacePhoto(ReadingPhotoVersion photo) async {
+    final source = await choosePhotoReplacementSource(context);
+    if (source != null && mounted) {
+      await _capture(source, replacementId: photo.id);
     }
-    setState(() {
-      _photo = photo;
-      if (old == null) _capturedAt = photo.capturedAt;
-    });
-    if (old != null && old.path != photo.path) await _photos.delete(old.path);
   }
 
-  Future<void> _replacePhoto() async {
-    FocusScope.of(context).unfocus();
-    final source = await showModalBottomSheet<ReadingSource>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Neu fotografieren'),
-              onTap: () => Navigator.pop(context, ReadingSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Aus Galerie wählen'),
-              onTap: () => Navigator.pop(context, ReadingSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (source != null) await _capture(source);
+  Future<void> _removePhoto(ReadingPhotoVersion photo) async {
+    try {
+      await _photoSession.removePhoto(photo.id, _draftFields);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(message: 'Foto konnte nicht entfernt werden: $error'),
+        );
+      }
+    }
   }
 
   Future<void> _pickCapturedAt() async {
@@ -401,28 +409,22 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
   }
 
   Future<void> _save(Meter meter) async {
-    if (!_formKey.currentState!.validate() || (!_manual && _photo == null)) {
+    if (!_formKey.currentState!.validate()) {
       return;
     }
     final value = ReadingValue.tryParseWhole(_value.text)!;
-    setState(() => _working = true);
+    setState(() => _saving = true);
     try {
       final service = ref.read(meterReadingServiceProvider);
-      final reading = _manual
-          ? await service.createManual(
-              meter: meter,
-              value: value,
-              capturedAt: _capturedAt,
-              note: _note.text,
-            )
-          : await service.create(
-              meter: meter,
-              photo: _photo!,
-              value: value,
-              capturedAt: _capturedAt,
-              note: _note.text,
-            );
-      _saved = true;
+      final reading = await service.createWithPhotos(
+        readingId: _photoSession.readingId,
+        meter: meter,
+        photos: List.of(_photoSession.photos),
+        value: value,
+        capturedAt: _capturedAt,
+        note: _note.text,
+      );
+      await _photoSession.committed();
       _allowPop = true;
       if (!mounted) return;
       context.pushReplacementNamed(
@@ -434,7 +436,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(message: 'Speichern fehlgeschlagen: $error'),
         );
-        setState(() => _working = false);
+        setState(() => _saving = false);
       }
     }
   }
@@ -458,7 +460,7 @@ class _CaptureGuidance extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           const Text(
-            'Merke dir deine aktuelle Reihe oder Runde. Ein Foto hält fest, wie dein Projekt gerade aussieht.',
+            'Merke dir deine aktuelle Reihe oder Runde. Fotos halten fest, wie dein Projekt gerade aussieht.',
           ),
           const SizedBox(height: 8),
           Text(

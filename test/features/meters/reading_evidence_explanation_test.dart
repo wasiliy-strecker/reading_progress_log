@@ -300,8 +300,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('PDF-Inhalt wählen'), findsOneWidget);
     expect(find.text('Kompakt ohne Fotos'), findsOneWidget);
-    expect(find.text('Mit aktuellem Foto'), findsOneWidget);
-    await tester.tap(find.text('Mit aktuellem Foto'));
+    expect(find.text('Mit aktuellen Fotos'), findsOneWidget);
+    await tester.tap(find.text('Mit aktuellen Fotos'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -309,7 +309,7 @@ void main() {
     expect(find.byKey(const ValueKey('pdf-export-progress')), findsOneWidget);
     expect(
       find.text(
-        'Das aktuelle Foto, der Projektstand und die Notizen werden für die PDF zusammengestellt.',
+        'Die aktuellen Fotos, der Projektstand und die Notizen werden für die PDF zusammengestellt.',
       ),
       findsOneWidget,
     );

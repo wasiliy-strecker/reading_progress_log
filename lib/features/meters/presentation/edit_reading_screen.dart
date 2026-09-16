@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:universal_io/io.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +9,8 @@ import '../../../app/widgets/app_snack_bar.dart';
 import '../../../app/widgets/confirm_dialog.dart';
 import '../../../core/files/meter_photo_repository.dart';
 import '../domain/meter.dart';
+import '../application/reading_photo_session.dart';
+import 'reading_photo_gallery.dart';
 import '../domain/meter_reading.dart';
 import '../domain/reading_value.dart';
 import 'editable_reading_time_card.dart';
@@ -55,30 +55,33 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
   late final TextEditingController _value;
   late final TextEditingController _note;
   final _reason = TextEditingController();
-  late final MeterPhotoCaptureRepository _photos;
+  late final ReadingPhotoSession _photoSession;
   late DateTime _capturedAt;
-  StoredMeterPhoto? _replacementPhoto;
-  bool _processingPhoto = false;
+  bool get _processingPhoto => _photoSession.busy;
   bool _saving = false;
-  bool _saved = false;
   bool _discardDialogOpen = false;
   bool _allowPop = false;
 
   @override
   void initState() {
     super.initState();
-    _photos = ref.read(meterPhotoCaptureRepositoryProvider);
+    _photoSession = ReadingPhotoSession(
+      route: '/reading/${widget.reading.id}/edit',
+      original: widget.reading,
+      repository: ref.read(meterPhotoCaptureRepositoryProvider),
+      store: ref.read(photoDraftStoreProvider),
+      readings: ref.read(meterReadingRepositoryProvider),
+    )..addListener(_photosChanged);
     _value = TextEditingController(text: widget.reading.value.displayText);
     _note = TextEditingController(text: widget.reading.note);
     _capturedAt = widget.reading.capturedAt.toLocal();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _recoverLostCapture());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _restorePhotoDraft());
   }
 
   @override
   void dispose() {
-    if (!_saved && _replacementPhoto != null) {
-      unawaited(_photos.delete(_replacementPhoto!.path));
-    }
+    _photoSession.removeListener(_photosChanged);
+    unawaited(_photoSession.close().catchError((Object _) {}));
     _value.dispose();
     _note.dispose();
     _reason.dispose();
@@ -182,7 +185,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
       _note.text.trim() != widget.reading.note ||
       _reason.text.trim().isNotEmpty ||
       _capturedAt != widget.reading.capturedAt.toLocal() ||
-      _replacementPhoto != null;
+      _photoSession.changed;
 
   Future<void> _handleBack() async {
     if (_saving || _processingPhoto || _discardDialogOpen) return;
@@ -202,7 +205,18 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     );
     _discardDialogOpen = false;
     if (!mounted || !discard) return;
-    await _leaveWithoutGuard();
+    try {
+      await _photoSession.discard();
+      if (mounted) await _leaveWithoutGuard();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(
+            message: 'Änderungen konnten nicht verworfen werden: $error',
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _leaveWithoutGuard() async {
@@ -222,200 +236,104 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     }
   }
 
-  Widget _buildPhotoCorrection(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              widget.reading.hasPhoto
-                  ? 'Aktuelles Projektstandfoto'
-                  : 'Foto ergänzen (optional)',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 10),
-            if (widget.reading.hasPhoto) ...[
-              _PhotoPreview(path: widget.reading.photoPath),
-              const SizedBox(height: 8),
-              Text(
-                '${widget.reading.source.label} · bisheriges Foto',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            if (_replacementPhoto != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Neues Foto für die Korrektur',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: colors.primary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _PhotoPreview(path: _replacementPhoto!.path),
-              const SizedBox(height: 8),
-              Text(
-                '${_replacementPhoto!.source.label} · neues Foto',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 12),
-              _buildPhotoSelectionButton(hasReplacement: true),
-              if (widget.reading.hasPhoto) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colors.secondaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.history_outlined, size: 20),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Das bisherige Foto bleibt als frühere Version erhalten.',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ] else ...[
-              const SizedBox(height: 12),
-              _buildPhotoSelectionButton(hasReplacement: false),
-            ],
-          ],
-        ),
+  Widget _buildPhotoCorrection(BuildContext context) => ReadingPhotoEditor(
+    photos: _photoSession.photos,
+    busy: _saving || _processingPhoto,
+    progress: _photoSession.progress,
+    correction: true,
+    onCamera: () => _capturePhoto(ReadingSource.camera),
+    onGallery: () => _capturePhoto(ReadingSource.gallery),
+    onReplace: _replacePhoto,
+    onRemove: _removePhoto,
+  );
+
+  void _photosChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Map<String, dynamic> get _draftFields => {
+    'value': _value.text,
+    'note': _note.text,
+    'reason': _reason.text,
+    'capturedAt': _capturedAt.toIso8601String(),
+  };
+
+  void _showPhotoFailures(PhotoImportResult result) {
+    if (!mounted || result.failures.isEmpty) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      AppSnackBar(
+        message:
+            '${result.photos.length} Fotos hinzugefügt. Nicht verarbeitet: ${result.failures.join(', ')}',
       ),
     );
   }
 
-  Widget _buildPhotoSelectionButton({required bool hasReplacement}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        OutlinedButton.icon(
-          onPressed: _processingPhoto || _saving
-              ? null
-              : _chooseReplacementSource,
-          icon: _processingPhoto
-              ? const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Icon(
-                  hasReplacement
-                      ? Icons.change_circle_outlined
-                      : Icons.add_a_photo_outlined,
-                ),
-          label: Text(
-            hasReplacement
-                ? 'Korrekturfoto ändern'
-                : widget.reading.hasPhoto
-                ? 'Neues Foto für Korrektur'
-                : 'Foto ergänzen',
-          ),
-        ),
-        if (_processingPhoto) ...[
-          const SizedBox(height: 8),
-          const Center(child: Text('Foto wird vorbereitet …')),
-        ],
-      ],
-    );
-  }
-
-  Future<void> _chooseReplacementSource() async {
-    FocusScope.of(context).unfocus();
-    final source = await showModalBottomSheet<ReadingSource>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          children: [
-            const ListTile(
-              title: Text(
-                'Neues Projektstandfoto',
-                style: TextStyle(fontWeight: FontWeight.w800),
-              ),
-              subtitle: Text('Quelle für das Korrekturfoto auswählen'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Neu fotografieren'),
-              onTap: () => Navigator.pop(context, ReadingSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Aus Galerie wählen'),
-              onTap: () => Navigator.pop(context, ReadingSource.gallery),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-    if (source != null) await _captureReplacement(source);
-  }
-
-  Future<void> _captureReplacement(ReadingSource source) async {
+  Future<void> _capturePhoto(
+    ReadingSource source, {
+    String? replacementId,
+  }) async {
     if (!mounted || _processingPhoto || _saving) return;
-    setState(() => _processingPhoto = true);
+    FocusScope.of(context).unfocus();
     try {
-      final photo = await _photos.capture(source);
-      if (photo == null) return;
-      if (!mounted) {
-        await _photos.delete(photo.path);
-        return;
-      }
-      await _processReplacementPhoto(photo);
+      final result = await _photoSession.capture(
+        source,
+        formFields: _draftFields,
+        replacementId: replacementId,
+      );
+      _showPhotoFailures(result);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'Foto konnte nicht verarbeitet werden: $error'),
+          AppSnackBar(
+            message: 'Fotos konnten nicht hinzugefügt werden: $error',
+          ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _processingPhoto = false);
     }
   }
 
-  Future<void> _recoverLostCapture() async {
-    if (!mounted || _processingPhoto || _saving) return;
-    setState(() => _processingPhoto = true);
+  Future<void> _replacePhoto(ReadingPhotoVersion photo) async {
+    final source = await choosePhotoReplacementSource(context);
+    if (source != null && mounted) {
+      await _capturePhoto(source, replacementId: photo.id);
+    }
+  }
+
+  Future<void> _removePhoto(ReadingPhotoVersion photo) async {
     try {
-      final photo = await _photos.recoverLostCapture();
-      if (photo == null) return;
-      if (!mounted) {
-        await _photos.delete(photo.path);
-        return;
+      await _photoSession.removePhoto(photo.id, _draftFields);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(message: 'Foto konnte nicht entfernt werden: $error'),
+        );
       }
-      await _processReplacementPhoto(photo);
-    } on Object {
-      return;
-    } finally {
-      if (mounted) setState(() => _processingPhoto = false);
     }
   }
 
-  Future<void> _processReplacementPhoto(StoredMeterPhoto photo) async {
-    final previousPending = _replacementPhoto;
-    if (!mounted) {
-      await _photos.delete(photo.path);
-      return;
-    }
-    setState(() => _replacementPhoto = photo);
-    if (previousPending != null && previousPending.path != photo.path) {
-      await _photos.delete(previousPending.path);
+  Future<void> _restorePhotoDraft() async {
+    try {
+      final result = await _photoSession.restore();
+      if (!mounted) return;
+      final fields = _photoSession.fields;
+      if (fields.isNotEmpty) {
+        setState(() {
+          _value.text = fields['value'] as String;
+          _note.text = fields['note'] as String;
+          _reason.text = fields['reason'] as String;
+          _capturedAt = DateTime.parse(fields['capturedAt'] as String);
+        });
+      }
+      _showPhotoFailures(result);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(
+            message:
+                'Foto-Zwischenstand konnte nicht wiederhergestellt werden: $error',
+          ),
+        );
+      }
     }
   }
 
@@ -460,11 +378,11 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
             capturedAt: _capturedAt,
             note: _note.text,
             reason: _reason.text,
-            replacementPhoto: _replacementPhoto,
+            photos: List.of(_photoSession.photos),
           );
       ref.invalidate(readingByIdProvider(widget.reading.id));
       ref.invalidate(revisionsForReadingProvider(widget.reading.id));
-      _saved = true;
+      await _photoSession.committed();
       if (mounted) {
         await _leaveWithoutGuard();
       }
@@ -476,29 +394,5 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
         setState(() => _saving = false);
       }
     }
-  }
-}
-
-class _PhotoPreview extends StatelessWidget {
-  const _PhotoPreview({required this.path});
-
-  final String path;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: AspectRatio(
-        aspectRatio: 4 / 3,
-        child: Image.file(
-          File(path),
-          fit: BoxFit.contain,
-          errorBuilder: (_, _, _) => const ColoredBox(
-            color: Colors.black12,
-            child: Center(child: Icon(Icons.broken_image_outlined)),
-          ),
-        ),
-      ),
-    );
   }
 }

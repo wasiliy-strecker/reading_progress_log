@@ -13,17 +13,21 @@ import 'meter_photo_repository.dart';
 typedef MeterPhotoDocumentsDirectoryProvider = Future<Directory> Function();
 typedef MeterPhotoPicker = Future<XFile?> Function(ReadingSource source);
 
-class DeviceMeterPhotoCaptureRepository implements MeterPhotoCaptureRepository {
+class DeviceMeterPhotoCaptureRepository implements MultiPhotoCaptureRepository {
   DeviceMeterPhotoCaptureRepository({
     ImagePicker? picker,
     IntegrityService integrity = const IntegrityService(),
     MeterPhotoOptimizer optimizer = const MeterPhotoOptimizer(),
     MeterPhotoDocumentsDirectoryProvider? documentsDirectoryProvider,
     MeterPhotoPicker? photoPicker,
+    Future<List<XFile>> Function()? multiPhotoPicker,
+    Future<LostDataResponse> Function()? lostDataPicker,
   }) : _picker = picker ?? ImagePicker(),
        _integrity = integrity,
        _optimizer = optimizer,
        _photoPicker = photoPicker,
+       _multiPhotoPicker = multiPhotoPicker,
+       _lostDataPicker = lostDataPicker,
        _documentsDirectoryProvider =
            documentsDirectoryProvider ?? getApplicationDocumentsDirectory;
 
@@ -32,6 +36,8 @@ class DeviceMeterPhotoCaptureRepository implements MeterPhotoCaptureRepository {
   final MeterPhotoOptimizer _optimizer;
   final MeterPhotoDocumentsDirectoryProvider _documentsDirectoryProvider;
   final MeterPhotoPicker? _photoPicker;
+  final Future<List<XFile>> Function()? _multiPhotoPicker;
+  final Future<LostDataResponse> Function()? _lostDataPicker;
 
   @override
   Future<StoredMeterPhoto?> capture(ReadingSource source) async {
@@ -67,6 +73,48 @@ class DeviceMeterPhotoCaptureRepository implements MeterPhotoCaptureRepository {
     );
   }
 
+  @override
+  Future<PhotoImportResult> pickGalleryPhotos({
+    PhotoImportProgress? onProgress,
+  }) async {
+    final files =
+        await (_multiPhotoPicker?.call() ??
+            _picker.pickMultiImage(requestFullMetadata: false));
+    return _persistAll(files, ReadingSource.gallery, onProgress);
+  }
+
+  @override
+  Future<PhotoImportResult> recoverPhotos({
+    required ReadingSource source,
+    PhotoImportProgress? onProgress,
+  }) async {
+    final response =
+        await (_lostDataPicker?.call() ?? _picker.retrieveLostData());
+    if (response.exception != null) throw response.exception!;
+    return _persistAll(response.files ?? [], source, onProgress);
+  }
+
+  Future<PhotoImportResult> _persistAll(
+    List<XFile> files,
+    ReadingSource source,
+    PhotoImportProgress? onProgress,
+  ) async {
+    final photos = <StoredMeterPhoto>[];
+    final failures = <String>[];
+    onProgress?.call(0, files.length);
+    for (final (index, file) in files.indexed) {
+      try {
+        photos.add(
+          await _persist(file, source: source, capturedAt: DateTime.now()),
+        );
+      } on Object {
+        failures.add(file.name);
+      }
+      onProgress?.call(index + 1, files.length);
+    }
+    return PhotoImportResult(photos: photos, failures: failures);
+  }
+
   Future<StoredMeterPhoto> _persist(
     XFile picked, {
     required ReadingSource source,
@@ -78,24 +126,31 @@ class DeviceMeterPhotoCaptureRepository implements MeterPhotoCaptureRepository {
     final id = newLocalId('photo');
     final optimizedFile = File(p.join(directory.path, '$id.jpg'));
     final staging = File(p.join(directory.path, '$id.preparing.jpg'));
-    final optimized = await _optimizer.optimize(
-      sourcePath: picked.path,
-      targetPath: staging.path,
-    );
-    late final File file;
-    if (optimized) {
-      file = await staging.rename(optimizedFile.path);
-    } else {
-      if (await staging.exists()) await staging.delete();
-      throw const MeterPhotoProcessingException();
+    try {
+      final optimized = await _optimizer.optimize(
+        sourcePath: picked.path,
+        targetPath: staging.path,
+      );
+      late final File file;
+      if (optimized) {
+        file = await staging.rename(optimizedFile.path);
+      } else {
+        if (await staging.exists()) await staging.delete();
+        throw const MeterPhotoProcessingException();
+      }
+      final bytes = await file.readAsBytes();
+      return StoredMeterPhoto(
+        path: file.path,
+        sha256: await _integrity.sha256Bytes(bytes),
+        source: source,
+        capturedAt: capturedAt,
+      );
+    } on Object {
+      for (final file in [staging, optimizedFile]) {
+        if (await file.exists()) await file.delete();
+      }
+      rethrow;
     }
-    final bytes = await file.readAsBytes();
-    return StoredMeterPhoto(
-      path: file.path,
-      sha256: await _integrity.sha256Bytes(bytes),
-      source: source,
-      capturedAt: capturedAt,
-    );
   }
 
   @override

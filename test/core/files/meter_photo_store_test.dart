@@ -11,6 +11,58 @@ import 'package:strick_haekelbuch/features/meters/domain/meter_reading.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test(
+    'gallery batch and Android recovery persist every valid file in order',
+    () async {
+      final temp = await Directory.systemTemp.createTemp('photo_batch_');
+      addTearDown(() => temp.delete(recursive: true));
+      final first = File('${temp.path}/first.png')
+        ..writeAsBytesSync(img.encodePng(img.Image(width: 20, height: 40)));
+      final broken = File('${temp.path}/broken.png')
+        ..writeAsBytesSync([0, 1, 2]);
+      final last = File('${temp.path}/last.png')
+        ..writeAsBytesSync(img.encodePng(img.Image(width: 40, height: 20)));
+      final files = [XFile(first.path), XFile(broken.path), XFile(last.path)];
+      final repository = DeviceMeterPhotoCaptureRepository(
+        documentsDirectoryProvider: () async => temp,
+        multiPhotoPicker: () async => files,
+        lostDataPicker: () async =>
+            LostDataResponse(files: [files.first, files.last]),
+      );
+      final progress = <(int, int)>[];
+      final batch = await repository.pickGalleryPhotos(
+        onProgress: (done, total) => progress.add((done, total)),
+      );
+      expect(batch.photos, hasLength(2));
+      expect(batch.failures, ['broken.png']);
+      expect(progress, [(0, 3), (1, 3), (2, 3), (3, 3)]);
+      expect(
+        batch.photos.map((p) => p.source),
+        everyElement(ReadingSource.gallery),
+      );
+      final restored = await repository.recoverPhotos(
+        source: ReadingSource.gallery,
+      );
+      expect(restored.photos, hasLength(2));
+      expect(
+        restored.photos.map((p) => p.source),
+        everyElement(ReadingSource.gallery),
+      );
+      for (final photo in [...batch.photos, ...restored.photos]) {
+        expect(await File(photo.path).exists(), true);
+        expect(
+          await const IntegrityService().sha256Bytes(
+            await File(photo.path).readAsBytes(),
+          ),
+          photo.sha256,
+        );
+      }
+      final savedFiles = Directory('${temp.path}/meter_photos').listSync();
+      expect(savedFiles, hasLength(4));
+      expect(savedFiles.where((f) => f.path.contains('.preparing.')), isEmpty);
+    },
+  );
+
   test('manual source never opens the camera or gallery picker', () async {
     var opened = false;
     final repository = DeviceMeterPhotoCaptureRepository(

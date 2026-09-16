@@ -1,3 +1,4 @@
+import 'reading_photo_gallery.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
@@ -75,28 +76,13 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
         children: [
           if (reading.hasPhoto) ...[
             Text(
-              reading.photoHistory.isEmpty
-                  ? 'Projektstandfoto'
-                  : 'Aktuelles Projektstandfoto',
+              'Aktuelle Fotos (${reading.currentPhotos.length})',
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: AspectRatio(
-                aspectRatio: 4 / 3,
-                child: Image.file(
-                  File(reading.photoPath),
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const ColoredBox(
-                    color: Colors.black12,
-                    child: Center(child: Icon(Icons.broken_image_outlined)),
-                  ),
-                ),
-              ),
-            ),
+            ReadingPhotoGallery(photos: reading.currentPhotos),
             const SizedBox(height: 16),
           ],
           Text(
@@ -164,7 +150,7 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
         context,
         description: photoMode == EvidencePhotoMode.withoutPhotos
             ? 'Projektstand und Notizen werden für die kompakte PDF zusammengestellt.'
-            : 'Das aktuelle Foto, der Projektstand und die Notizen werden für die PDF zusammengestellt.',
+            : 'Die aktuellen Fotos, der Projektstand und die Notizen werden für die PDF zusammengestellt.',
         operation: () async {
           final revisions = await ref
               .read(meterReadingRepositoryProvider)
@@ -364,7 +350,15 @@ class _InfoCard extends StatelessWidget {
               'Zeitpunkt des Projektstands',
               formatDateTime(reading.capturedAt),
             ),
-            _row('Quelle', reading.source.label),
+            _row(
+              'Quelle',
+              reading.hasPhoto
+                  ? reading.currentPhotos
+                        .map((photo) => photo.source.label)
+                        .toSet()
+                        .join(' · ')
+                  : ReadingSource.manual.label,
+            ),
             if (reading.lowerReadingReason != null)
               _row('Niedrigerer Stand', reading.lowerReadingReason!.label),
             if (reading.note.isNotEmpty) _row('Notiz', reading.note),
@@ -580,6 +574,24 @@ class _RevisionPhotos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (photos.beforePhotos != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Fotos nachher (${photos.afterList.length})',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          ReadingPhotoGallery(photos: photos.afterList),
+          ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            title: Text('Fotos vorher (${photos.beforeList.length})'),
+            children: [ReadingPhotoGallery(photos: photos.beforeList)],
+          ),
+        ],
+      );
+    }
     final after = photos.after;
     final before = photos.before;
     return Column(

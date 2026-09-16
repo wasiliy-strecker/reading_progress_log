@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:strick_haekelbuch/app/app_providers.dart';
 import 'package:strick_haekelbuch/core/files/evidence_photo_asset_repository.dart';
 import 'package:strick_haekelbuch/core/files/meter_photo_repository.dart';
+import 'package:strick_haekelbuch/core/files/photo_draft_store.dart';
 import 'package:strick_haekelbuch/features/meters/domain/meter_reading.dart';
 import 'package:strick_haekelbuch/features/meters/presentation/capture_reading_screen.dart';
 import 'package:strick_haekelbuch/features/meters/presentation/edit_reading_screen.dart';
@@ -112,13 +113,11 @@ void main() {
         await tester.enterText(valueField, '237');
         FocusManager.instance.primaryFocus?.unfocus();
         await tester.pumpAndSettle();
-        final replace = find.text(
-          editing
-              ? 'Korrekturfoto ändern'
-              : 'Neues Foto aufnehmen oder auswählen',
-        );
+        final replace = find.byTooltip('Foto 1 bearbeiten');
         await tester.ensureVisible(replace);
         await tester.tap(replace);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Foto ersetzen'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Neu fotografieren'));
         await tester.pumpAndSettle();
@@ -146,6 +145,29 @@ Future<MemoryReadingRepository> _open(
   final book = sampleBook();
   final readings = MemoryReadingRepository();
   if (editing) readings.items['reading'] = sampleReading();
+  final drafts = MemoryPhotoDraftStore();
+  if (photos.pendingRecovery != null) {
+    final original = editing ? sampleReading() : null;
+    await drafts.write(
+      editing ? '/reading/reading/edit' : '/meter/${book.id}/capture',
+      {
+        'originalUpdatedAt': original?.updatedAt.toIso8601String(),
+        'photos': original?.currentPhotos.map((p) => p.toJson()).toList() ?? [],
+        'ownedPaths': <String>[],
+        'fields': {
+          'value': '',
+          'note': '',
+          'reason': '',
+          'manual': false,
+          'photoEntry': false,
+          'capturedAt': DateTime.now().toIso8601String(),
+          'initialCapturedAt': DateTime.now().toIso8601String(),
+        },
+        'pendingSource': 'camera',
+        if (original != null) 'replacementId': original.currentPhotos.single.id,
+      },
+    );
+  }
   final router = GoRouter(
     routes: [
       GoRoute(
@@ -184,6 +206,7 @@ Future<MemoryReadingRepository> _open(
           NoopMeterReminderRepository(),
         ),
         meterPhotoCaptureRepositoryProvider.overrideWithValue(photos),
+        photoDraftStoreProvider.overrideWithValue(drafts),
       ],
       child: MaterialApp.router(routerConfig: router),
     ),
@@ -198,14 +221,16 @@ Future<MemoryReadingRepository> _open(
 }
 
 Future<void> _capture(WidgetTester tester, {required bool editing}) async {
-  final button = find.text(
-    editing ? 'Neues Foto für Korrektur' : 'Projekt fotografieren',
-  );
-  await tester.ensureVisible(button);
-  await tester.tap(button);
   if (editing) {
+    final menu = find.byTooltip('Foto 1 bearbeiten');
+    await tester.ensureVisible(menu);
+    await tester.tap(menu);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Foto ersetzen'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Neu fotografieren'));
+  } else {
+    await tester.tap(find.text('Projekt fotografieren'));
   }
   await tester.pump();
 }

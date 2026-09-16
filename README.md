@@ -9,11 +9,15 @@ Fotos und Notizen. Android-first, lokal und ohne Konto.
 - Projekte mit Name, Technik **Stricken/Häkeln**, optionalem Garn und Nadelstärke
 - Zählweise **Reihen/Runden** pro Projekt, unabhängig von der Technik
 - Manuelle Eingabe der aktuellen Reihe oder Runde als ganze Zahl ab 0
-- Projektstand mit oder ohne Foto; Kamera und Galerie dienen der Dokumentation
+- Projektstand mit oder ohne Fotos. Mehrere Kameraaufnahmen nacheinander oder
+  Galerie-Mehrfachauswahl, auch gemischt
 - Datum/Uhrzeit, Notizen, Verlauf mit Suche, Fortschrittsdifferenzen und Korrekturen
-- Nachträglich ergänzte oder ersetzte Fotos mit erhaltener Fotohistorie
+- Fotoübersicht mit Großansicht, Wischen und Vergrößern
+- Einzelne Fotos nachträglich ergänzen, ersetzen oder entfernen, mit erhaltener
+  Fotohistorie und Vorher-/Nachher-Ansicht
 - Optionale stündliche, tägliche, wöchentliche, monatliche und jährliche Erinnerungen
-- Projektprotokolle als Einzel- und Verlaufs-PDF, mit oder ohne Fotos
+- Projektprotokolle als Einzel- und Verlaufs-PDF, mit allen aktuellen Fotos oder
+  kompakt ohne Fotos. Bereits gespeicherte PDFs bleiben unverändert
 - Passwortgeschützte AES-256-GCM-Backups (`.shbackup`) einschließlich Fotos,
   Korrekturverläufen und gespeicherten PDFs
 
@@ -33,6 +37,21 @@ der jüngsten Formular-, Foto-, Backup- und PDF-Verbesserungen. LeseLog wurde
 nicht verändert. Architektur: Feature-first Clean MVVM, Riverpod, Drift/SQLite
 und austauschbare Foto-, Reminder-, Export- und Backup-Implementierungen.
 Keine Runtime-Abhängigkeit auf eine andere App.
+
+Fotos werden in der Reihenfolge des Hinzufügens angezeigt. Beim Ersetzen bleibt
+die Position erhalten. Entfernte oder ersetzte gespeicherte Bilder sind nur noch
+im Korrekturverlauf sichtbar und werden nicht in neue PDFs übernommen. Erst
+„Korrektur protokollieren“ übernimmt Änderungen. Der Grund bleibt optional.
+
+Vor Kamera-/Galerieaufrufen sichert die App den Fotoentwurf und die offenen
+Formulareingaben intern auf dem Gerät. Nach einer Android-Prozessbeendigung kann
+sie die Auswahl einschließlich mehrerer zurückgelieferter Fotos wieder aufnehmen.
+Abbrechen räumt neue Dateien auf. Bereits gespeicherte Fotoversionen bleiben
+bis zur Löschung des Projektstands oder Projekts erhalten.
+
+Datenbankschema 5 liest alte Einzelfotos ohne Verlust. Neue Backups verwenden
+Version 4. Backups der Versionen 1–3 bleiben importierbar, inklusive bestehender
+Fotokorrekturen und gespeicherter PDFs.
 
 Projekte zeigen die zehn neuesten Stände; vollständige Verläufe und gespeicherte
 Verlaufs-PDFs sind paginiert. Korrekturgründe sind optional. Beim Löschen eines

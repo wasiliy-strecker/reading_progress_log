@@ -260,6 +260,11 @@ class DriftMeterReadingRepository implements MeterReadingRepository {
                   .toUtc()
                   .millisecondsSinceEpoch,
               reason: revision.reason,
+              photoChangeJson: Value(
+                revision.photoChange == null
+                    ? null
+                    : jsonEncode(revision.photoChange!.toJson()),
+              ),
               changesJson: jsonEncode(
                 revision.changes.map(
                   (key, value) => MapEntry(key, value.toJson()),
@@ -286,6 +291,11 @@ class DriftMeterReadingRepository implements MeterReadingRepository {
           isUtc: true,
         ),
         reason: row.reason,
+        photoChange: row.photoChangeJson == null
+            ? null
+            : ReadingPhotoChange.fromJson(
+                jsonDecode(row.photoChangeJson!) as Map<String, dynamic>,
+              ),
         changes: rawChanges.map(
           (key, value) => MapEntry(
             key,
@@ -306,6 +316,11 @@ class DriftMeterReadingRepository implements MeterReadingRepository {
             readingId: revision.readingId,
             changedAtMillis: revision.changedAt.toUtc().millisecondsSinceEpoch,
             reason: revision.reason,
+            photoChangeJson: Value(
+              revision.photoChange == null
+                  ? null
+                  : jsonEncode(revision.photoChange!.toJson()),
+            ),
             changesJson: jsonEncode(
               revision.changes.map(
                 (key, value) => MapEntry(key, value.toJson()),
@@ -347,6 +362,13 @@ class DriftMeterReadingRepository implements MeterReadingRepository {
       ocrConfidence: Value(reading.ocrConfidence),
       photoAddedAtMillis: Value(
         reading.photoAddedAt?.toUtc().millisecondsSinceEpoch,
+      ),
+      photosJson: Value(
+        reading.photos == null
+            ? null
+            : jsonEncode(
+                reading.photos!.map((photo) => photo.toJson()).toList(),
+              ),
       ),
       photoHistoryJson: Value(
         jsonEncode(
@@ -396,6 +418,15 @@ class DriftMeterReadingRepository implements MeterReadingRepository {
               row.photoAddedAtMillis!,
               isUtc: true,
             ),
+      photos: row.photosJson == null
+          ? null
+          : (jsonDecode(row.photosJson!) as List)
+                .map(
+                  (item) => ReadingPhotoVersion.fromJson(
+                    Map<String, dynamic>.from(item as Map),
+                  ),
+                )
+                .toList(),
       photoHistory: (jsonDecode(row.photoHistoryJson) as List)
           .map(
             (item) => ReadingPhotoVersion.fromJson(

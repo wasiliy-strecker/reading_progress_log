@@ -3,21 +3,82 @@
   "files": {
     "lib/core/persistence/app_database.dart": {
       "sourceSha256": "cde5acf1ad2c23f01c78cd808febc8584e171243af7d310bc369d5ad6a7094db",
-      "localSha256": "b5b7de67d629e2b4d3504374297beb167bb26e61015b3ef82ba7a3dc6eebc7fd",
-      "reason": "Use the independent app database filename and temporary directory prefix; schema and migrations are unchanged.",
+      "localSha256": "ff4d1eb382801fdafc9b6ac7a43a215455f69ad50c0932857e87dd52a9b5f6e6",
+      "reason": "Retain the independent database identity and add schema 5 photo collections and correction snapshots without modifying legacy rows.",
       "tests": [
         "test/core/persistence/app_database_migration_test.dart",
-        "test/features/meters/drift_meter_repositories_test.dart"
+        "test/features/meters/multiple_photos_test.dart"
       ]
     },
     "lib/features/backup/application/binary_backup_codec.dart": {
       "sourceSha256": "e90cfd4c98a594ebb2e9adba9f2f1299c894f23c377aebf7e05ae68a12078124",
-      "localSha256": "ae20865c16b6260e6d108dae1bd81ed122e0f59d5a56aed2f0fc8d4688aed193",
-      "reason": "Use the independent app backup format identity in header and authenticated data; retain AES-256-GCM and all integrity checks.",
+      "localSha256": "f5d24d584b01ef0dd3e97cd9d364b12770458940bdb55fd64b035bbe0b35e6f2",
+      "reason": "Write independent app backup version 4 and read version 3 with its original authenticated data and encryption checks.",
       "tests": [
-        "test/features/backup/binary_backup_codec_test.dart",
-        "test/features/backup/encrypted_backup_service_test.dart",
-        "test/features/backup/backup_identity_test.dart"
+        "test/features/backup/multiple_photo_backup_test.dart",
+        "test/features/backup/binary_backup_codec_test.dart"
+      ]
+    },
+    "lib/core/files/meter_photo_repository.dart": {
+      "sourceSha256": "bb1c37d78b3a195452c851ba8da11620950bab2481ab87280ebef08b2460b4aa",
+      "localSha256": "804953296e72e0431e08d8371cd36cc5d1681a73b2d558cdb627d510946226e6",
+      "reason": "Expose gallery batches and complete lost-photo recovery while retaining single-photo adapters.",
+      "tests": [
+        "test/core/files/meter_photo_store_test.dart",
+        "test/features/meters/reading_photo_session_test.dart"
+      ]
+    },
+    "lib/core/files/meter_photo_store.dart": {
+      "sourceSha256": "624a0b26bc739d901436247ec420be2c4062b8fb4c6e2b4dea05a97cfd89811b",
+      "localSha256": "9df9bcf98d79eb7ede7b9a7ffbf71361c0408a12fc89aa3dc73a884f556b7305",
+      "reason": "Persist every selected or recovered photo in order with isolated processing failures and temporary-file cleanup.",
+      "tests": [
+        "test/core/files/meter_photo_store_test.dart"
+      ]
+    },
+    "lib/core/integrity/integrity_service.dart": {
+      "sourceSha256": "8d6a25dbc93d39a8067b46ee42ac20429c78f15210373f2309c88646dc703a92",
+      "localSha256": "5cc3c02dd5dd93bb021b916e6eb6c3d83515f3ae2a323417f447c3a83f6c1eaf",
+      "reason": "Hash ordered photo collections without local paths and preserve the legacy single-photo representation.",
+      "tests": [
+        "test/features/meters/multiple_photos_test.dart",
+        "test/features/backup/multiple_photo_backup_test.dart"
+      ]
+    },
+    "lib/core/persistence/app_database.g.dart": {
+      "sourceSha256": "b65e72efd885416543813f3a296ef3c0b4b70e0c2cbe32e5f08fd8be9a437534",
+      "localSha256": "1ebba475d6885fe8980aa91e2efaf2206d4921c020adfa54489c72c0d6b3e0ce",
+      "reason": "Generate Drift mappings for schema 5 photo collections and correction snapshots.",
+      "tests": [
+        "test/core/persistence/app_database_migration_test.dart",
+        "test/features/meters/multiple_photos_test.dart"
+      ]
+    },
+    "lib/features/evidence/domain/evidence_export.dart": {
+      "sourceSha256": "9a5a050f97354b76002f23e3a16cc8728d2d7b9f47fc97608478bd80c6842e51",
+      "localSha256": "1545531a731f0ba6234c3144c51d04ae25ec673fd9590e954298511400454c37",
+      "reason": "Name current-photo exports consistently for a collection while retaining historical export metadata.",
+      "tests": [
+        "test/features/evidence/multiple_photo_pdf_test.dart",
+        "test/features/meters/reading_evidence_explanation_test.dart"
+      ]
+    },
+    "lib/features/meters/application/reading_revision_photos.dart": {
+      "sourceSha256": "8151a48a68abd61860871628fca19baf864ca3016b590cc7adfe149c43637905",
+      "localSha256": "90f6cbae81abf36ef1f0a3ab6c7b55d758691174a072fd50341ab1740ac4c577",
+      "reason": "Resolve before and after photo collections by immutable IDs and preserve legacy hash-based correction lookup.",
+      "tests": [
+        "test/features/meters/multiple_photos_test.dart",
+        "test/features/meters/reading_revision_photos_test.dart"
+      ]
+    },
+    "lib/features/meters/data/drift_meter_repositories.dart": {
+      "sourceSha256": "8c5a4c08c3d4ab76a402d2a0f450f476d074e7f3275f5509c0dff51974345e1d",
+      "localSha256": "845706777feff8f7b32780dad3676016d35f768737acd12d33106b0d41cbe1af",
+      "reason": "Persist ordered current photos and before/after photo references with atomic correction writes and legacy fallbacks.",
+      "tests": [
+        "test/features/meters/multiple_photos_test.dart",
+        "test/core/persistence/app_database_migration_test.dart"
       ]
     }
   }

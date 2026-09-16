@@ -43,16 +43,17 @@ class ReadingPhotoVersion {
   final String ocrCandidate;
   final double? ocrConfidence;
 
-  ReadingPhotoVersion copyWith({String? path}) => ReadingPhotoVersion(
-    id: id,
-    path: path ?? this.path,
-    sha256: sha256,
-    source: source,
-    addedAt: addedAt,
-    ocrRawText: ocrRawText,
-    ocrCandidate: ocrCandidate,
-    ocrConfidence: ocrConfidence,
-  );
+  ReadingPhotoVersion copyWith({String? path, String? sha256}) =>
+      ReadingPhotoVersion(
+        id: id,
+        path: path ?? this.path,
+        sha256: sha256 ?? this.sha256,
+        source: source,
+        addedAt: addedAt,
+        ocrRawText: ocrRawText,
+        ocrCandidate: ocrCandidate,
+        ocrConfidence: ocrConfidence,
+      );
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -98,6 +99,7 @@ class MeterReading {
     this.ocrConfidence,
     this.photoAddedAt,
     this.photoHistory = const [],
+    this.photos,
     this.lowerReadingReason,
     this.note = '',
   });
@@ -118,12 +120,16 @@ class MeterReading {
   final double? ocrConfidence;
   final DateTime? photoAddedAt;
   final List<ReadingPhotoVersion> photoHistory;
+
+  /// Null preserves the original single-photo representation and its hash.
+  /// An explicit empty list means all current photos were removed.
+  final List<ReadingPhotoVersion>? photos;
   final LowerReadingReason? lowerReadingReason;
   final String note;
   final String manifestSha256;
 
   /// An attachment can exist in the record even if its local file is missing.
-  bool get hasPhoto => source != ReadingSource.manual;
+  bool get hasPhoto => currentPhotos.isNotEmpty;
 
   bool get wasManuallyCorrected {
     if (!hasPhoto) return false;
@@ -135,7 +141,7 @@ class MeterReading {
 
   DateTime get effectivePhotoAddedAt => photoAddedAt ?? storedAt;
 
-  ReadingPhotoVersion? get currentPhotoVersion => !hasPhoto
+  ReadingPhotoVersion? get _legacyPhoto => source == ReadingSource.manual
       ? null
       : ReadingPhotoVersion(
           id: '${id}_current_photo',
@@ -148,14 +154,17 @@ class MeterReading {
           ocrConfidence: ocrConfidence,
         );
 
+  List<ReadingPhotoVersion> get currentPhotos => photos ?? [?_legacyPhoto];
+
+  ReadingPhotoVersion? get currentPhotoVersion => currentPhotos.firstOrNull;
+
   List<ReadingPhotoVersion> get allPhotoVersions => [
     ...photoHistory,
-    ?currentPhotoVersion,
+    ...currentPhotos,
   ];
 
   Set<String> get allPhotoPaths => {
-    if (hasPhoto) photoPath,
-    ...photoHistory.map((version) => version.path),
+    ...allPhotoVersions.map((version) => version.path),
   };
 
   MeterReading copyWith({
@@ -172,6 +181,7 @@ class MeterReading {
     bool clearOcrConfidence = false,
     DateTime? photoAddedAt,
     List<ReadingPhotoVersion>? photoHistory,
+    List<ReadingPhotoVersion>? photos,
     LowerReadingReason? lowerReadingReason,
     bool clearLowerReadingReason = false,
     String? note,
@@ -197,6 +207,16 @@ class MeterReading {
           : ocrConfidence ?? this.ocrConfidence,
       photoAddedAt: photoAddedAt ?? this.photoAddedAt,
       photoHistory: photoHistory ?? this.photoHistory,
+      photos:
+          photos ??
+          (this.photos == null
+              ? null
+              : [
+                  for (final (index, photo) in this.photos!.indexed)
+                    index == 0 && (photoPath != null || photoSha256 != null)
+                        ? photo.copyWith(path: photoPath, sha256: photoSha256)
+                        : photo,
+                ]),
       lowerReadingReason: clearLowerReadingReason
           ? null
           : lowerReadingReason ?? this.lowerReadingReason,
@@ -222,6 +242,8 @@ class MeterReading {
     'ocrConfidence': ocrConfidence,
     'photoAddedAt': photoAddedAt?.toUtc().toIso8601String(),
     'photoHistory': photoHistory.map((version) => version.toJson()).toList(),
+    if (photos != null)
+      'photos': photos!.map((photo) => photo.toJson()).toList(),
     'lowerReadingReason': lowerReadingReason?.name,
     'note': note,
     'manifestSha256': manifestSha256,
@@ -260,6 +282,13 @@ class MeterReading {
               )
               .toList(growable: false) ??
           const [],
+      photos: (json['photos'] as List?)
+          ?.map(
+            (item) => ReadingPhotoVersion.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(),
       lowerReadingReason: lowerReason == null
           ? null
           : LowerReadingReason.values.byName(lowerReason),
@@ -283,6 +312,22 @@ class ReadingChange {
   );
 }
 
+class ReadingPhotoChange {
+  const ReadingPhotoChange({required this.beforeIds, required this.afterIds});
+  final List<String> beforeIds;
+  final List<String> afterIds;
+
+  Map<String, dynamic> toJson() => {
+    'beforeIds': beforeIds,
+    'afterIds': afterIds,
+  };
+  factory ReadingPhotoChange.fromJson(Map<String, dynamic> json) =>
+      ReadingPhotoChange(
+        beforeIds: (json['beforeIds'] as List).cast<String>(),
+        afterIds: (json['afterIds'] as List).cast<String>(),
+      );
+}
+
 class ReadingRevision {
   const ReadingRevision({
     required this.id,
@@ -290,6 +335,7 @@ class ReadingRevision {
     required this.changedAt,
     required this.reason,
     required this.changes,
+    this.photoChange,
   });
 
   final String id;
@@ -297,6 +343,7 @@ class ReadingRevision {
   final DateTime changedAt;
   final String reason;
   final Map<String, ReadingChange> changes;
+  final ReadingPhotoChange? photoChange;
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -304,6 +351,7 @@ class ReadingRevision {
     'changedAt': changedAt.toUtc().toIso8601String(),
     'reason': reason,
     'changes': changes.map((key, value) => MapEntry(key, value.toJson())),
+    if (photoChange != null) 'photoChange': photoChange!.toJson(),
   };
 
   factory ReadingRevision.fromJson(Map<String, dynamic> json) {
@@ -313,6 +361,11 @@ class ReadingRevision {
       readingId: json['readingId'] as String,
       changedAt: DateTime.parse(json['changedAt'] as String),
       reason: json['reason'] as String,
+      photoChange: json['photoChange'] == null
+          ? null
+          : ReadingPhotoChange.fromJson(
+              Map<String, dynamic>.from(json['photoChange'] as Map),
+            ),
       changes: changes.map(
         (key, value) => MapEntry(
           key,

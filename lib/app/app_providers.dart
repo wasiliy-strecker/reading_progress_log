@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/files/meter_photo_repository.dart';
+import '../core/files/photo_draft_store.dart';
 import '../core/files/evidence_photo_asset_repository.dart';
 import '../core/files/photo_capture_factory.dart';
 import '../core/integrity/integrity_service.dart';
@@ -19,6 +20,11 @@ import '../features/meters/domain/meter_dashboard_item.dart';
 import '../features/meters/domain/meter_reading.dart';
 import '../features/meters/domain/meter_reading_page.dart';
 import '../features/meters/domain/meter_repositories.dart';
+
+final photoDraftStoreProvider = Provider<PhotoDraftStore>(
+  (ref) => MemoryPhotoDraftStore(),
+);
+final initialPhotoDraftRouteProvider = Provider<String?>((ref) => null);
 
 final appVersionProvider = Provider<String>((ref) => '');
 
