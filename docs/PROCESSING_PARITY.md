@@ -47,8 +47,10 @@ Quell-Hashes dürfen nicht zur Reparatur fehlgeschlagener Prüfungen geändert w
   Die Formatkennung lautet in allen Backup-Pfaden `strick_haekelbuch_backup`.
   Fremde Backups werden vor Schreiboperationen abgewiesen; keine Migration von
   LeseLog-Daten oder -Installationen.
-- Die bestehende Datenschutzerklärung ist app-lokal und offline zugänglich;
-  GitHub-Verweise auf die Vorlage oder auf nicht veröffentlichte Ziele entfallen.
+- Die Datenschutzerklärung beschreibt die Daten dieser App und ist im eigenen
+  GitHub-Repository `wasiliy-strecker/reading_progress_log` öffentlich abrufbar.
+  Die Einstellungen öffnen sie wie LeseLog über `url_launcher` extern. Die App
+  übergibt ausschließlich die öffentliche URL, keine Projektinhalte.
 
 ## Android-Erinnerungshinweise
 

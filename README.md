@@ -58,7 +58,8 @@ Quelle liegt unter `assets/branding/strick_haekelbuch_icon.svg`.
 
 Flutter und Android SDK installieren und deren Werkzeuge in `PATH` aufnehmen.
 Die App verwendet den mitgelieferten Dependency-Lockstand der Vorlage,
-ausgenommen entfernte OCR-/URL-Launcher-Pakete.
+ausgenommen entfernte OCR-Pakete. `url_launcher` öffnet die Datenschutzerklärung
+über die externe Browser- oder GitHub-App.
 
 ```bash
 flutter pub get
@@ -127,8 +128,10 @@ native Erinnerungen und vollständige Datei-/Backup-Abläufe erfordern Android.
 
 Alle Projektinhalte werden lokal verarbeitet. Die Android-Release-App hat
 keine Internetberechtigung. Keine Cloud, Analytics, Werbung oder KI-Dienste.
-Die [Datenschutzerklärung](PRIVACY.md) ist auch offline in den Einstellungen
-lesbar. PDFs sind private Dokumentation, kein amtlicher Zeitstempel.
+Die [Datenschutzerklärung](https://github.com/wasiliy-strecker/reading_progress_log/blob/main/PRIVACY.md)
+ist öffentlich auf GitHub abrufbar und wird aus den Einstellungen extern geöffnet.
+Dafür wird eine Internetverbindung benötigt. Projektinhalte werden dabei nicht
+übergeben. PDFs sind private Dokumentation, kein amtlicher Zeitstempel.
 
 Quellcode: [Mozilla Public License 2.0](LICENSE).
 [Drittanbieterhinweise](THIRD_PARTY_NOTICES.md).

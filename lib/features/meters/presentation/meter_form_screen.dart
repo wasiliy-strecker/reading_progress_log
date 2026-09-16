@@ -530,9 +530,12 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                                   ? null
                                   : _openExactAlarmSettings,
                               icon: const Icon(Icons.open_in_new_outlined),
-                              label: const Text(
-                                '„Alarme & Erinnerungen“ öffnen',
-                                textAlign: TextAlign.center,
+                              label: const SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  '„Alarme & Erinnerungen“ öffnen',
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
                           ),
@@ -571,7 +574,13 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                                     ),
                                   )
                                 : const Icon(Icons.notification_add_outlined),
-                            label: const Text('Erinnerung jetzt testen'),
+                            label: const SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                'Erinnerung jetzt testen',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),

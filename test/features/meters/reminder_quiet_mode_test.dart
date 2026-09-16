@@ -22,6 +22,29 @@ const _testFeedback =
     'Test-Erinnerung wurde an Android übergeben. Ziehe die Benachrichtigungsleiste herunter. Die Test-Erinnerung verschwindet nach einer Minute. „Nicht stören“ ist aktiv. Ton und Banner können unterdrückt werden.';
 
 void main() {
+  for (final scale in [1.0, 2.0]) {
+    testWidgets(
+      'reminder buttons align icons and center labels at scale $scale',
+      (tester) async {
+        await _pump(tester, NoopMeterReminderRepository(), scale: scale);
+        final settingsLabel = find.text('„Alarme & Erinnerungen“ öffnen');
+        await _reveal(tester, settingsLabel);
+        final settingsIconX = tester
+            .getTopLeft(find.byIcon(Icons.open_in_new_outlined))
+            .dx;
+        final testLabel = find.text('Erinnerung jetzt testen');
+        await _reveal(tester, testLabel);
+        expect(
+          tester.getTopLeft(find.byIcon(Icons.notification_add_outlined)).dx,
+          closeTo(settingsIconX, 0.01),
+        );
+        expect(tester.widget<Text>(settingsLabel).textAlign, TextAlign.center);
+        expect(tester.widget<Text>(testLabel).textAlign, TextAlign.center);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets(
     'app denial takes precedence over channel denial and quiet mode',
     (tester) async {

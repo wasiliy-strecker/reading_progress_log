@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:strick_haekelbuch/app/app_providers.dart';
+import 'package:strick_haekelbuch/app/app_theme.dart';
 import 'package:strick_haekelbuch/core/reminders/local_notification_reminder_repository.dart';
 import 'package:strick_haekelbuch/features/backup/application/backup_file_exporter.dart';
 import 'package:strick_haekelbuch/features/backup/application/backup_file_picker.dart';
@@ -13,30 +14,87 @@ import 'package:strick_haekelbuch/features/backup/presentation/settings_screen.d
 import '../../support/fakes.dart';
 
 void main() {
-  testWidgets('privacy is available offline and shows this app identity', (
-    tester,
-  ) async {
+  testWidgets('privacy opens the own public GitHub policy', (tester) async {
+    final opened = <Uri>[];
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: SettingsScreen())),
+      ProviderScope(
+        child: MaterialApp(
+          home: SettingsScreen(
+            externalUrlLauncher: (uri) async {
+              opened.add(uri);
+              return true;
+            },
+          ),
+        ),
+      ),
     );
     final button = find.byKey(const ValueKey('open-privacy-policy'));
     await tester.ensureVisible(button);
     await tester.tap(button);
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 100)),
-    );
     await tester.pumpAndSettle();
-    expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.byType(SelectableText), findsOneWidget);
-    final text = tester
-        .widget<SelectableText>(find.byType(SelectableText))
-        .data!;
-    expect(text, contains('Strick & Häkelbuch'));
-    expect(text, contains('.shbackup'));
-    expect(text, isNot(contains('LeseLog')));
-    await tester.tap(find.text('Schließen'));
-    await tester.pumpAndSettle();
+    expect(opened, [
+      Uri.parse(
+        'https://github.com/wasiliy-strecker/reading_progress_log/blob/main/PRIVACY.md',
+      ),
+    ]);
     expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(SnackBar), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final throws in [false, true]) {
+    testWidgets('privacy launch failure explains retry, throws=$throws', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: SettingsScreen(
+              externalUrlLauncher: (_) async {
+                if (throws) throw StateError('No external application');
+                return false;
+              },
+            ),
+          ),
+        ),
+      );
+      final button = find.byKey(const ValueKey('open-privacy-policy'));
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'Die Datenschutzerklärung konnte nicht geöffnet werden. Bitte versuche es erneut.',
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('privacy button centers wrapped text on a narrow screen', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.dark(),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(2)),
+            child: child!,
+          ),
+          home: const SettingsScreen(),
+        ),
+      ),
+    );
+    final label = find.text('Datenschutzerklärung öffnen');
+    await tester.scrollUntilVisible(label, 250);
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(label).textAlign, TextAlign.center);
     expect(tester.takeException(), isNull);
   });
 

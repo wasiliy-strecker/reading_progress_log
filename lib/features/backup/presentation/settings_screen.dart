@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/app_providers.dart';
 import '../../../app/widgets/app_snack_bar.dart';
@@ -9,8 +9,12 @@ import '../application/backup_file_exporter.dart';
 import '../application/backup_file_picker.dart';
 import '../application/encrypted_backup_service.dart';
 
+typedef ExternalUrlLauncher = Future<bool> Function(Uri uri);
+
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.externalUrlLauncher});
+
+  final ExternalUrlLauncher? externalUrlLauncher;
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -112,7 +116,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               key: const ValueKey('open-privacy-policy'),
                               onPressed: _openPrivacyPolicy,
                               icon: const Icon(Icons.description_outlined),
-                              label: const Text('Datenschutzerklärung öffnen'),
+                              label: const Text(
+                                'Datenschutzerklärung öffnen',
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                         ],
@@ -164,29 +171,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _openPrivacyPolicy() async {
+    final uri = Uri.parse(
+      'https://github.com/wasiliy-strecker/reading_progress_log/blob/main/PRIVACY.md',
+    );
+    final launcher = widget.externalUrlLauncher ?? _launchExternalUrl;
+    var opened = false;
     try {
-      final policy = await rootBundle.loadString('PRIVACY.md');
-      if (!mounted) return;
-      await showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Datenschutzerklärung'),
-          content: SizedBox(
-            width: 560,
-            child: SingleChildScrollView(child: SelectableText(policy)),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Schließen'),
-            ),
-          ],
-        ),
-      );
+      opened = await launcher(uri);
     } on Object {
-      if (mounted) {
-        _showMessage('Die Datenschutzerklärung konnte nicht geladen werden.');
-      }
+      opened = false;
+    }
+    if (!opened && mounted) {
+      _showMessage(
+        'Die Datenschutzerklärung konnte nicht geöffnet werden. Bitte versuche es erneut.',
+      );
     }
   }
 
@@ -507,6 +505,10 @@ String _backupFileName(String path) => path.split(RegExp(r'[/\\]')).last;
 
 String _countLabel(int count, String singular, String plural) {
   return '$count ${count == 1 ? singular : plural}';
+}
+
+Future<bool> _launchExternalUrl(Uri uri) {
+  return launchUrl(uri, mode: LaunchMode.externalApplication);
 }
 
 class _BackupWorkOverlay extends StatelessWidget {
