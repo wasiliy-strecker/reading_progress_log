@@ -181,46 +181,84 @@ void main() {
     },
   );
 
-  testWidgets(
-    'empty manual form leaves directly and entered values use discard confirmation',
-    (tester) async {
-      final readings = MemoryReadingRepository();
-      final photos = _Photos();
-      final router = await _open(tester, readings, photos);
-      await _press(tester, 'Stand eintragen');
-      await tester.tap(find.byType(BackButton));
-      await tester.pumpAndSettle();
-      expect(find.text('Projektübersicht'), findsOneWidget);
-      expect(find.text('Projektstand verwerfen?'), findsNothing);
-      router.go('/');
-      await tester.pumpAndSettle();
-      await _press(tester, 'Stand eintragen');
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Aktuelle Reihe *'),
-        '85',
+  for (final systemBack in [false, true]) {
+    testWidgets(
+      'manual back returns to options and protects edits, systemBack=$systemBack',
+      (tester) async {
+        final readings = MemoryReadingRepository();
+        final photos = _Photos();
+        await _open(tester, readings, photos, pushCapture: true);
+        await _press(tester, 'Stand eintragen');
+        await _back(tester, systemBack: systemBack);
+        _expectCaptureOptions();
+        expect(find.text('Projektstand verwerfen?'), findsNothing);
+
+        await _press(tester, 'Stand eintragen');
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Aktuelle Reihe *'),
+          '85',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Notiz'),
+          'Am Ärmel weiterarbeiten',
+        );
+        await _chooseTime(tester, DateTime(2026, 9, 1, 10));
+        await _back(tester, systemBack: systemBack);
+        expect(find.text('Projektstand verwerfen?'), findsOneWidget);
+        await _press(tester, 'Weiter bearbeiten');
+        expect(find.text('85'), findsOneWidget);
+        expect(find.text('Am Ärmel weiterarbeiten'), findsOneWidget);
+
+        await _back(tester, systemBack: systemBack);
+        await _press(tester, 'Projektstand verwerfen');
+        _expectCaptureOptions();
+        await _press(tester, 'Stand eintragen');
+        for (final field in tester.widgetList<TextFormField>(
+          find.byType(TextFormField),
+        )) {
+          expect(field.controller!.text, isEmpty);
+        }
+        // A discarded date must not make the new empty form dirty.
+        await _back(tester, systemBack: systemBack);
+        _expectCaptureOptions();
+        expect(find.text('Projektstand verwerfen?'), findsNothing);
+        await _back(tester, systemBack: systemBack);
+        expect(find.text('Projektübersicht'), findsOneWidget);
+        expect(readings.items, isEmpty);
+        expect(photos.captures, 0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    for (final source in ['Projekt fotografieren', 'Foto aus Galerie']) {
+      testWidgets(
+        '$source back discards only the draft photo, systemBack=$systemBack',
+        (tester) async {
+          final readings = MemoryReadingRepository();
+          final photos = _Photos();
+          await _open(tester, readings, photos, pushCapture: true);
+          await _press(tester, source);
+          await _back(tester, systemBack: systemBack);
+          expect(find.text('Projektstand verwerfen?'), findsOneWidget);
+          await _press(tester, 'Weiter bearbeiten');
+          expect(find.byType(Image), findsOneWidget);
+          expect(photos.deleted, isEmpty);
+          await _back(tester, systemBack: systemBack);
+          await _press(tester, 'Projektstand verwerfen');
+          _expectCaptureOptions();
+          expect(photos.deleted, ['/synthetic-added.jpg']);
+          expect(readings.items, isEmpty);
+          await _press(tester, 'Stand eintragen');
+          expect(find.byType(Image), findsNothing);
+          await _back(tester, systemBack: systemBack);
+          await _back(tester, systemBack: systemBack);
+          expect(find.text('Projektübersicht'), findsOneWidget);
+          expect(photos.deleted, ['/synthetic-added.jpg']);
+          expect(tester.takeException(), isNull);
+        },
       );
-      await tester.tap(find.byType(BackButton));
-      await tester.pumpAndSettle();
-      expect(find.text('Projektstand verwerfen?'), findsOneWidget);
-      await _press(tester, 'Weiter bearbeiten');
-      expect(
-        tester
-            .widget<TextFormField>(
-              find.widgetWithText(TextFormField, 'Aktuelle Reihe *'),
-            )
-            .controller!
-            .text,
-        '85',
-      );
-      await tester.tap(find.byType(BackButton));
-      await tester.pumpAndSettle();
-      await _press(tester, 'Projektstand verwerfen');
-      expect(find.text('Projektübersicht'), findsOneWidget);
-      expect(readings.items, isEmpty);
-      expect(photos.captures, 0);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    }
+  }
 
   testWidgets(
     'manual history entries show progress and an entry icon instead of a missing photo',
@@ -254,11 +292,13 @@ Future<GoRouter> _open(
   MemoryReadingRepository readings,
   _Photos photos, {
   String unit = 'Reihen',
+  bool pushCapture = false,
 }) async {
   await tester.binding.setSurfaceSize(const Size(430, 1500));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final book = sampleBook().copyWith(unit: unit);
   final router = GoRouter(
+    initialLocation: pushCapture ? '/book/${book.id}' : '/',
     routes: [
       GoRoute(
         path: '/',
@@ -306,6 +346,10 @@ Future<GoRouter> _open(
     ),
   );
   await tester.pumpAndSettle();
+  if (pushCapture) {
+    router.push<void>('/');
+    await tester.pumpAndSettle();
+  }
   return router;
 }
 
@@ -360,4 +404,23 @@ Future<void> _chooseTime(WidgetTester tester, DateTime selected) async {
     tester.element(find.byType(TimePickerDialog)),
   ).pop(TimeOfDay.fromDateTime(selected));
   await tester.pumpAndSettle();
+}
+
+Future<void> _back(WidgetTester tester, {required bool systemBack}) async {
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pumpAndSettle();
+  if (systemBack) {
+    expect(await tester.binding.handlePopRoute(), isTrue);
+  } else {
+    await tester.tap(find.byType(BackButton));
+  }
+  await tester.pumpAndSettle();
+}
+
+void _expectCaptureOptions() {
+  expect(find.text('Stand eintragen'), findsOneWidget);
+  expect(find.text('Projekt fotografieren'), findsOneWidget);
+  expect(find.text('Foto aus Galerie'), findsOneWidget);
+  expect(find.byType(TextFormField), findsNothing);
+  expect(find.text('Projektübersicht'), findsNothing);
 }

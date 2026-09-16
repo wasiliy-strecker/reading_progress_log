@@ -89,7 +89,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
-            if (_photo == null && !_manual) ...[
+            if (!_isEnteringReading) ...[
               const _CaptureGuidance(),
               const SizedBox(height: 18),
               FilledButton.icon(
@@ -214,13 +214,15 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
       ),
     );
     return PopScope<void>(
-      canPop: _allowPop || (!_hasUnsavedChanges && !_working),
+      canPop: _allowPop || (!_isEnteringReading && !_working),
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) _handleBack();
       },
       child: scaffold,
     );
   }
+
+  bool get _isEnteringReading => _manual || _photo != null;
 
   bool get _hasUnsavedChanges =>
       _photo != null ||
@@ -232,7 +234,11 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
     if (_working || _discardDialogOpen) return;
     FocusScope.of(context).unfocus();
     if (!_hasUnsavedChanges) {
-      _leaveForm();
+      if (_isEnteringReading) {
+        await _returnToCaptureOptions();
+      } else {
+        _leaveForm();
+      }
       return;
     }
 
@@ -246,13 +252,37 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
     );
     _discardDialogOpen = false;
     if (!mounted || !discard) return;
-    await _leaveWithoutGuard();
+    await _returnToCaptureOptions();
   }
 
-  Future<void> _leaveWithoutGuard() async {
-    setState(() => _allowPop = true);
-    await WidgetsBinding.instance.endOfFrame;
-    if (mounted) _leaveForm();
+  Future<void> _returnToCaptureOptions() async {
+    final photo = _photo;
+    setState(() => _working = true);
+    try {
+      if (photo != null) await _photos.delete(photo.path);
+      if (!mounted) return;
+      _formKey.currentState?.reset();
+      setState(() {
+        _manual = false;
+        _photo = null;
+        _value.clear();
+        _note.clear();
+        _initialCapturedAt = DateTime.now();
+        _capturedAt = _initialCapturedAt;
+      });
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(
+            message:
+                'Das ungespeicherte Foto konnte nicht entfernt werden. '
+                'Bitte versuche es erneut.',
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
   }
 
   void _leaveForm() {
