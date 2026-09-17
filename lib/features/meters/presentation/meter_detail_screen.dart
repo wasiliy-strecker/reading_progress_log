@@ -209,21 +209,24 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
 
   Future<void> _exportHistory(Meter meter) async {
     if (_exporting) return;
-    final photoMode = await showEvidencePhotoModeSheet(
-      context,
-      kind: EvidenceExportKind.meterHistory,
-    );
-    if (photoMode == null || !mounted) return;
     setState(() => _exporting = true);
     try {
+      final repository = ref.read(meterReadingRepositoryProvider);
+      // Use the complete export selection, not the ten-entry history preview.
+      final readings = await repository.loadForMeter(meter.id);
+      if (!mounted) return;
+      final photoMode = await showEvidencePhotoModeSheet(
+        context,
+        kind: EvidenceExportKind.meterHistory,
+        hasCurrentPhotos: readings.any((reading) => reading.hasPhoto),
+      );
+      if (photoMode == null || !mounted) return;
       final report = await runWithPdfExportProgress(
         context,
         description: photoMode == EvidencePhotoMode.withoutPhotos
             ? 'Projektstände und Notizen werden für die kompakte PDF zusammengestellt.'
             : 'Projektstände, aktuelle Fotos und Notizen werden für die PDF zusammengestellt.',
         operation: () async {
-          final repository = ref.read(meterReadingRepositoryProvider);
-          final readings = await repository.loadForMeter(meter.id);
           final revisionLists = await Future.wait(
             readings.map((reading) => repository.loadRevisions(reading.id)),
           );

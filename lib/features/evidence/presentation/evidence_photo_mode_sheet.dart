@@ -5,13 +5,14 @@ import '../domain/evidence_export.dart';
 Future<EvidencePhotoMode?> showEvidencePhotoModeSheet(
   BuildContext context, {
   required EvidenceExportKind kind,
+  required bool hasCurrentPhotos,
 }) {
   return showModalBottomSheet<EvidencePhotoMode>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
     builder: (context) => SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -25,7 +26,7 @@ Future<EvidencePhotoMode?> showEvidencePhotoModeSheet(
             ),
             const SizedBox(height: 6),
             Text(
-              'Du kannst jede PDF mit oder ohne Fotos erstellen.',
+              'Wähle, welche Inhalte deine PDF enthalten soll.',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -41,6 +42,7 @@ Future<EvidencePhotoMode?> showEvidencePhotoModeSheet(
             const SizedBox(height: 8),
             _PhotoModeTile(
               mode: EvidencePhotoMode.currentPhotos,
+              enabled: hasCurrentPhotos,
               kind: kind,
               icon: Icons.photo_outlined,
               description: kind == EvidenceExportKind.singleReading
@@ -60,12 +62,14 @@ class _PhotoModeTile extends StatelessWidget {
     required this.kind,
     required this.icon,
     required this.description,
+    this.enabled = true,
   });
 
   final EvidencePhotoMode mode;
   final EvidenceExportKind kind;
   final IconData icon;
   final String description;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -75,14 +79,21 @@ class _PhotoModeTile extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         key: ValueKey('evidence-photo-mode-${mode.name}'),
-        leading: Icon(icon, color: colors.primary),
+        enabled: enabled,
+        leading: Icon(
+          icon,
+          color: enabled ? colors.primary : Theme.of(context).disabledColor,
+        ),
         title: Text(
           mode.labelFor(kind),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-        subtitle: Text(description),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => Navigator.pop(context, mode),
+        subtitle: Text(
+          enabled ? description : 'Keine aktuellen Fotos vorhanden.',
+          style: enabled ? null : TextStyle(color: colors.onSurfaceVariant),
+        ),
+        trailing: enabled ? const Icon(Icons.chevron_right) : null,
+        onTap: enabled ? () => Navigator.pop(context, mode) : null,
       ),
     );
   }

@@ -153,13 +153,14 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
 
   Future<void> _export(MeterReading reading) async {
     if (_exporting) return;
-    final photoMode = await showEvidencePhotoModeSheet(
-      context,
-      kind: EvidenceExportKind.singleReading,
-    );
-    if (photoMode == null || !mounted) return;
     setState(() => _exporting = true);
     try {
+      final photoMode = await showEvidencePhotoModeSheet(
+        context,
+        kind: EvidenceExportKind.singleReading,
+        hasCurrentPhotos: reading.hasPhoto,
+      );
+      if (photoMode == null || !mounted) return;
       final report = await runWithPdfExportProgress(
         context,
         description: photoMode == EvidencePhotoMode.withoutPhotos
