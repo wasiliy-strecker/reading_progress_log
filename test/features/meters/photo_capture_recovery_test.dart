@@ -18,6 +18,59 @@ import '../../support/reading_fixtures.dart';
 void main() {
   for (final editing in [false, true]) {
     testWidgets(
+      'failed recovery preserves form fields and clears pending picker, editing=$editing',
+      (tester) async {
+        final recovered = Completer<StoredMeterPhoto?>();
+        final photos = _Photos(pendingRecovery: recovered.future);
+        final drafts = MemoryPhotoDraftStore();
+        await _open(
+          tester,
+          editing: editing,
+          photos: photos,
+          settle: false,
+          drafts: drafts,
+          draftFields: {
+            'value': '237',
+            'note': 'Ärmel fortsetzen',
+            'reason': 'Foto ergänzen',
+            'manual': true,
+          },
+        );
+        recovered.completeError(StateError('Picker interrupted'));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Foto-Zwischenstand konnte nicht wiederhergestellt werden',
+          ),
+          findsOneWidget,
+        );
+        final value = find.widgetWithText(TextFormField, 'Aktuelle Reihe *');
+        await tester.ensureVisible(value);
+        expect(tester.widget<TextFormField>(value).controller!.text, '237');
+        final note = find.widgetWithText(TextFormField, 'Notiz');
+        await tester.ensureVisible(note);
+        expect(
+          tester.widget<TextFormField>(note).controller!.text,
+          'Ärmel fortsetzen',
+        );
+        if (editing) {
+          final reason = find.widgetWithText(
+            TextFormField,
+            'Grund der Korrektur (optional)',
+          );
+          await tester.ensureVisible(reason);
+          expect(
+            tester.widget<TextFormField>(reason).controller!.text,
+            'Foto ergänzen',
+          );
+        }
+        expect(await drafts.pendingRoute(), null);
+        expect(photos.deleted, isEmpty);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
       'photo remains attached to manually entered value, editing=$editing',
       (tester) async {
         final photos = _Photos();
@@ -139,13 +192,15 @@ Future<MemoryReadingRepository> _open(
   required bool editing,
   required _Photos photos,
   bool settle = true,
+  MemoryPhotoDraftStore? drafts,
+  Map<String, dynamic> draftFields = const {},
 }) async {
   await tester.binding.setSurfaceSize(const Size(430, 1800));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final book = sampleBook();
   final readings = MemoryReadingRepository();
   if (editing) readings.items['reading'] = sampleReading();
-  final drafts = MemoryPhotoDraftStore();
+  drafts ??= MemoryPhotoDraftStore();
   if (photos.pendingRecovery != null) {
     final original = editing ? sampleReading() : null;
     await drafts.write(
@@ -162,6 +217,7 @@ Future<MemoryReadingRepository> _open(
           'photoEntry': false,
           'capturedAt': DateTime.now().toIso8601String(),
           'initialCapturedAt': DateTime.now().toIso8601String(),
+          ...draftFields,
         },
         'pendingSource': 'camera',
         if (original != null) 'replacementId': original.currentPhotos.single.id,

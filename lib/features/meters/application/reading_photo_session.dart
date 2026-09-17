@@ -24,11 +24,13 @@ class ReadingPhotoSession extends ChangeNotifier {
   final MeterReading? original;
   final List<ReadingPhotoVersion> photos;
   final Set<String> _owned = {};
+  final Map<String, Future<void>> _deletions = {};
   Map<String, dynamic> fields = {};
   String readingId = newLocalId('reading');
   bool busy = false;
   bool _closed = false;
   bool _committed = false;
+  Future<void> _pendingWrite = Future.value();
   String progress = '';
 
   bool get changed => !listEquals(
@@ -36,16 +38,24 @@ class ReadingPhotoSession extends ChangeNotifier {
     (original?.currentPhotos ?? []).map((p) => p.id).toList(),
   );
 
-  Future<void> _persist({ReadingSource? source, String? replacementId}) =>
-      store.write(route, {
-        'readingId': readingId,
-        'originalUpdatedAt': original?.updatedAt.toIso8601String(),
-        'photos': photos.map((photo) => photo.toJson()).toList(),
-        'ownedPaths': _owned.toList(),
-        'fields': fields,
-        if (source != null) 'pendingSource': source.name,
-        'replacementId': ?replacementId,
-      });
+  Future<void> _persist({ReadingSource? source, String? replacementId}) {
+    if (_closed || _committed) return Future.value();
+    final draft = <String, dynamic>{
+      'readingId': readingId,
+      'originalUpdatedAt': original?.updatedAt.toIso8601String(),
+      'photos': photos.map((photo) => photo.toJson()).toList(),
+      'ownedPaths': _owned.toList(),
+      'fields': Map<String, dynamic>.of(fields),
+      if (source != null) 'pendingSource': source.name,
+      'replacementId': ?replacementId,
+    };
+    final writing = _pendingWrite.then((_) async {
+      if (!_closed && !_committed) await store.write(route, draft);
+    });
+    // Closing must wait for an in-flight write before removing its draft.
+    _pendingWrite = writing.then<void>((_) {}, onError: (Object _) {});
+    return writing;
+  }
 
   Future<PhotoImportResult> restore() async {
     if (busy || _closed) return const PhotoImportResult();
@@ -59,11 +69,12 @@ class ReadingPhotoSession extends ChangeNotifier {
       final references = (await readings.loadAll())
           .expand((r) => r.allPhotoPaths)
           .toSet();
+      if (_closed) return const PhotoImportResult();
       // A commit may have completed immediately before the process stopped.
       if ((original == null && await readings.findById(readingId) != null) ||
           _owned.any(references.contains) ||
           draft['originalUpdatedAt'] != original?.updatedAt.toIso8601String()) {
-        await discard();
+        await _discard();
         return const PhotoImportResult();
       }
       photos
@@ -77,10 +88,18 @@ class ReadingPhotoSession extends ChangeNotifier {
         );
       fields = Map<String, dynamic>.from(draft['fields'] as Map);
       if (draft['pendingSource'] case final String source) {
-        final result = await repository.recoverPhotos(
-          source: ReadingSource.values.byName(source),
-          onProgress: _progress,
-        );
+        final PhotoImportResult result;
+        try {
+          result = await repository.recoverPhotos(
+            source: ReadingSource.values.byName(source),
+            onProgress: _progress,
+          );
+        } on Object {
+          // The picker has returned. Keep the form, but do not retry a consumed
+          // recovery operation on every launch.
+          await _persist();
+          rethrow;
+        }
         await _accept(result, replacementId: draft['replacementId'] as String?);
         return result;
       }
@@ -144,6 +163,7 @@ class ReadingPhotoSession extends ChangeNotifier {
       }
       return;
     }
+    final previous = List<ReadingPhotoVersion>.of(photos);
     for (final picked in result.photos) {
       final photo = ReadingPhotoVersion(
         id: newLocalId('photo_version'),
@@ -165,7 +185,16 @@ class ReadingPhotoSession extends ChangeNotifier {
         photos.add(photo);
       }
     }
-    await _persist();
+    try {
+      await _persist();
+    } on Object {
+      photos
+        ..clear()
+        ..addAll(previous);
+      // Only newly imported files are owned. Saved originals remain intact.
+      await _cleanUnused();
+      rethrow;
+    }
     await _cleanUnused();
   }
 
@@ -174,15 +203,22 @@ class ReadingPhotoSession extends ChangeNotifier {
     fields = formFields;
     final index = photos.indexWhere((photo) => photo.id == id);
     if (index < 0) return;
+    busy = true;
+    progress = 'Foto wird entfernt …';
     final removed = photos.removeAt(index);
-    try {
-      await _persist();
-    } on Object {
-      photos.insert(index, removed);
-      rethrow;
-    }
     notifyListeners();
-    await _cleanUnused();
+    try {
+      try {
+        await _persist();
+      } on Object {
+        photos.insert(index, removed);
+        rethrow;
+      }
+      await _cleanUnused();
+    } finally {
+      busy = false;
+      if (!_closed) notifyListeners();
+    }
   }
 
   Future<void> reorderPhotos(
@@ -223,20 +259,38 @@ class ReadingPhotoSession extends ChangeNotifier {
   }
 
   Future<void> _cleanUnused() async {
+    if (_closed) return;
     final used = photos.map((p) => p.path).toSet();
     for (final path in _owned.toList()) {
+      if (_closed) return;
       if (!used.contains(path)) {
-        await repository.delete(path);
-        _owned.remove(path);
+        await _deleteOwned(path);
       }
     }
     await _persist();
   }
 
+  Future<void> _deleteOwned(String path) =>
+      _deletions.putIfAbsent(path, () async {
+        try {
+          await repository.delete(path);
+          _owned.remove(path);
+        } finally {
+          _deletions.remove(path);
+        }
+      });
+
   Future<void> rememberFields(Map<String, dynamic> formFields) async {
-    if (_closed) return;
+    if (busy || _closed) return;
+    busy = true;
     fields = formFields;
-    await _persist();
+    notifyListeners();
+    try {
+      await _persist();
+    } finally {
+      busy = false;
+      if (!_closed) notifyListeners();
+    }
   }
 
   Future<void> committed() async {
@@ -244,6 +298,7 @@ class ReadingPhotoSession extends ChangeNotifier {
     _owned.clear();
     // A stale draft is recognized against saved photo references on recovery.
     try {
+      await _pendingWrite;
       await store.remove(route);
     } on Object {
       /* The reading is committed. */
@@ -251,12 +306,28 @@ class ReadingPhotoSession extends ChangeNotifier {
   }
 
   Future<void> discard() async {
+    if (busy || _closed) return;
+    busy = true;
+    progress = 'Ungespeicherte Fotos werden entfernt …';
+    notifyListeners();
+    try {
+      await _discard();
+    } finally {
+      busy = false;
+      if (!_closed) notifyListeners();
+    }
+  }
+
+  Future<void> _discard() async {
     final references = (await readings.loadAll())
         .expand((r) => r.allPhotoPaths)
         .toSet();
     for (final path in _owned.toList()) {
-      if (!references.contains(path)) await repository.delete(path);
-      _owned.remove(path);
+      if (references.contains(path)) {
+        _owned.remove(path);
+      } else {
+        await _deleteOwned(path);
+      }
     }
     await store.remove(route);
     photos
@@ -268,6 +339,7 @@ class ReadingPhotoSession extends ChangeNotifier {
 
   Future<void> close() async {
     _closed = true;
-    if (!_committed) await discard();
+    await _pendingWrite;
+    if (!_committed) await _discard();
   }
 }

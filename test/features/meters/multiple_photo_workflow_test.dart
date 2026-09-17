@@ -13,6 +13,91 @@ import '../../support/reading_fixtures.dart';
 
 void main() {
   testWidgets(
+    'manual entry can remove all drafts and later add, remove and sort saved photos',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(430, 1800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final meter = sampleBook();
+      final readings = MemoryReadingRepository();
+      final photos = _Photos();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            initialPhotoDraftRouteProvider.overrideWithValue(
+              '/meter/${meter.id}/capture',
+            ),
+            meterRepositoryProvider.overrideWithValue(
+              MemoryMeterRepository()..items[meter.id] = meter,
+            ),
+            meterReadingRepositoryProvider.overrideWithValue(readings),
+            evidenceExportRepositoryProvider.overrideWithValue(
+              MemoryEvidenceExportRepository(),
+            ),
+            meterPhotoCaptureRepositoryProvider.overrideWithValue(photos),
+            meterReminderRepositoryProvider.overrideWithValue(
+              NoopMeterReminderRepository(),
+            ),
+          ],
+          child: const MeterReadingLogApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await _tap(tester, 'Stand eintragen');
+      final value = find.widgetWithText(TextFormField, 'Aktuelle Reihe *');
+      await tester.enterText(value, '12');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await _tap(tester, 'Fotos aus Galerie hinzufügen');
+      await _photoAction(tester, 2, 'Foto entfernen');
+      expect(find.text('Aktuelle Fotos (1)'), findsOneWidget);
+      await _photoAction(tester, 1, 'Foto entfernen');
+      expect(find.text('Aktuelle Fotos (0)'), findsOneWidget);
+      expect(tester.widget<TextFormField>(value).controller!.text, '12');
+      expect(photos.deleted, ['/photo2.jpg', '/photo1.jpg']);
+      await _tap(tester, 'Projektstand speichern');
+      await _wait(tester, () => readings.items.isNotEmpty);
+      final manual = readings.items.values.single;
+      expect(manual.currentPhotos, isEmpty);
+      expect(manual.photoHistory, isEmpty);
+
+      await _tap(tester, 'Korrigieren');
+      await _tap(tester, 'Foto aufnehmen');
+      await _tap(tester, 'Korrektur protokollieren');
+      await _wait(tester, () => readings.items.values.single.hasPhoto);
+      final single = readings.items.values.single;
+      expect(single.currentPhotos, hasLength(1));
+      expect(single.photoHistory, isEmpty);
+      await _tap(tester, 'Korrigieren');
+      await _photoAction(tester, 1, 'Foto entfernen');
+      await _tap(tester, 'Korrektur protokollieren');
+      await _wait(tester, () => !readings.items.values.single.hasPhoto);
+      expect(
+        readings.items.values.single.photoHistory.single.id,
+        single.currentPhotos.single.id,
+      );
+      expect(photos.deleted, isNot(contains('/photo3.jpg')));
+
+      await _tap(tester, 'Korrigieren');
+      await _tap(tester, 'Fotos aus Galerie hinzufügen');
+      await _photoAction(tester, 2, 'Nach vorne');
+      await _tap(tester, 'Korrektur protokollieren');
+      await _wait(
+        tester,
+        () => readings.items.values.single.currentPhotos.length == 2,
+      );
+      final saved = readings.items.values.single;
+      expect(saved.currentPhotos.map((p) => p.path), [
+        '/photo5.jpg',
+        '/photo4.jpg',
+      ]);
+      expect(saved.photoHistory.single.id, single.currentPhotos.single.id);
+      expect(saved.value.displayText, '12');
+      expect(saved.capturedAt, manual.capturedAt);
+      expect(await readings.loadRevisions(saved.id), hasLength(3));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'capture mixed photos, browse them, replace one, remove one and add more',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(430, 1800));

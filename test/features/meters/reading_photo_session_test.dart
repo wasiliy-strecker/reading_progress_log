@@ -12,6 +12,198 @@ import 'multiple_photos_test.dart' show testPhoto;
 
 void main() {
   test(
+    'closing during file cleanup deletes each owned photo only once',
+    () async {
+      final repo = _Photos();
+      final store = MemoryPhotoDraftStore();
+      final session = ReadingPhotoSession(
+        route: '/new',
+        repository: repo,
+        store: store,
+        readings: MemoryReadingRepository(),
+      );
+      await session.capture(ReadingSource.gallery, formFields: {});
+      final pending = repo.pendingDelete = Completer<void>();
+      final removing = session.removePhoto(session.photos.first.id, {});
+      await Future<void>.delayed(Duration.zero);
+      expect(repo.deleted, ['/gallery1.jpg']);
+      final closing = session.close();
+      await Future<void>.delayed(Duration.zero);
+      expect(repo.deleted, ['/gallery1.jpg']);
+      pending.complete();
+      await Future.wait([removing, closing]);
+      expect(repo.deleted, ['/gallery1.jpg', '/gallery2.jpg']);
+      expect(await store.read('/new'), null);
+    },
+  );
+
+  for (final source in [ReadingSource.camera, ReadingSource.gallery]) {
+    test(
+      'cancelled $source replacement preserves saved photos and fields',
+      () async {
+        final repo = _Photos()..pending = Future.value(null);
+        final store = MemoryPhotoDraftStore();
+        final original = sampleReading();
+        final session = ReadingPhotoSession(
+          route: '/edit',
+          repository: repo,
+          store: store,
+          readings: MemoryReadingRepository(),
+          original: original,
+        );
+        final result = await session.capture(
+          source,
+          formFields: {'value': '34', 'note': 'Nicht verlieren'},
+          replacementId: original.currentPhotos.single.id,
+        );
+        expect(result.photos, isEmpty);
+        expect(session.changed, false);
+        expect(
+          session.photos.single.toJson(),
+          original.currentPhotos.single.toJson(),
+        );
+        expect(session.fields, {'value': '34', 'note': 'Nicht verlieren'});
+        expect(await store.pendingRoute(), null);
+        expect(repo.deleted, isEmpty);
+      },
+    );
+  }
+
+  test(
+    'empty and partially failed gallery selections keep valid photos in order',
+    () async {
+      final repo = _Photos()..batch = const PhotoImportResult();
+      final session = ReadingPhotoSession(
+        route: '/new',
+        repository: repo,
+        store: MemoryPhotoDraftStore(),
+        readings: MemoryReadingRepository(),
+      );
+      await session.capture(ReadingSource.gallery, formFields: {});
+      expect(session.photos, isEmpty);
+      repo.batch = PhotoImportResult(
+        photos: [_photo('good', ReadingSource.gallery)],
+        failures: ['broken.jpg'],
+      );
+      final result = await session.capture(
+        ReadingSource.gallery,
+        formFields: {},
+      );
+      expect(result.failures, ['broken.jpg']);
+      expect(session.photos.map((p) => p.path), ['/good.jpg']);
+      repo.batch = const PhotoImportResult(failures: ['broken.jpg']);
+      await session.capture(ReadingSource.gallery, formFields: {});
+      expect(session.photos.map((p) => p.path), ['/good.jpg']);
+      await session.close();
+      expect(repo.deleted, ['/good.jpg']);
+    },
+  );
+
+  test('failed removal restores the photo at its original position', () async {
+    final repo = _Photos();
+    final session = ReadingPhotoSession(
+      route: '/edit',
+      repository: repo,
+      store: _FailingStore(),
+      readings: MemoryReadingRepository(),
+      original: sampleReading().copyWith(
+        photos: [testPhoto('a'), testPhoto('b'), testPhoto('c')],
+      ),
+    );
+    await expectLater(session.removePhoto('b', {}), throwsStateError);
+    expect(session.photos.map((p) => p.id), ['a', 'b', 'c']);
+    expect(session.changed, false);
+    expect(session.busy, false);
+    expect(repo.deleted, isEmpty);
+  });
+
+  test(
+    'removal blocks overlapping photo actions until storage finishes',
+    () async {
+      final store = _ControlledStore();
+      final repo = _Photos();
+      final original = sampleReading().copyWith(
+        photos: [testPhoto('a'), testPhoto('b'), testPhoto('c')],
+      );
+      final session = ReadingPhotoSession(
+        route: '/edit',
+        repository: repo,
+        store: store,
+        readings: MemoryReadingRepository(),
+        original: original,
+      );
+      final pending = store.pending = Completer<void>();
+      final removing = session.removePhoto('a', {'value': '12'});
+      expect(session.busy, true);
+      await session.capture(ReadingSource.camera, formFields: {});
+      await session.removePhoto('b', {});
+      await session.reorderPhotos(['c', 'b'], {});
+      expect(repo.captureCalls, 0);
+      pending.complete();
+      await removing;
+      expect(session.busy, false);
+      expect(session.photos.map((p) => p.id), ['b', 'c']);
+      expect(repo.deleted, isEmpty);
+    },
+  );
+
+  test(
+    'failed replacement keeps the previous photo and cleans the new file',
+    () async {
+      final store = _ControlledStore()..failAtWrite = 2;
+      final repo = _Photos();
+      final session = ReadingPhotoSession(
+        route: '/new',
+        repository: repo,
+        store: store,
+        readings: MemoryReadingRepository(),
+        original: sampleReading().copyWith(
+          photos: [testPhoto('a'), testPhoto('b')],
+        ),
+      );
+      await expectLater(
+        session.capture(
+          ReadingSource.camera,
+          formFields: {'value': '12'},
+          replacementId: 'a',
+        ),
+        throwsStateError,
+      );
+      expect(session.photos.map((p) => p.id), ['a', 'b']);
+      expect(repo.deleted, ['/camera.jpg']);
+      expect((await store.read('/new'))!['photos'], [
+        testPhoto('a').toJson(),
+        testPhoto('b').toJson(),
+      ]);
+      expect(await store.pendingRoute(), null);
+    },
+  );
+
+  test(
+    'closing while a draft is written does not resurrect deleted files',
+    () async {
+      final store = _ControlledStore();
+      final repo = _Photos();
+      final session = ReadingPhotoSession(
+        route: '/new',
+        repository: repo,
+        store: store,
+        readings: MemoryReadingRepository(),
+      );
+      await session.capture(ReadingSource.gallery, formFields: {});
+      final pending = store.pending = Completer<void>();
+      final removing = session.removePhoto(session.photos.first.id, {});
+      await Future<void>.delayed(Duration.zero);
+      final closing = session.close();
+      await Future<void>.delayed(Duration.zero);
+      pending.complete();
+      await Future.wait([removing, closing]);
+      expect(await store.read('/new'), null);
+      expect(repo.deleted.toSet(), {'/gallery1.jpg', '/gallery2.jpg'});
+    },
+  );
+
+  test(
     'reorder restores the draft and discard preserves saved files',
     () async {
       final original = sampleReading().copyWith(
@@ -273,6 +465,8 @@ class _Photos extends UnsupportedMeterPhotoCaptureRepository
   final deleted = <String>[];
   ReadingSource? recoveredSource;
   Future<StoredMeterPhoto?>? pending;
+  PhotoImportResult? batch;
+  Completer<void>? pendingDelete;
   int captureCalls = 0;
   @override
   Future<StoredMeterPhoto?> capture(ReadingSource source) async {
@@ -283,12 +477,14 @@ class _Photos extends UnsupportedMeterPhotoCaptureRepository
   @override
   Future<PhotoImportResult> pickGalleryPhotos({
     PhotoImportProgress? onProgress,
-  }) async => PhotoImportResult(
-    photos: [
-      _photo('gallery1', ReadingSource.gallery),
-      _photo('gallery2', ReadingSource.gallery),
-    ],
-  );
+  }) async =>
+      batch ??
+      PhotoImportResult(
+        photos: [
+          _photo('gallery1', ReadingSource.gallery),
+          _photo('gallery2', ReadingSource.gallery),
+        ],
+      );
   @override
   Future<PhotoImportResult> recoverPhotos({
     required ReadingSource source,
@@ -301,6 +497,7 @@ class _Photos extends UnsupportedMeterPhotoCaptureRepository
   @override
   Future<void> delete(String path) async {
     deleted.add(path);
+    if (pendingDelete case final pending?) await pending.future;
   }
 }
 
@@ -308,4 +505,18 @@ class _FailingStore extends MemoryPhotoDraftStore {
   @override
   Future<void> write(String route, Map<String, dynamic> draft) async =>
       throw StateError('Disk unavailable');
+}
+
+class _ControlledStore extends MemoryPhotoDraftStore {
+  Completer<void>? pending;
+  int? failAtWrite;
+  int writes = 0;
+  @override
+  Future<void> write(String route, Map<String, dynamic> draft) async {
+    final waiting = pending;
+    pending = null;
+    if (waiting != null) await waiting.future;
+    if (++writes == failAtWrite) throw StateError('Disk unavailable');
+    await super.write(route, draft);
+  }
 }

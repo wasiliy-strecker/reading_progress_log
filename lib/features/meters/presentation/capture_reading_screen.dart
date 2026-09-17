@@ -336,22 +336,24 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
 
   Future<void> _restorePhotoDraft() async {
     try {
-      final result = await _photoSession.restore();
-      if (!mounted) return;
-      final fields = _photoSession.fields;
-      if (fields.isNotEmpty) {
-        setState(() {
-          _value.text = fields['value'] as String;
-          _note.text = fields['note'] as String;
-          _capturedAt = DateTime.parse(fields['capturedAt'] as String);
-          _initialCapturedAt = DateTime.parse(
-            fields['initialCapturedAt'] as String,
-          );
-          _manual = fields['manual'] as bool;
-          _photoEntry =
-              (fields['photoEntry'] as bool) || _photoSession.photos.isNotEmpty;
-        });
-      }
+      final result = await _photoSession.restore().whenComplete(() {
+        if (!mounted) return;
+        final fields = _photoSession.fields;
+        if (fields.isNotEmpty) {
+          setState(() {
+            _value.text = fields['value'] as String;
+            _note.text = fields['note'] as String;
+            _capturedAt = DateTime.parse(fields['capturedAt'] as String);
+            _initialCapturedAt = DateTime.parse(
+              fields['initialCapturedAt'] as String,
+            );
+            _manual = fields['manual'] as bool;
+            _photoEntry =
+                (fields['photoEntry'] as bool) ||
+                _photoSession.photos.isNotEmpty;
+          });
+        }
+      });
       _showPhotoFailures(result);
     } catch (error) {
       if (mounted) {

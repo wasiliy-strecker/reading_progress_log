@@ -328,17 +328,18 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
 
   Future<void> _restorePhotoDraft() async {
     try {
-      final result = await _photoSession.restore();
-      if (!mounted) return;
-      final fields = _photoSession.fields;
-      if (fields.isNotEmpty) {
-        setState(() {
-          _value.text = fields['value'] as String;
-          _note.text = fields['note'] as String;
-          _reason.text = fields['reason'] as String;
-          _capturedAt = DateTime.parse(fields['capturedAt'] as String);
-        });
-      }
+      final result = await _photoSession.restore().whenComplete(() {
+        if (!mounted) return;
+        final fields = _photoSession.fields;
+        if (fields.isNotEmpty) {
+          setState(() {
+            _value.text = fields['value'] as String;
+            _note.text = fields['note'] as String;
+            _reason.text = fields['reason'] as String;
+            _capturedAt = DateTime.parse(fields['capturedAt'] as String);
+          });
+        }
+      });
       _showPhotoFailures(result);
     } catch (error) {
       if (mounted) {
