@@ -189,9 +189,11 @@ bestehenden Vorher-/Nachher-IDs und wird im Korrekturverlauf ausdrücklich benan
 
 Neue PDFs zeigen eine nummerierte Projektstand-Überschrift und die Wert-/Zeittabelle
 oberhalb des ersten Fotos. Weitere Fotos tragen die gleiche Projektstandnummer.
-Die Verlaufsübersicht und Detailabschnitte nutzen dieselbe Nummerierung in der
-bisherigen Reihenfolge, neuester Stand zuerst. Kompakte Einträge bleiben in der
-Übersicht. Gespeicherte PDF-Dateien werden nicht nachträglich geändert.
+Die Verlaufsübersicht und Detailabschnitte zählen chronologisch ab dem ältesten
+Stand mit Nummer 1. Der neueste Stand bleibt oben, bei drei Einträgen also in der
+Reihenfolge 3, 2, 1. Kompakte Einträge ohne Detailabschnitt zählen mit und bleiben
+in der Übersicht. Weitere Fotozeilen behalten die Nummer ihres Projektstands.
+Gespeicherte PDF-Dateien werden nicht nachträglich geändert.
 
 Schema 5, Backup-Version 4, Verschlüsselung und eingefrorene Paritätsdateien bleiben
 unverändert. Sortierung, Rücknahme, Entwurfswiederherstellung, Backup-Reihenfolge

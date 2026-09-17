@@ -220,6 +220,8 @@ void main() {
       );
       expect(pages, hasLength(1));
       expect(pages.single, contains('= -2 Reihen Fortschritt'));
+      expect(pages.single, contains('2 Reihe 85'));
+      expect(pages.single, contains('1 Reihe 87'));
       expect(pages.single, isNot(contains('Nicht angegeben')));
       expect(pages.single, isNot(contains('Garn')));
       expect('14.09.2026'.allMatches(pages.single), hasLength(1));
@@ -295,6 +297,18 @@ void main() {
           'strick_haekelbuch-layout-${mode.name}',
         );
         final text = pages.join(' ');
+        expect(
+          RegExp(
+            r'(\d+) Reihe (150|130|85)',
+          ).allMatches(text).map((match) => (match.group(1), match.group(2))),
+          [('3', '150'), ('2', '130'), ('1', '85')],
+        );
+        expect(
+          RegExp(
+            r'Projektstand (\d+)',
+          ).allMatches(text).map((match) => match.group(1)),
+          ['3', '2', if (mode != EvidencePhotoMode.withoutPhotos) '1'],
+        );
         expect(text, contains('NOTIZANFANG'));
         expect(text, contains('NOTIZENDE'));
         for (final word in ['weiterer', 'Leseabschnitt.']) {
@@ -320,8 +334,8 @@ void main() {
         for (final row in images) {
           final page = pages[int.parse(row[0]) - 1];
           final title = switch (row[3]) {
-            '300' => 'Projektstand 1',
-            '640' => 'Projektstand 3',
+            '300' => 'Projektstand 3',
+            '640' => 'Projektstand 1',
             '420' => 'Früheres Foto 1',
             _ => throw StateError('Unexpected image dimensions: $row'),
           };

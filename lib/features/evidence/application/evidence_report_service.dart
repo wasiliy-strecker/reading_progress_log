@@ -327,7 +327,7 @@ class EvidenceReportService {
               if (_hasReadingDetails(reading, reportMeter, photoMode)) ...[
                 ..._readingSection(
                   reading: reading,
-                  number: index + 1,
+                  number: readings.length - index,
                   date: date,
                   photoMode: photoMode,
                   photoAssets: photoAssets,
@@ -429,7 +429,8 @@ class EvidenceReportService {
       data: [
         for (var index = 0; index < readings.length; index++)
           [
-            '${index + 1}',
+            // The oldest reading is 1 even though the newest is shown first.
+            '${readings.length - index}',
             rows[index][0],
             progressValueLabel(
               readings[index].value.displayText,

@@ -48,6 +48,21 @@ void main() {
             );
           }
           final reading = sampleReading().copyWith(photos: photos);
+          final older = sampleReading(id: 'older', source: ReadingSource.manual)
+              .copyWith(
+                capturedAt: reading.capturedAt.subtract(
+                  const Duration(days: 2),
+                ),
+              );
+          final middle =
+              sampleReading(
+                id: 'middle',
+                source: ReadingSource.manual,
+              ).copyWith(
+                capturedAt: reading.capturedAt.subtract(
+                  const Duration(days: 1),
+                ),
+              );
           final service = EvidenceReportService(
             exports: MemoryEvidenceExportRepository(),
             documentsDirectoryProvider: () async => temp,
@@ -56,7 +71,7 @@ void main() {
           final report = history
               ? await service.createHistory(
                   meter: sampleBook(),
-                  readings: [reading],
+                  readings: [older, reading, middle],
                   revisions: {},
                 )
               : await service.createSingle(reading: reading, revisions: []);
@@ -82,6 +97,7 @@ void main() {
           ).allMatches(result.stdout as String).toList();
           final images = <Map<String, double>>[];
           final captions = <String, Map<String, double>>{};
+          final readingHeadings = <String>[];
           for (final page in pages) {
             final pageAttrs = _attributes(page.group(1)!);
             final pageNumber = double.parse(pageAttrs['number']!);
@@ -101,6 +117,9 @@ void main() {
               dotAll: true,
             ).allMatches(page.group(2)!)) {
               final text = match.group(2)!.replaceAll(RegExp(r'<[^>]+>'), '');
+              if (RegExp(r'^Projektstand \d+').hasMatch(text)) {
+                readingHeadings.add(text);
+              }
               final a = _attributes(match.group(1)!);
               captions[text] = {
                 'top': double.parse(a['top']!),
@@ -110,6 +129,18 @@ void main() {
             }
           }
           expect(images, hasLength(count));
+          expect(
+            readingHeadings,
+            hasLength(count == 0 ? (history ? 0 : 1) : (count + 1) ~/ 2),
+          );
+          for (final heading in readingHeadings) {
+            expect(
+              heading,
+              startsWith('Projektstand ${history ? 3 : 1}'),
+              reason:
+                  'Compact entries count towards photo continuation numbers',
+            );
+          }
           for (var i = 0; i < count; i++) {
             final image = images[i];
             final cellWidth = (image['pageWidth']! - 80 - 12) / 2;
