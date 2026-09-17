@@ -130,11 +130,27 @@ class AppDatabase extends _$AppDatabase {
         );
       }
       if (from < 5) {
-        await migrator.addColumn(readingRecords, readingRecords.photosJson);
-        await migrator.addColumn(
-          revisionRecords,
-          revisionRecords.photoChangeJson,
-        );
+        // A previous opening may have added columns before its schema version
+        // was saved. Complete that migration without replacing existing data.
+        final readingColumns = await customSelect(
+          'PRAGMA table_info(reading_records)',
+        ).get();
+        if (!readingColumns.any(
+          (row) => row.read<String>('name') == 'photos_json',
+        )) {
+          await migrator.addColumn(readingRecords, readingRecords.photosJson);
+        }
+        final revisionColumns = await customSelect(
+          'PRAGMA table_info(revision_records)',
+        ).get();
+        if (!revisionColumns.any(
+          (row) => row.read<String>('name') == 'photo_change_json',
+        )) {
+          await migrator.addColumn(
+            revisionRecords,
+            revisionRecords.photoChangeJson,
+          );
+        }
       }
       if (from < 4) {
         await customStatement(

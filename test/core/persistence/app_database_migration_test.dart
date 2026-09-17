@@ -2,11 +2,139 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:strick_haekelbuch/core/persistence/app_database.dart';
+import 'package:strick_haekelbuch/core/integrity/integrity_service.dart';
 import 'package:strick_haekelbuch/features/meters/data/drift_meter_repositories.dart';
 import 'package:strick_haekelbuch/features/meters/domain/meter_reading.dart';
 import '../../support/reading_fixtures.dart';
 
 void main() {
+  for (final existing in [(true, false), (false, true), (true, true)]) {
+    test(
+      'schema 4 resumes with photo columns already present: $existing',
+      () async {
+        final temp = await Directory.systemTemp.createTemp(
+          'partial_photo_migration_',
+        );
+        addTearDown(() => temp.delete(recursive: true));
+        final file = File('${temp.path}/interrupted.sqlite');
+        final meter = sampleBook();
+        final legacy = sampleReading();
+        var original = legacy.copyWith(
+          photos: existing.$1
+              ? [
+                  legacy.currentPhotos.single,
+                  ReadingPhotoVersion(
+                    id: 'second-photo',
+                    path: '/second.jpg',
+                    sha256: 'b' * 64,
+                    source: ReadingSource.gallery,
+                    addedAt: legacy.storedAt,
+                    ocrRawText: '',
+                    ocrCandidate: '',
+                  ),
+                ]
+              : null,
+          note: 'Vorhandene Projektnotiz',
+        );
+        original = original.copyWith(
+          manifestSha256: await const IntegrityService().readingManifestHash(
+            original,
+          ),
+        );
+        final revision = ReadingRevision(
+          id: 'revision',
+          readingId: original.id,
+          changedAt: original.updatedAt,
+          reason: 'Bestehende Korrektur',
+          changes: const {
+            'Notiz': ReadingChange(
+              before: '',
+              after: 'Vorhandene Projektnotiz',
+            ),
+          },
+          photoChange: existing.$2
+              ? ReadingPhotoChange(
+                  beforeIds: [],
+                  afterIds: original.currentPhotos
+                      .map((photo) => photo.id)
+                      .toList(),
+                )
+              : null,
+        );
+        final previous = AppDatabase.withExecutor(NativeDatabase(file));
+        await DriftMeterRepository(previous).save(meter);
+        await DriftMeterReadingRepository(previous).save(original);
+        await DriftMeterReadingRepository(previous).saveRevision(revision);
+        await previous.close();
+        final upgraded = AppDatabase.withExecutor(
+          NativeDatabase(
+            file,
+            setup: (database) {
+              if (!existing.$1) {
+                database.execute(
+                  'ALTER TABLE reading_records DROP COLUMN photos_json',
+                );
+              }
+              if (!existing.$2) {
+                database.execute(
+                  'ALTER TABLE revision_records DROP COLUMN photo_change_json',
+                );
+              }
+              database.execute('PRAGMA user_version = 4');
+            },
+          ),
+        );
+        try {
+          // The home screen is the first reader after a cold start.
+          final dashboard = await DriftMeterDashboardRepository(
+            upgraded,
+          ).watchAll().first;
+          expect(dashboard.single.meter.id, meter.id);
+          expect(dashboard.single.latestValue, original.value);
+          final loaded = (await DriftMeterReadingRepository(
+            upgraded,
+          ).findById(original.id))!;
+          expect(loaded.toJson(), original.toJson());
+          expect(
+            (await DriftMeterReadingRepository(
+              upgraded,
+            ).loadRevisions(original.id)).single.toJson(),
+            revision.toJson(),
+          );
+          expect(
+            await const IntegrityService().readingManifestHash(loaded),
+            original.manifestSha256,
+          );
+          expect(
+            (await upgraded.customSelect('PRAGMA user_version').getSingle())
+                .read<int>('user_version'),
+            5,
+          );
+        } finally {
+          await upgraded.close();
+        }
+        // The completed migration must remain usable after another cold start.
+        final reopened = AppDatabase.withExecutor(NativeDatabase(file));
+        try {
+          expect(
+            (await DriftMeterReadingRepository(
+              reopened,
+            ).findById(original.id))!.toJson(),
+            original.toJson(),
+          );
+          expect(
+            (await DriftMeterDashboardRepository(
+              reopened,
+            ).watchAll().first).single.meter.id,
+            meter.id,
+          );
+        } finally {
+          await reopened.close();
+        }
+      },
+    );
+  }
+
   test(
     'schema 4 migration preserves legacy photos, revisions and hashes',
     () async {

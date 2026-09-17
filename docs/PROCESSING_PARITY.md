@@ -170,6 +170,14 @@ Die autorisierten Abweichungen sind in `processing_exceptions.json` mit
 unveränderten Quell-Hashes und gezielten Regressionstests dokumentiert. Der
 ursprüngliche Verarbeitungsvergleich wird nicht neu eingefroren.
 
+Die Aktualisierung auf Schema 5 erkennt auch Datenbanken mit noch alter
+Versionsnummer, in denen eine oder beide neuen Fotospalten bereits vorhanden
+sind. Sie ergänzt nur fehlende Spalten und lässt deren vorhandene Inhalte
+unverändert. So lässt sich ein teilweise abgeschlossener Wechsel beim nächsten
+Start fortsetzen. Tests prüfen beide Zwischenstände, bereits vollständig
+angelegte Spalten, die Projektübersicht und einen weiteren Kaltstart. Schema 5,
+Fotolisten, Revisionen und Manifest-Prüfwerte bleiben erhalten.
+
 ## Fotoreihenfolge und PDF-Gliederung
 
 Die vorhandenen geordneten Fotolisten werden jetzt im Erfassen- und Korrekturformular

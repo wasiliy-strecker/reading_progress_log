@@ -3,8 +3,8 @@
   "files": {
     "lib/core/persistence/app_database.dart": {
       "sourceSha256": "cde5acf1ad2c23f01c78cd808febc8584e171243af7d310bc369d5ad6a7094db",
-      "localSha256": "ff4d1eb382801fdafc9b6ac7a43a215455f69ad50c0932857e87dd52a9b5f6e6",
-      "reason": "Retain the independent database identity and add schema 5 photo collections and correction snapshots without modifying legacy rows.",
+      "localSha256": "19eb9dab622f854b4a09665f9100d83e453c839f5903f6db9922b18533a684c4",
+      "reason": "Retain the independent database identity and add schema 5 photo collections and correction snapshots without modifying legacy rows. Resume partially completed photo-column migrations without overwriting existing photos, revisions or hashes.",
       "tests": [
         "test/core/persistence/app_database_migration_test.dart",
         "test/features/meters/multiple_photos_test.dart"
