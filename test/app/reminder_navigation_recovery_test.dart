@@ -12,6 +12,40 @@ import 'package:strick_haekelbuch/features/meters/presentation/meter_form_screen
 import '../support/fakes.dart';
 
 void main() {
+  testWidgets('saving meter edits shows confirmation on the detail screen', (
+    tester,
+  ) async {
+    final meters = MemoryMeterRepository()
+      ..items['saved'] = _meter().copyWith(clearReminder: true);
+    await tester.pumpWidget(_app(meters, NoopMeterReminderRepository()));
+    await tester.pumpAndSettle();
+    final router = _router(tester);
+    router.pushNamed('meterDetail', pathParameters: {'id': 'saved'});
+    await tester.pumpAndSettle();
+    router.pushNamed('meterEdit', pathParameters: {'id': 'saved'});
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byType(TextFormField).first,
+      'Neuer Projektname',
+    );
+    await tester.pump();
+    await tester.tap(find.text('Änderungen speichern'));
+    await tester.pumpAndSettle();
+
+    expect(router.state.uri.path, '/meter/saved');
+    expect(meters.items['saved']!.label, 'Neuer Projektname');
+    expect(find.byType(MeterFormScreen), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.text('Änderungen am Projekt gespeichert.'),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   for (final permissions in [(true, false), (false, true), (true, true)]) {
     testWidgets(
       'restores edit route after restart and exact alarm change $permissions',

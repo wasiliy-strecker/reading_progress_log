@@ -320,13 +320,29 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
       message:
           'Alle Projektstände, Projektstandfotos und lokal gespeicherten Projektprotokolle dieses Projekts werden dauerhaft entfernt. Bereits extern geteilte Dateien bleiben bestehen.',
     );
-    if (!confirmed) return;
-    await ref.read(meterServiceProvider).delete(meter.id);
-    if (!mounted) return;
-    if (context.canPop()) {
-      context.pop();
-    } else {
-      context.goNamed('home');
+    if (!confirmed || !mounted) return;
+    try {
+      await ref.read(meterServiceProvider).delete(meter.id);
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.goNamed('home');
+      }
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(AppSnackBar(message: 'Projekt gelöscht.'));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          AppSnackBar(
+            message:
+                'Projekt konnte nicht vollständig gelöscht werden. Bitte versuche es erneut.',
+          ),
+        );
     }
   }
 }

@@ -116,6 +116,7 @@ void main() {
       expect(meters.items['saved']!.label, 'Gespeichert');
       expect(find.text('Nächste Erinnerung'), findsOneWidget);
       expect(find.text('Erinnerung nicht geplant'), findsNothing);
+      expect(find.text('Änderungen am Projekt gespeichert.'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     },

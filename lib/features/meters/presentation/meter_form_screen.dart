@@ -860,10 +860,13 @@ class _MeterFormState extends ConsumerState<_MeterForm>
       } else {
         ref.invalidate(meterByIdProvider(meter.id));
         await _leaveWithoutGuard();
-        if (blockedNotice != null && messenger.mounted) {
+        if (messenger.mounted) {
           messenger
             ..hideCurrentSnackBar()
-            ..showSnackBar(blockedNotice);
+            ..showSnackBar(
+              blockedNotice ??
+                  AppSnackBar(message: 'Änderungen am Projekt gespeichert.'),
+            );
         }
       }
     } catch (error) {

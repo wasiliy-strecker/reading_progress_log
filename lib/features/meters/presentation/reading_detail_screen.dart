@@ -251,14 +251,33 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
       message:
           'Projektstand, alle Foto-Versionen, der Korrekturverlauf und alle Einzel-PDFs dieses Projektstands werden dauerhaft gelöscht. Gespeicherte Verlaufs-PDFs bleiben erhalten. Bereits außerhalb der App gespeicherte Kopien bleiben bestehen.',
     );
-    if (!confirmed) return;
-    await ref.read(meterReadingServiceProvider).delete(reading);
-    if (mounted) {
+    if (!confirmed || !mounted) return;
+    try {
+      await ref.read(meterReadingServiceProvider).delete(reading);
+      if (!mounted) return;
+      ref.invalidate(readingByIdProvider(reading.id));
+      ref.invalidate(revisionsForReadingProvider(reading.id));
+      ref.invalidate(evidenceForMeterProvider(reading.meterId));
+      final messenger = ScaffoldMessenger.of(context);
       if (context.canPop()) {
         context.pop();
       } else {
         context.goNamed('meterDetail', pathParameters: {'id': reading.meterId});
       }
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(AppSnackBar(message: 'Projektstand gelöscht.'));
+    } catch (_) {
+      if (!mounted) return;
+      ref.invalidate(evidenceForMeterProvider(reading.meterId));
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          AppSnackBar(
+            message:
+                'Projektstand konnte nicht vollständig gelöscht werden. Bitte versuche es erneut.',
+          ),
+        );
     }
   }
 }

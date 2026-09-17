@@ -442,10 +442,17 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
       await _photoSession.committed();
       _allowPop = true;
       if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
       context.pushReplacementNamed(
         'readingDetail',
         pathParameters: {'id': reading.id},
       );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!messenger.mounted) return;
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(AppSnackBar(message: 'Projektstand gespeichert.'));
+      });
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

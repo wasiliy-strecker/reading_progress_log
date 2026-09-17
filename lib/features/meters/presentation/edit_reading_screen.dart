@@ -382,7 +382,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     try {
-      await ref
+      final updated = await ref
           .read(meterReadingServiceProvider)
           .update(
             existing: widget.reading,
@@ -395,11 +395,24 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
             reason: _reason.text,
             photos: List.of(_photoSession.photos),
           );
+      final changed = !identical(updated, widget.reading);
       ref.invalidate(readingByIdProvider(widget.reading.id));
       ref.invalidate(revisionsForReadingProvider(widget.reading.id));
       await _photoSession.committed();
       if (mounted) {
+        final messenger = ScaffoldMessenger.of(context);
         await _leaveWithoutGuard();
+        if (messenger.mounted) {
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              AppSnackBar(
+                message: changed
+                    ? 'Korrektur protokolliert.'
+                    : 'Keine Änderungen vorhanden.',
+              ),
+            );
+        }
       }
     } catch (error) {
       if (mounted) {

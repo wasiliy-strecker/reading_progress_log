@@ -91,6 +91,7 @@ void main() {
       );
       expect(find.text('Zukünftigen Zeitpunkt speichern?'), findsNothing);
       await _settleSave(tester, () => readings.items.isNotEmpty);
+      expect(find.text('Projektstand gespeichert.'), findsOneWidget);
       final created = readings.items.values.single;
       expect(created.capturedAt, selected.toUtc());
       expect(created.storedAt.isBefore(created.capturedAt), isTrue);
@@ -99,6 +100,16 @@ void main() {
         manual ? ReadingSource.manual : ReadingSource.camera,
       );
       expect(find.textContaining('Zukunft'), findsNothing);
+
+      await _press(tester, 'Korrigieren');
+      await _press(tester, 'Korrektur protokollieren');
+      await _settleSave(
+        tester,
+        () => find.text('Keine Änderungen vorhanden.').evaluate().isNotEmpty,
+      );
+      expect(readings.revisions, isEmpty);
+      expect(find.text('Keine Änderungen vorhanden.'), findsOneWidget);
+      expect(find.text('Korrektur protokolliert.'), findsNothing);
 
       await _press(tester, 'Korrigieren');
       final corrected = DateTime(2100, 1, 2, 13, 45);
@@ -110,6 +121,7 @@ void main() {
         tester,
         () => readings.items.values.single.capturedAt == corrected.toUtc(),
       );
+      expect(find.text('Korrektur protokolliert.'), findsOneWidget);
       final saved = readings.items.values.single;
       expect(saved.capturedAt, corrected.toUtc());
       expect(saved.storedAt, created.storedAt);
