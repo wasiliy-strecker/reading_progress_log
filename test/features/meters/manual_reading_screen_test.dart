@@ -48,21 +48,18 @@ void main() {
     await _press(tester, 'Projektstand speichern');
     await _settleSave(tester, () => readings.items.isNotEmpty);
     expect(readings.items.values.single.meter.unit, 'Runden');
-    await _press(tester, 'Korrigieren');
+    await _press(tester, 'Bearbeiten');
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Aktuelle Runde *'),
       '31',
     );
-    await _press(tester, 'Korrektur protokollieren');
+    await _press(tester, 'Änderungen speichern');
     await _settleSave(
       tester,
       () => readings.items.values.single.value.displayText == '31',
     );
     final saved = readings.items.values.single;
-    expect(
-      (await readings.loadRevisions(saved.id)).single.changes,
-      contains('Aktuelle Runde'),
-    );
+    expect(await readings.loadRevisions(saved.id), isEmpty);
     expect(tester.takeException(), isNull);
   });
 
@@ -101,34 +98,31 @@ void main() {
       );
       expect(find.textContaining('Zukunft'), findsNothing);
 
-      await _press(tester, 'Korrigieren');
-      await _press(tester, 'Korrektur protokollieren');
+      await _press(tester, 'Bearbeiten');
+      await _press(tester, 'Änderungen speichern');
       await _settleSave(
         tester,
         () => find.text('Keine Änderungen vorhanden.').evaluate().isNotEmpty,
       );
       expect(readings.revisions, isEmpty);
       expect(find.text('Keine Änderungen vorhanden.'), findsOneWidget);
-      expect(find.text('Korrektur protokolliert.'), findsNothing);
+      expect(find.text('Änderungen gespeichert.'), findsNothing);
 
-      await _press(tester, 'Korrigieren');
+      await _press(tester, 'Bearbeiten');
       final corrected = DateTime(2100, 1, 2, 13, 45);
       await _chooseTime(tester, corrected);
       expect(find.textContaining('Zukunft'), findsNothing);
-      await _press(tester, 'Korrektur protokollieren');
+      await _press(tester, 'Änderungen speichern');
       expect(find.text('Zukünftigen Zeitpunkt speichern?'), findsNothing);
       await _settleSave(
         tester,
         () => readings.items.values.single.capturedAt == corrected.toUtc(),
       );
-      expect(find.text('Korrektur protokolliert.'), findsOneWidget);
+      expect(find.text('Änderungen gespeichert.'), findsOneWidget);
       final saved = readings.items.values.single;
       expect(saved.capturedAt, corrected.toUtc());
       expect(saved.storedAt, created.storedAt);
-      expect(
-        (await readings.loadRevisions(saved.id)).single.changes,
-        contains('Zeitpunkt des Projektstands'),
-      );
+      expect(await readings.loadRevisions(saved.id), isEmpty);
       expect(find.textContaining('Zukunft'), findsNothing);
     });
   }
@@ -179,29 +173,29 @@ void main() {
       expect(photos.captures, 0);
       expect(photos.deleted, isEmpty);
 
-      await _press(tester, 'Korrigieren');
+      await _press(tester, 'Bearbeiten');
       expect(find.byType(Image), findsNothing);
       expect(find.text('Foto aufnehmen'), findsOneWidget);
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Aktuelle Reihe *'),
         '135',
       );
-      await _press(tester, 'Korrektur protokollieren');
+      await _press(tester, 'Änderungen speichern');
       await _settleSave(
         tester,
         () => readings.items.values.single.value.displayText == '135',
       );
       saved = readings.items.values.single;
       expect(saved.hasPhoto, isFalse);
-      expect((await readings.loadRevisions(saved.id)).single.reason, '');
+      expect(await readings.loadRevisions(saved.id), isEmpty);
 
-      await _press(tester, 'Korrigieren');
+      await _press(tester, 'Bearbeiten');
       await _press(tester, 'Fotos aus Galerie hinzufügen');
       expect(
         find.text('Das bisherige Foto bleibt als frühere Version erhalten.'),
         findsNothing,
       );
-      await _press(tester, 'Korrektur protokollieren');
+      await _press(tester, 'Änderungen speichern');
       await _settleSave(tester, () => readings.items.values.single.hasPhoto);
       saved = readings.items.values.single;
       expect(saved.source, ReadingSource.gallery);
@@ -393,7 +387,7 @@ Future<void> _press(WidgetTester tester, String text) async {
   await tester.tap(target);
   await tester.pump();
   // Saving also includes asynchronous hashing; settle those separately.
-  if (text != 'Projektstand speichern' && text != 'Korrektur protokollieren') {
+  if (text != 'Projektstand speichern' && text != 'Änderungen speichern') {
     await tester.pumpAndSettle();
   }
 }

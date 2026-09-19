@@ -47,7 +47,7 @@ void main() {
         }
         await tester.tap(find.text('Fotos sortieren'));
         await tester.pumpAndSettle();
-        expect(find.text('Projektstand korrigieren'), findsOneWidget);
+        expect(find.text('Projektstand bearbeiten'), findsOneWidget);
         expect(
           find.text(
             'Zum Sortieren ein Foto länger gedrückt halten und verschieben.',
@@ -59,7 +59,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Nach hinten'));
         await tester.pumpAndSettle();
-        final save = find.text('Korrektur protokollieren');
+        final save = find.text('Änderungen speichern');
         await tester.ensureVisible(save);
         await tester.tap(save);
         for (
@@ -78,12 +78,7 @@ void main() {
         expect(sorted.value, reading.value);
         expect(sorted.capturedAt, reading.capturedAt);
         expect(sorted.photoHistory, isEmpty);
-        expect(
-          (await readings.loadRevisions(
-            reading.id,
-          )).single.photoChange!.afterIds,
-          ['1', '0', '2'],
-        );
+        expect(await readings.loadRevisions(reading.id), isEmpty);
         expect(find.text('Fotos sortieren'), findsOneWidget);
         expect(tester.takeException(), isNull);
       },

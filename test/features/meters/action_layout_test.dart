@@ -124,7 +124,7 @@ void main() {
         await tester.pumpAndSettle();
         await _checkAction(tester, 'Foto aufnehmen');
         await _checkAction(tester, 'Datum & Uhrzeit ändern');
-        await _checkAction(tester, 'Korrektur protokollieren');
+        await _checkAction(tester, 'Änderungen speichern');
         expect(tester.takeException(), isNull);
       },
     );

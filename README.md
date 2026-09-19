@@ -1,5 +1,9 @@
 # Strick & Häkelbuch
 
+Einträge werden über „Bearbeiten“ und „Änderungen speichern“ geändert.
+Es gibt keinen Korrekturverlauf und keine neuen historischen Versionen.
+Vorhandene Altdaten bleiben für kompatible Backups erhalten.
+
 Eine eigenständige Flutter-App für Strick- und Häkelprojekte. Merke dir, bei
 welcher Reihe oder Runde du aufgehört hast, und dokumentiere dein Projekt mit
 Fotos und Notizen. Android-first, lokal und ohne Konto.
@@ -11,7 +15,7 @@ Fotos und Notizen. Android-first, lokal und ohne Konto.
 - Manuelle Eingabe der aktuellen Reihe oder Runde als ganze Zahl ab 0
 - Projektstand mit oder ohne Fotos. Mehrere Kameraaufnahmen nacheinander oder
   Galerie-Mehrfachauswahl, auch gemischt
-- Datum/Uhrzeit, Notizen, Verlauf mit Suche, Fortschrittsdifferenzen und Korrekturen
+- Datum/Uhrzeit, Notizen, Verlauf mit Suche, Fortschrittsdifferenzen und Bearbeiten
 - Fotoübersicht mit Großansicht, Wischen und Vergrößern
 - Einzelne Fotos nachträglich ergänzen, ersetzen oder entfernen, mit erhaltener
   Fotohistorie und Vorher-/Nachher-Ansicht
@@ -19,10 +23,10 @@ Fotos und Notizen. Android-first, lokal und ohne Konto.
 - Projektprotokolle als Einzel- und Verlaufs-PDF, mit allen aktuellen Fotos oder
   kompakt ohne Fotos. Bereits gespeicherte PDFs bleiben unverändert
 - Passwortgeschützte AES-256-GCM-Backups (`.shbackup`) einschließlich Fotos,
-  Korrekturverläufen und gespeicherten PDFs
+  bereits vorhandenen Altversionen und gespeicherten PDFs
 
 Es gibt keine automatische Erkennung von Reihen oder Runden. Ein neues Foto
-verändert die eingegebene Zahl nicht. Neue Projekte starten mit Stricken/Reihen;
+verändert die eingegebene Zahl nicht. Neue Projekte starten mit Stricken/Reihen.
 beide Angaben lassen sich unabhängig ändern. Garn und Nadelstärke sind Freitext,
 beispielsweise „Merinowolle, Salbei“ und „4,5 mm“.
 
@@ -38,17 +42,17 @@ nicht verändert. Architektur: Feature-first Clean MVVM, Riverpod, Drift/SQLite
 und austauschbare Foto-, Reminder-, Export- und Backup-Implementierungen.
 Keine Runtime-Abhängigkeit auf eine andere App.
 
-Fotos lassen sich beim Erfassen und Korrigieren direkt im Raster sortieren:
+Fotos lassen sich beim Erfassen und Bearbeiten direkt im Raster sortieren:
 länger drücken und an die gewünschte Position ziehen. Am Bildschirmrand scrollt
 das Formular mit. Das Fotomenü bietet außerdem „Nach vorne“ und „Nach hinten“.
 Bei gespeicherten Projektständen mit mehreren Bildern führt „Fotos sortieren“
-direkt oberhalb der Galerie in diesen Editor. „Korrektur protokollieren“ speichert
+direkt oberhalb der Galerie in diesen Editor. „Änderungen speichern“ speichert
 die neue Reihenfolge.
 Neue Fotos werden angehängt. Beim Ersetzen bleibt die Position erhalten.
-Eine reine Umsortierung wird als „Fotoreihenfolge geändert“ protokolliert.
-Entfernte oder ersetzte gespeicherte Bilder sind nur noch
-im Korrekturverlauf sichtbar und werden nicht in neue PDFs übernommen. Erst
-„Korrektur protokollieren“ übernimmt Änderungen. Der Grund bleibt optional.
+Die gespeicherte Reihenfolge gilt für die Galerie und neue PDFs.
+Entfernte oder ersetzte Bilder werden nach dem Speichern nicht als neue
+Versionen archiviert und nicht in neue PDFs übernommen. Erst
+„Änderungen speichern“ übernimmt Änderungen. Ein Korrekturgrund entfällt.
 
 Vor Kamera-/Galerieaufrufen sichert die App den Fotoentwurf und die offenen
 Formulareingaben intern auf dem Gerät. Nach einer Android-Prozessbeendigung kann
@@ -69,9 +73,9 @@ von oben nach unten. Im Verlaufs-PDF verweisen die Nummern der Übersicht auf di
 Detailabschnitte. Die neuesten Stände stehen weiterhin zuerst. Die Nummern gelten
 nur innerhalb des jeweiligen Dokuments.
 
-Projekte zeigen die zehn neuesten Stände; vollständige Verläufe und gespeicherte
-Verlaufs-PDFs sind paginiert. Korrekturgründe sind optional. Beim Löschen eines
-Stands werden seine Fotos, Revisionen und Einzel-PDFs gelöscht; gespeicherte
+Projekte zeigen die zehn neuesten Stände. Vollständige Verläufe und gespeicherte
+Verlaufs-PDFs sind paginiert. Einträge werden ohne Korrekturgrund bearbeitet. Beim Löschen eines
+Stands werden seine Fotos, Revisionen und Einzel-PDFs gelöscht. Gespeicherte
 Verlaufs-PDFs bleiben erhalten. Projektlöschung entfernt auch diese. Extern
 geteilte Dateien bleiben bestehen.
 
@@ -84,7 +88,7 @@ werden abgelehnt. Details: [Verarbeitungsparität](docs/PROCESSING_PARITY.md).
 
 Creme `#FAF6EF`, warmes Weiß `#FFFCF7`, Salbeigrün `#526B59` und warme Wolltöne.
 Material 3, abgerundete Karten, großzügige Schaltflächen, Hell- und Dunkelmodus.
-Das App-Icon zeigt ein Wollknäuel mit Stricknadel und Häkelnadel; die editierbare
+Das App-Icon zeigt ein Wollknäuel mit Stricknadel und Häkelnadel. Die editierbare
 Quelle liegt unter `assets/branding/strick_haekelbuch_icon.svg`.
 `python3 scripts/generate_icons.py` erzeugt die Plattformgrößen erneut
 (benötigt Python GI, librsvg und Cairo).

@@ -53,17 +53,7 @@ void main() {
           tester.widget<TextFormField>(note).controller!.text,
           'Ärmel fortsetzen',
         );
-        if (editing) {
-          final reason = find.widgetWithText(
-            TextFormField,
-            'Grund der Korrektur (optional)',
-          );
-          await tester.ensureVisible(reason);
-          expect(
-            tester.widget<TextFormField>(reason).controller!.text,
-            'Foto ergänzen',
-          );
-        }
+        expect(find.text('Grund der Korrektur (optional)'), findsNothing);
         expect(await drafts.pendingRoute(), null);
         expect(photos.deleted, isEmpty);
         expect(tester.takeException(), isNull);
@@ -90,7 +80,7 @@ void main() {
         final save = find.widgetWithText(
           FilledButton,
           editing
-              ? 'Korrektur protokollieren'
+              ? 'Änderungen speichern'
               : 'Projektstand bestätigen und speichern',
         );
         await tester.ensureVisible(save);
@@ -114,14 +104,11 @@ void main() {
         expect(saved.ocrCandidate, isEmpty);
         expect(saved.ocrConfidence, isNull);
         if (editing) {
-          expect(saved.photoHistory.single.path, '/synthetic.jpg');
-          expect(
-            (await readings.loadRevisions(saved.id)).single.reason,
-            isEmpty,
-          );
+          expect(saved.photoHistory, isEmpty);
+          expect(await readings.loadRevisions(saved.id), isEmpty);
         }
         await tester.pumpWidget(const SizedBox());
-        expect(photos.deleted, isEmpty);
+        expect(photos.deleted, editing ? ['/synthetic.jpg'] : isEmpty);
         expect(tester.takeException(), isNull);
       },
     );

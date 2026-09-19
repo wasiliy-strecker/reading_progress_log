@@ -54,7 +54,6 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _value;
   late final TextEditingController _note;
-  final _reason = TextEditingController();
   late final ReadingPhotoSession _photoSession;
   late DateTime _capturedAt;
   bool get _processingPhoto => _photoSession.busy;
@@ -84,7 +83,6 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     unawaited(_photoSession.close().catchError((Object _) {}));
     _value.dispose();
     _note.dispose();
-    _reason.dispose();
     super.dispose();
   }
 
@@ -93,7 +91,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     final scaffold = Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: _handleBack),
-        title: const Text('Projektstand korrigieren'),
+        title: const Text('Projektstand bearbeiten'),
       ),
       body: Form(
         key: _formKey,
@@ -101,19 +99,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Text(
-                  'Nach dem Speichern findest du diese Änderung unter „Korrekturverlauf“. Dort siehst du die geänderten Angaben mit „Vorher“ und „Neu“.',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            _buildPhotoCorrection(context),
+            _buildPhotoEditor(context),
             const SizedBox(height: 14),
             TextFormField(
               controller: _value,
@@ -144,17 +130,6 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
               onChanged: (_) => setState(() {}),
               onTapOutside: (_) => FocusScope.of(context).unfocus(),
             ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _reason,
-              decoration: const InputDecoration(
-                labelText: 'Grund der Korrektur (optional)',
-                hintText: 'z. B. Tippfehler beim Bestätigen',
-              ),
-              maxLines: 2,
-              onChanged: (_) => setState(() {}),
-              onTapOutside: (_) => FocusScope.of(context).unfocus(),
-            ),
             const SizedBox(height: 22),
             FilledButton.icon(
               onPressed: _saving || _processingPhoto ? null : _save,
@@ -164,7 +139,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save_outlined),
-              label: const Text('Korrektur protokollieren'),
+              label: const Text('Änderungen speichern'),
             ),
           ],
         ),
@@ -183,7 +158,6 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
   bool get _hasUnsavedChanges =>
       _value.text.trim() != widget.reading.value.displayText ||
       _note.text.trim() != widget.reading.note ||
-      _reason.text.trim().isNotEmpty ||
       _capturedAt != widget.reading.capturedAt.toLocal() ||
       _photoSession.changed;
 
@@ -198,10 +172,10 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     _discardDialogOpen = true;
     final discard = await confirmDiscardChanges(
       context,
-      title: 'Korrektur verwerfen?',
+      title: 'Änderungen verwerfen?',
       message:
           'Deine Änderungen an diesem Projektstand wurden noch nicht gespeichert.',
-      discardLabel: 'Korrektur verwerfen',
+      discardLabel: 'Änderungen verwerfen',
     );
     _discardDialogOpen = false;
     if (!mounted || !discard) return;
@@ -236,11 +210,10 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     }
   }
 
-  Widget _buildPhotoCorrection(BuildContext context) => ReadingPhotoEditor(
+  Widget _buildPhotoEditor(BuildContext context) => ReadingPhotoEditor(
     photos: _photoSession.photos,
     busy: _saving || _processingPhoto,
     progress: _photoSession.progress,
-    correction: true,
     onCamera: () => _capturePhoto(ReadingSource.camera),
     onGallery: () => _capturePhoto(ReadingSource.gallery),
     onReplace: _replacePhoto,
@@ -255,7 +228,6 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
   Map<String, dynamic> get _draftFields => {
     'value': _value.text,
     'note': _note.text,
-    'reason': _reason.text,
     'capturedAt': _capturedAt.toIso8601String(),
   };
 
@@ -335,7 +307,6 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
           setState(() {
             _value.text = fields['value'] as String;
             _note.text = fields['note'] as String;
-            _reason.text = fields['reason'] as String;
             _capturedAt = DateTime.parse(fields['capturedAt'] as String);
           });
         }
@@ -393,12 +364,10 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
             )!,
             capturedAt: _capturedAt,
             note: _note.text,
-            reason: _reason.text,
             photos: List.of(_photoSession.photos),
           );
       final changed = !identical(updated, widget.reading);
       ref.invalidate(readingByIdProvider(widget.reading.id));
-      ref.invalidate(revisionsForReadingProvider(widget.reading.id));
       await _photoSession.committed();
       if (mounted) {
         final messenger = ScaffoldMessenger.of(context);
@@ -409,7 +378,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
             ..showSnackBar(
               AppSnackBar(
                 message: changed
-                    ? 'Korrektur protokolliert.'
+                    ? 'Änderungen gespeichert.'
                     : 'Keine Änderungen vorhanden.',
               ),
             );
@@ -418,7 +387,9 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'Korrektur fehlgeschlagen: $error'),
+          AppSnackBar(
+            message: 'Änderungen konnten nicht gespeichert werden: $error',
+          ),
         );
         setState(() => _saving = false);
       }

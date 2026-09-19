@@ -52,8 +52,8 @@ void main() {
       ]);
       expect((await rig.load(tester)).toJson(), original.toJson());
 
-      await _tap(tester, 'Korrektur protokollieren');
-      await _waitFor(tester, find.text('Korrektur protokolliert.'));
+      await _tap(tester, 'Änderungen speichern');
+      await _waitFor(tester, find.text('Änderungen gespeichert.'));
       final saved = await rig.load(tester);
       expect(
         saved.currentPhotos.map((p) => p.toJson()),
@@ -70,13 +70,7 @@ void main() {
       final revisions = await tester.runAsync(
         () => rig.readings.loadRevisions(original.id),
       );
-      expect(revisions, hasLength(1));
-      expect(revisions!.single.changes, isEmpty);
-      expect(
-        revisions.single.photoChange!.beforeIds,
-        original.currentPhotos.map((p) => p.id),
-      );
-      expect(revisions.single.photoChange!.afterIds, pending.map((p) => p.id));
+      expect(revisions, isEmpty);
       final expectedHash = await tester.runAsync(
         () => const IntegrityService().readingManifestHash(saved),
       );
@@ -84,7 +78,7 @@ void main() {
       expect(rig.photos.deleted, isEmpty);
       expect(await rig.drafts.read('/reading/${original.id}/edit'), null);
 
-      await _tap(tester, 'Korrigieren');
+      await _tap(tester, 'Bearbeiten');
       await _waitFor(tester, find.byType(ReadingPhotoEditor));
       expect(
         tester
@@ -111,8 +105,11 @@ void main() {
           .photos
           .toList();
       rig.readings.failNextUpdate = true;
-      await _tap(tester, 'Korrektur protokollieren');
-      await _waitFor(tester, find.textContaining('Korrektur fehlgeschlagen:'));
+      await _tap(tester, 'Änderungen speichern');
+      await _waitFor(
+        tester,
+        find.textContaining('Änderungen konnten nicht gespeichert werden:'),
+      );
       expect((await rig.load(tester)).toJson(), original.toJson());
       expect(
         await tester.runAsync(() => rig.readings.loadRevisions(original.id)),
@@ -126,15 +123,15 @@ void main() {
         pending.map((p) => p.id),
       );
       expect(rig.photos.deleted, isEmpty);
-      await _tap(tester, 'Korrektur protokollieren');
-      await _waitFor(tester, find.text('Korrektur protokolliert.'));
+      await _tap(tester, 'Änderungen speichern');
+      await _waitFor(tester, find.text('Änderungen gespeichert.'));
       expect(
         (await rig.load(tester)).currentPhotos.map((p) => p.id),
         pending.map((p) => p.id),
       );
       expect(
         await tester.runAsync(() => rig.readings.loadRevisions(original.id)),
-        hasLength(1),
+        isEmpty,
       );
       expect(rig.photos.galleryCalls, 1);
       expect(rig.photos.deleted, isEmpty);
@@ -157,8 +154,8 @@ void main() {
       expect(rig.photos.deleted, isEmpty);
       await tester.tap(find.byType(BackButton).last);
       await tester.pumpAndSettle();
-      await _tap(tester, 'Korrektur verwerfen');
-      await _waitFor(tester, find.text('Korrigieren'));
+      await _tap(tester, 'Änderungen verwerfen');
+      await _waitFor(tester, find.text('Bearbeiten'));
       expect((await rig.load(tester)).toJson(), original.toJson());
       expect(
         await tester.runAsync(() => rig.readings.loadRevisions(original.id)),
@@ -262,15 +259,12 @@ class _Readings extends DriftMeterReadingRepository {
   _Readings(super.database);
   bool failNextUpdate = false;
   @override
-  Future<void> updateWithRevision(
-    MeterReading reading,
-    ReadingRevision revision,
-  ) async {
+  Future<void> save(MeterReading reading) async {
     if (failNextUpdate) {
       failNextUpdate = false;
       throw StateError('Simulated write failure');
     }
-    await super.updateWithRevision(reading, revision);
+    await super.save(reading);
   }
 }
 

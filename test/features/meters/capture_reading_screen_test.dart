@@ -175,14 +175,14 @@ void main() {
       expect(find.text('Niedrigerer Stand'), findsOneWidget);
       expect(find.text('Neuer Projektabschnitt'), findsOneWidget);
 
-      await tester.tap(find.text('Korrigieren'));
+      await tester.tap(find.text('Bearbeiten'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField).first, '400');
       expect(find.textContaining('Grund für niedrigeren'), findsNothing);
       expect(find.textContaining('niedrigeren Stand'), findsNothing);
       expect(readings.watchForMeterCalls, 0);
 
-      final save = find.text('Korrektur protokollieren');
+      final save = find.text('Änderungen speichern');
       await tester.ensureVisible(save);
       await tester.tap(save);
       await tester.pumpAndSettle();
