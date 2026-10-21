@@ -1,0 +1,1 @@
+L’app ora supporta tedesco, inglese, spagnolo, francese, italiano e portoghese brasiliano. La lingua scelta viene salvata. Numeri e date seguono la regione del dispositivo. I nuovi PDF e promemoria usano la lingua selezionata.

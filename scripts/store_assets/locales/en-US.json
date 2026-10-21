@@ -1,0 +1,36 @@
+{
+  "language": "English",
+  "choice": "en",
+  "region": "en-US",
+  "eyebrow": "SPACE FOR YOUR HANDMADE WORK",
+  "tagline": "Your craft.\nYour progress.",
+  "heads": [
+    "Your projects\nat a glance",
+    "Keep progress\nand photos together",
+    "See how far\nyou have come",
+    "Make time for\nyour next project",
+    "Share project\nreports as PDFs",
+    "Your language.\nYour backups."
+  ],
+  "projects": [
+    [
+      "Winter set",
+      "Merino wool · Sage & natural",
+      "4.5 mm",
+      "Scarf and matching hat. Lengthen the scarf next."
+    ],
+    [
+      "Granny blanket",
+      "Cotton · Cream & terracotta",
+      "3.5 mm",
+      "Round six finished. Weave in the ends next."
+    ],
+    [
+      "Crochet basket",
+      "Cotton cord · Natural",
+      "6 mm",
+      "The base is finished. The sides are taking shape."
+    ]
+  ],
+  "locale": "en-US"
+}

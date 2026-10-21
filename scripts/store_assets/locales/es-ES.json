@@ -1,0 +1,36 @@
+{
+  "language": "Español",
+  "choice": "es",
+  "region": "es-ES",
+  "eyebrow": "UN ESPACIO PARA TUS LABORES",
+  "tagline": "Tu labor.\nTu progreso.",
+  "heads": [
+    "Tus proyectos\nde un vistazo",
+    "Avances y fotos\nen un mismo lugar",
+    "Consulta todos\ntus avances",
+    "Un momento para\ntu próximo proyecto",
+    "Comparte informes\nen PDF",
+    "Tu idioma.\nTus copias de seguridad."
+  ],
+  "projects": [
+    [
+      "Conjunto de invierno",
+      "Lana merina · Salvia y natural",
+      "4,5 mm",
+      "Bufanda y gorro a juego. Ahora toca alargar la bufanda."
+    ],
+    [
+      "Manta de grannys",
+      "Algodón · Crema y terracota",
+      "3,5 mm",
+      "Sexta vuelta terminada. Después, rematar los hilos."
+    ],
+    [
+      "Cesta de ganchillo",
+      "Cordón de algodón · Natural",
+      "6 mm",
+      "La base está lista. Las paredes van tomando forma."
+    ]
+  ],
+  "locale": "es-ES"
+}

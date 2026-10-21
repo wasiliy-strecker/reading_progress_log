@@ -1,0 +1,36 @@
+{
+  "language": "Português (Brasil)",
+  "choice": "pt-BR",
+  "region": "pt-BR",
+  "eyebrow": "ESPAÇO PARA O SEU ARTESANATO",
+  "tagline": "Seu trabalho.\nSeu progresso.",
+  "heads": [
+    "Seus projetos\nem um só lugar",
+    "Progresso e fotos\nsempre juntos",
+    "Acompanhe\nseu progresso",
+    "Um tempo para\nseu próximo projeto",
+    "Compartilhe\nrelatórios em PDF",
+    "Seu idioma.\nSeus backups."
+  ],
+  "projects": [
+    [
+      "Conjunto de inverno",
+      "Lã merino · Sálvia e natural",
+      "4,5 mm",
+      "Cachecol e gorro combinando. Agora, alongar o cachecol."
+    ],
+    [
+      "Manta de quadradinhos",
+      "Algodão · Creme e terracota",
+      "3,5 mm",
+      "Sexta volta concluída. Depois, arrematar os fios."
+    ],
+    [
+      "Cesto de crochê",
+      "Cordão de algodão · Natural",
+      "6 mm",
+      "A base está pronta. As laterais estão tomando forma."
+    ]
+  ],
+  "locale": "pt-BR"
+}

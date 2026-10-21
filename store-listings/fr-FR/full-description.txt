@@ -1,0 +1,13 @@
+Strick & Häkelbuch accompagne vos projets de tricot et de crochet, de la première maille à l’ouvrage terminé. Notez le rang ou le tour en cours pour reprendre facilement votre travail.
+
+Créez des projets avec un nom, une technique, un fil et une taille d’aiguilles ou de crochet. Saisissez manuellement des nombres entiers de rangs et de tours, avec la date, l’heure et vos notes. Consultez l’historique et les écarts de progression, recherchez des entrées et modifiez-les si nécessaire.
+
+Documentez vos ouvrages avec des photos prises avec l’appareil photo ou choisies dans la galerie. Ajoutez et classez plusieurs images par entrée. Les photos servent à documenter votre travail. Les rangs et les tours sont saisis par vos soins, sans comptage automatique à partir des images.
+
+Programmez des rappels pour vos projets avec une heure et une fréquence. Leur réception dépend des réglages de notifications et de batterie d’Android.
+
+Créez des rapports PDF pour une entrée ou pour l’historique d’un projet, en version compacte ou avec les photos actuelles. Prévisualisez, imprimez et partagez vos rapports pour conserver ou présenter vos avancées.
+
+Les données de vos projets restent en local sur votre appareil. Exportez et restaurez des sauvegardes chiffrées et protégées par mot de passe. Conservez la sauvegarde et le mot de passe en lieu sûr.
+
+Choisissez Deutsch, English, Español, Français, Italiano ou Português (Brasil) dans les paramètres, ou suivez la langue du système. Les nombres et les dates suivent toujours la région de votre appareil. Vos noms et vos notes restent inchangés.

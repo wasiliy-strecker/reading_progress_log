@@ -14,6 +14,18 @@ def validate_serial(serial):
     return serial
 
 
+def system_ui_wait_button(nodes):
+    # Only titles actually observed from Android's System UI startup dialog.
+    # An application ANR must remain visible and fail the capture.
+    titles = {"System UI isn't responding", "System-UI reagiert nicht",
+              "Interface ne répond pas.", "L'app UI sistema non risponde"}
+    title = next((n.get("text") for n in nodes
+                  if n.get("resource-id") == "android:id/alertTitle"), None)
+    if title not in titles:
+        return None
+    return next((n for n in nodes if n.get("resource-id") == "android:id/aerr_wait"), None)
+
+
 class Device:
     def __init__(self, serial):
         self.serial = validate_serial(serial)
@@ -28,8 +40,34 @@ class Device:
         return subprocess.check_output([self.adb, "-s", self.serial, *args])
 
     def nodes(self):
-        self.run("shell", "uiautomator", "dump", "/sdcard/sh-store-ui.xml")
-        return ET.fromstring(self.run("shell", "cat", "/sdcard/sh-store-ui.xml")).iter("node")
+        # Android can return exit code zero with a null root. Never reuse a
+        # previous screen's XML when switching between Flutter and DocumentsUI.
+        for _ in range(12):
+            self.run("shell", "rm", "-f", "/sdcard/sh-store-ui.xml")
+            try:
+                result = self.run("shell", "uiautomator", "dump", "/sdcard/sh-store-ui.xml")
+            except subprocess.CalledProcessError:
+                time.sleep(1)
+                continue
+            if b"dumped to" in result:
+                try:
+                    root = ET.fromstring(self.run("shell", "cat", "/sdcard/sh-store-ui.xml"))
+                    nodes = list(root.iter("node"))
+                    wait_button = system_ui_wait_button(nodes)
+                    if wait_button is not None:
+                        # Fresh Android boots can briefly stall System UI on a
+                        # busy host. Never dismiss a failure of the app itself.
+                        a,b,c,d = map(int,re.findall(r"\d+",wait_button.get("bounds")))
+                        self.run("shell","input","tap",str((a+c)//2),str((b+d)//2))
+                        print("Waiting for emulated Android System UI startup", flush=True)
+                        time.sleep(2)
+                        continue
+                    if nodes:
+                        return nodes
+                except (ET.ParseError, subprocess.CalledProcessError):
+                    pass
+            time.sleep(1)
+        raise ValueError("No current accessibility tree on the capture emulator")
 
     def tap(self, label):
         matches = [n for n in self.nodes() if any(
@@ -42,7 +80,7 @@ class Device:
         time.sleep(0.6)
 
     def visible(self, label):
-        return any(value == label or value.startswith(label + "\n")
+        return any(value == label or label in value.splitlines()
                    for n in self.nodes()
                    for value in (n.get("text", ""), n.get("content-desc", "")))
 
@@ -60,6 +98,7 @@ class Device:
         time.sleep(1.5)
         path.write_bytes(self.run("exec-out", "screencap", "-p"))
         subprocess.run(["convert", str(path), f"PNG24:{path}"], check=True)
+        print(f"Captured {path}", flush=True)
 
     def text(self, value):
         # Only simple fixture input is accepted, never arbitrary shell syntax.

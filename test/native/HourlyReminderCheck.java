@@ -11,7 +11,7 @@ import java.time.ZoneId;
 class HourlyReminderCheck {
     private static StoredReminder reminder(Long start) {
         return new StoredReminder("meter", "Synthetic project", "knitting",
-                "Stricken", null, null, "hourly", 1, null, 14, 30, "normal", start);
+                "Stricken", null, null, "hourly", 1, null, 14, 30, "normal", start, null, null);
     }
 
     private static void equal(long actual, long expected) {

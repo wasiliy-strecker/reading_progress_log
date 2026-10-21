@@ -122,6 +122,13 @@ TZ=Europe/Berlin flutter test --dart-define=PDF_TEXT_AUDIT=true test/features/ev
 
 ## Android
 
+Die App unterstützt Deutsch, Englisch, Spanisch, Französisch, Italienisch und
+Portugiesisch (Brasilien). Die dauerhaft gespeicherte Sprachwahl steht in den
+Einstellungen. Zahlen und Daten folgen unabhängig davon der Geräteregion.
+Pflege und Prüfungen sind unter [Internationalisierung](docs/INTERNATIONALIZATION.md)
+beschrieben. Der [Aufnahmeablauf für Store-Unterlagen](scripts/store_assets/README.md)
+verwendet ausschließlich isolierte Emulatoren und synthetische Beispiele.
+
 | Variante | App-Name | Paketkennung |
 | --- | --- | --- |
 | dev | Strick & Häkelbuch Dev | `com.appfactory.strick_haekelbuch.dev` |

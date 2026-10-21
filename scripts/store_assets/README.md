@@ -1,168 +1,129 @@
-# Deutsche Play-Store-Bilder erzeugen
+# Internationale Play-Unterlagen lokal erzeugen
 
-Die Ausgabe vom 17.09.2026 liegt unter
-`build/store-assets/de-DE/2026-09-17_2202/`. Sie enthält 18 Upload-Bilder,
-`VORSCHAU.png`, `manifest.json`, eine Upload-Anleitung mit deutschen
-Bildbeschreibungen und `strick-haekelbuch-play-store-bilder-de.zip`.
-Generierte Bilder, APKs und Demo-Backups bleiben im ignorierten Build-Verzeichnis.
+Sechs Sprachpakete: de-DE, en-US, es-ES, fr-FR, it-IT und pt-BR.
+Jedes enthält ein Icon, eine Feature-Grafik, sechs Smartphone-Bilder und je vier
+Bilder für 7- und 10-Zoll-Tablets. Insgesamt 96 Upload-Bilder. Englisch ist der
+vorbereitete Standard des Store-Eintrags. Keine Länderfreigabe wird geändert.
 
-## Voraussetzungen und Aufnahmequelle
+## Aufnahmequelle und Daten
 
-Alle Befehle vom App-Verzeichnis aus ausführen. Benötigt werden Flutter, Python 3,
-Node 22 oder neuer, Google Chrome, ImageMagick, `rg`, `unzip` und das Android-SDK
-mit Build Tools 36.0.0 sowie `system-images;android-35;google_apis;x86_64`.
-Die vorhandenen Roboto-Schriften, das App-SVG und vier synthetische Projektfotos
-werden unverändert als Eingaben verwendet. Keine zusätzlichen npm/Python-Pakete.
+Voraussetzungen: Flutter, Android SDK mit API-35-Google-APIs-x86_64-Systemimage,
+Build Tools 36.0.0, Python 3, Node 22, Chrome und ImageMagick. Bestehendes Marken-SVG,
+Roboto-Schriften und vier synthetische Projektfotos verwenden. Keine neuen
+Bildgeneratoren oder zusätzlichen Python-/npm-Pakete erforderlich.
 
-Quelle ist die tatsächliche Android-App im Dev-Profile-Build mit AOT-Dart-Code.
-Dieser Build zeigt keine Dart-Debug-Bedienelemente. Androids Profile-Konfiguration
-erbt dennoch das native Debug-Flag und die lokale Debug-Signatur.
-Das ist eine Aufnahmequelle, kein Store-Release. Versionsnummer und Runtime-Code
-werden für diese Bilder nicht geändert. APK-Hash, Paket, Version und Git-Quellstand
-werden beim Vorbereiten protokolliert und beim Verpacken geprüft.
+Quelle ist die wirkliche App als Dev-Profile-APK mit AOT-Code. Es enthält keine
+Dart-Debug-Bedienelemente. Androids Profile-Konfiguration erbt die lokale
+Debug-Signatur. Das ist kein Store-Build. Diese Aufnahme-APK niemals auf das
+Nutzer-Smartphone installieren. Ein Dev-Debug-APK für das Smartphone ist ein
+separater Vorgang nach den Regeln in AGENTS.md.
 
-`prepare_emulator.sh` erstellt ausschließlich einen neuen, isolierten AVD.
-`device.py` lehnt physische Geräte und fremde AVD-Namen ab. Jede Geräteaktion
-benennt die Seriennummer ausdrücklich. Nur einen UI-Ablauf gleichzeitig ausführen.
-Keinen bereits laufenden Nutzer-Emulator oder ein Smartphone übernehmen.
+`prepare_emulator.sh` erzeugt für jede Sprache einen frischen isolierten AVD.
+`Device` akzeptiert nur explizite Emulator-Seriennummern und eigene AVD-Namen mit
+Präfix `sh_store_assets`. Fremde Emulatoren und physische Geräte werden abgewiesen.
+Keine Aufnahmeschritte auf einem impliziten ADB-Ziel ausführen.
 
-## Demo-Daten und Emulator
-
-Der Host-Test erstellt ein regulär verschlüsseltes Backup mit drei erfundenen
-Projekten und 24 Projektständen. 21 Stände haben keine Fotos. Der neueste Stand
-des Wintersets hat zwei Fotos, Granny-Decke und Häkelkörbchen jeweils eines.
-Der Test prüft den Import einschließlich Werte, Foto-Reihenfolge und Prüfsummen.
-Es gibt keine OCR-Daten. `Demo2026` ist nur das öffentliche Testpasswort dieser
-synthetischen Fixture und darf nicht für echte Nutzerdaten verwendet werden.
+`locales/<Locale>.json` enthält übersetzte erfundene Projekte, Notizen und
+Bildüberschriften. Drei Projekte besitzen insgesamt 24 manuelle Stände und vier
+synthetische Fotos. Das Testpasswort `Demo2026` ist öffentlich und nur für diese
+Fixture geeignet. Der Host-Test erzeugt regulär verschlüsselte Backups und prüft
+Wiederherstellung, Werte, Foto-Reihenfolge und Prüfsummen. Keine OCR-Daten.
 
 ```bash
-export SH_ASSET_DIR="$PWD/build/store-assets/de-DE/$(date +%Y-%m-%d_%H%M)"
-flutter test --no-pub test/tooling/store_demo_backup_test.dart \
-  --dart-define=STORE_DEMO_DIR="$SH_ASSET_DIR/raw/demo"
+flutter test --no-pub --timeout 3m test/tooling/store_demo_backup_test.dart \
+  --dart-define=STORE_DEMO_LOCALE=all \
+  --dart-define=STORE_DEMO_DIR=build/international-work/demo
 flutter build apk --profile --flavor dev --target-platform android-x64 --no-pub
-bash scripts/store_assets/prepare_emulator.sh \
-  build/app/outputs/flutter-apk/app-dev-profile.apk "$SH_ASSET_DIR"
 ```
 
-Das letzte Kommando bleibt mit dem eigenen Emulator verbunden. SDK-Pfad und
-ADB lassen sich über `SH_ANDROID_SDK` und `SH_ADB` einstellen. Ein anderer freier
-gerader Emulator-Port wird mit `SH_EMULATOR_PORT` gewählt, standardmäßig 5580.
-Bei den folgenden Befehlen die tatsächlich ausgegebene Seriennummer verwenden.
+## Je Sprache aufnehmen
 
-In einem zweiten Terminal denselben absoluten `SH_ASSET_DIR` setzen. Die
-Initialisierung über den geprüften Geräte-Helper ausführen:
-
-```python
-import os
-import sys
-sys.path.insert(0, 'scripts/store_assets')
-from device import Device
-
-d = Device('emulator-5580')
-package = 'com.appfactory.strick_haekelbuch.dev'
-d.run('shell', 'wm', 'size', '1080x1920')
-d.run('shell', 'wm', 'density', '360')
-d.run('shell', 'settings', 'put', 'system', 'accelerometer_rotation', '0')
-d.run('shell', 'settings', 'put', 'system', 'user_rotation', '0')
-d.run('shell', 'cmd', 'uimode', 'night', 'no')
-for setting in ['window_animation_scale', 'transition_animation_scale', 'animator_duration_scale']:
-    d.run('shell', 'settings', 'put', 'global', setting, '0')
-d.run('shell', 'cmd', 'locale', 'set-app-locales', package, '--user', '0', '--locales', 'de-DE')
-d.run('shell', 'pm', 'grant', package, 'android.permission.POST_NOTIFICATIONS')
-d.run('push', os.environ['SH_ASSET_DIR'] + '/raw/demo/Demo.shbackup', '/sdcard/Download/Demo.shbackup')
-for source, name in [('01_stricken_schal.png', 'Schal.png'), ('02_stricken_muetze.png', 'Muetze.png')]:
-    target = '/sdcard/Pictures/' + name
-    d.run('push', 'assets/examples/project_photos/' + source, target)
-    d.run('shell', 'am', 'broadcast', '-a', 'android.intent.action.MEDIA_SCANNER_SCAN_FILE', '-d', 'file://' + target)
-d.run('shell', 'am', 'start', '-n', package + '/com.appfactory.strick_haekelbuch.MainActivity')
-```
-
-In der App Einstellungen → Backup wiederherstellen → Downloads → Demo.shbackup
-wählen. Mit `Demo2026` und der regulären Wiederherstellung bestätigen.
-Für die Statusleiste `python3 scripts/store_assets/device.py emulator-5580 status`
-ausführen. Der Android-Demomodus zeigt 09:41 Uhr und verbirgt Benachrichtigungen.
-
-## Smartphone-Motive
-
-`device.py` bietet `dump`, `tap LABEL`, `capture DATEI` und `status` an.
-`Device.run` erlaubt zusätzlich explizite Eingaben und echte Scroll-Gesten.
-Screenshots erst nach Abschluss von Import, Bildverarbeitung und PDF-Erstellung
-aufnehmen. Tastatur schließen und Erfolgshinweise abwarten.
-
-| Rohbild unter `raw/phone/` | Echte App-Ansicht |
-| --- | --- |
-| `01.png` | Projektübersicht direkt nach Wiederherstellung mit allen drei Projekten |
-| `02.png` | Winterset → Projektstand erfassen → Stand eintragen. Reihe 52 und Notiz „Am Schal weitergestrickt. Das Muster sitzt.“ |
-| `03.png` | Derselbe ungespeicherte Entwurf nach gemeinsamer Auswahl von Schal und Mütze über „Fotos aus Galerie hinzufügen“ |
-| `04.png` | Gespeicherten Stand 48 öffnen → Fotos sortieren. Erstes Foto über „Nach hinten“ verschieben und Menü von Foto 1 öffnen |
-| `05.png` | Winterset → Alle Projektstände anzeigen. Liste mit 12 Ständen, neuester Stand 48 |
-| `06.png` | Projekt & Erinnerung bearbeiten. Projekterinnerung aktiviert, täglich 09:00 Uhr, normale Erinnerung |
-| `07.png` | Projektprotokoll für den Projektverlauf erstellen → Mit aktuellen Fotos. Vollständig gerenderte PDF-Vorschau |
-| `08.png` | Einstellungen mit Datensicherung und Datenschutz |
-
-Den Entwurf aus 02/03 verwerfen und anschließend auch die Erfassungsauswahl
-verlassen. Die Fotokorrektur aus 04 regulär mit „Korrektur protokollieren“ speichern.
-Dadurch bleiben es 24 Stände und der Wert 48 unverändert. Die Reihenfolge ist
-anschließend Mütze, Schal. Motiv 05 wurde vor dieser Korrektur aufgenommen.
-Die Erinnerung für 06 speichern und vor den Tablet-Übersichten wieder deaktivieren,
-damit alle drei Projektkarten sichtbar sind. Das PDF zeigt die Stände absteigend
-nummeriert, beginnend mit Projektstand 12. Die Folgeseiten enthalten ältere Stände
-und die aktuellen Fotos.
-
-## Tablet-Aufnahmen und Ausgabe
-
-Jeweils auf der Projektübersicht starten. Die beiden Serien werden separat mit
-echter Tablet-Geometrie aufgenommen. Eine kleine Scroll-Geste im Foto-Detail
-macht den Reihenwert unter den zwei vollständigen Fotos sichtbar.
+Einen freien geraden Port verwenden. Niemals eine bereits laufende Instanz
+übernehmen. `prepare_emulator.sh` bleibt bis zum Ende seines Emulators geöffnet.
+Quell-APK, Version, Git-Basisstand, Status und Quellbaum-Fingerabdruck werden
+protokolliert. SDK und ADB können mit `SH_ANDROID_SDK` und `SH_ADB` gesetzt werden.
 
 ```bash
-python3 scripts/store_assets/capture_tablet.py emulator-5580 7 "$SH_ASSET_DIR"
-python3 scripts/store_assets/capture_tablet.py emulator-5580 10 "$SH_ASSET_DIR"
-node scripts/store_assets/render.mjs assets "$SH_ASSET_DIR"
-node scripts/store_assets/render.mjs contact "$SH_ASSET_DIR"
-python3 scripts/store_assets/package.py "$SH_ASSET_DIR" \
-  --apk build/app/outputs/flutter-apk/app-dev-profile.apk
+SH_EMULATOR_PORT=5610 bash scripts/store_assets/prepare_emulator.sh \
+  build/app/outputs/flutter-apk/app-dev-profile.apk \
+  build/international-work/capture/de-DE
+python3 scripts/store_assets/capture_international.py emulator-5610 de-DE \
+  releases/international/build-1/store/de-DE
+node scripts/store_assets/render.mjs assets \
+  releases/international/build-1/store/de-DE de-DE
+node scripts/store_assets/render.mjs contact \
+  releases/international/build-1/store/de-DE de-DE
 ```
 
-| Upload-Gruppe | Anzahl | Pixel | Aufnahme-Dichte |
+Die Aufnahme setzt nur im eigenen Emulator die Gerätesprache und -region, startet
+Android dort neu und importiert das jeweilige Backup über die normale App.
+Androids Demomodus setzt die Statusleiste auf 09:41. PDF-Erstellung erfolgt in der
+App. Nicht gespeicherte Demonstrationsformulare werden nur auf diesem synthetischen
+Testgerät verlassen. Es gibt keinen versteckten Demo-Modus im Runtime-Code.
+
+Auf belasteten Rechnern zunächst nur zwei Emulatoren gleichzeitig verwenden.
+Die Automatisierung wartet auf die Android-Dienste und frische Accessibility-Bäume.
+Ein erkannter Startstillstand von Androids System UI kann mit Warten fortgesetzt
+werden. App-eigene Fehler werden dadurch nicht ausgeblendet. Nach einem Abbruch
+den tatsächlichen Bildschirm prüfen. `--phase restore` setzt im Dateiauswahldialog
+fort. `--phase capture` nimmt ein bereits importiertes Beispiel erneut auf.
+`--from-screen 4` beginnt bei den Erinnerungen. Diese Wiederholungen nur für eine
+noch nicht fertig übergebene Lieferung verwenden.
+
+Smartphone-Motive: Übersicht, Bearbeiten eines Standes mit Fotos, Verlauf,
+Erinnerungseinstellungen, erzeugtes PDF und Einstellungen mit Sprachwahl/Backup.
+Tablet-Motive: Übersicht, Verlauf, Fotodetail und Einstellungen.
+
+| Gruppe | Anzahl je Sprache | Pixel | Dichte |
 | --- | --- | --- | --- |
-| App-Icon | 1 | 512 × 512 | SVG-Render |
+| Icon | 1 | 512 × 512 | SVG-Render |
 | Feature-Grafik | 1 | 1024 × 500 | HTML-Layout |
-| Smartphone | 8 | 1080 × 1920 | 360 dpi |
-| 7-Zoll-Tablet | 4 | 1920 × 1080 | 240 dpi |
-| 10-Zoll-Tablet | 4 | 2560 × 1440 | 288 dpi |
+| Smartphone | 6 | 1080 × 1920 | 360 dpi |
+| 7-Zoll-Tablet | 4 | 1920 × 1200 | 320 dpi |
+| 10-Zoll-Tablet | 4 | 2560 × 1600 | 300 dpi |
 
-Die Smartphone-Layouts zeigen den vollständigen Screenshot proportional unter
-einer Überschrift. Der Header nimmt weniger als 20 Prozent der Bildhöhe ein.
-Es werden keine App-Bedienelemente retuschiert oder ergänzt. Tablet-Bilder sind
-direkte Screenshots. ImageMagick setzt nur die verlustlose RGB/PNG-Kodierung.
-Das Icon hat einen deckenden Hintergrund ohne aufgesetzte Außenmaske.
+Die Smartphone-Bilder zeigen die proportional skalierte App-Fläche unter
+übersetzten Überschriften. Nur die Android-Status- und Navigationsleisten werden
+im Rahmen ausgeblendet. Oben entfallen 72 Pixel mit Statussymbolen und Leerraum,
+unten 54 Pixel der Navigationsleiste bei 360 dpi. Die Rohaufnahmen bleiben
+unverändert. Keine App-Bedienelemente ergänzen oder retuschieren.
+Tablet-Bilder sind direkte Aufnahmen in echter Tablet-Geometrie. Die PNG-Konversion
+ändert nur die verlustlose RGB-Kodierung. Icon: deckendes PNG32. Andere Bilder:
+PNG24 ohne Alpha. `VORSCHAU.png` ist eine Kontaktübersicht und kein Upload-Bild.
 
-`package.py` prüft Bildanzahl, vollständige PNG-Dekodierung, Farbmodus, Maße,
-Dateigröße und deutsche Alt-Texte mit höchstens 140 Zeichen. Das ZIP enthält
-genau 21 Dateien. APK, Rohbilder, HTML-Dateien und Demo-Backup sind ausgeschlossen.
-Alle Bilder zusätzlich visuell auf abgeschnittene Kernaussagen, Tastaturen,
-Loader, Fehlermeldungen und fremde App-Namen prüfen.
+## Prüfen und verpacken
 
-Referenz: [Google Play – Preview assets](https://support.google.com/googleplay/android-developer/answer/9866151?hl=en-GB).
-
-## Prüfungen und Abschluss
+Die kopierbaren Texte in `store-listings/<Locale>/` pflegen. Titel höchstens 30,
+Kurzbeschreibung 80, vollständige Beschreibung 4000 Zeichen. Release-Notizen
+höchstens 500 Zeichen. Keine führenden Markdown-Aufzählungen in Textfeldern.
 
 ```bash
-dart format lib test
-flutter analyze --no-pub
-flutter test --no-pub --dart-define=PDF_TEXT_AUDIT=true \
-  test/tooling/store_demo_backup_test.dart \
-  test/features/backup/multiple_photo_backup_test.dart \
-  test/features/evidence/multiple_photo_pdf_test.dart \
-  test/features/evidence/pdf_photo_grid_test.dart
+python3 scripts/store_assets/package_international.py \
+  releases/international/build-1 \
+  --captures build/international-work/capture \
+  --apk build/app/outputs/flutter-apk/app-dev-profile.apk
 python3 -m unittest discover -s scripts/store_assets -p 'test_*.py'
 node --check scripts/store_assets/render.mjs
 bash -n scripts/store_assets/prepare_emulator.sh
-git diff --check
 ```
 
-Den eigenen Emulator abschließend über `Device('emulator-5580').run('emu', 'kill')`
-beenden. Erst nach dessen Ende ausschließlich den in
-`raw/emulator-workspace.txt` aufgezeichneten temporären Aufnahme-AVD entfernen.
-Die Ausgabedateien bleiben erhalten. Ein Store-Upload ist ein separater Auftrag.
+Das gemeinsame ZIP enthält nur Store-Unterlagen und Vorschauen. APKs, Rohbilder,
+Demo-Backups und temporäre HTML-Dateien gehören nicht in das Store-ZIP. Nach der
+Verpackung alle sechs Kontaktübersichten und relevante Einzelbilder visuell prüfen.
+Lesbarkeit, echte Zielsprache, keine abgeschnittenen Texte, leere Bilder, Lade-
+oder Fehlermeldungen prüfen. Technische Prüfungen ersetzen keine muttersprachliche
+Abnahme. Tatsächlichen Umfang in der Lieferung dokumentieren.
+
+Offizielle Vorgaben, am 21.10.2026 geprüft:
+[Grafiken und Screenshots](https://support.google.com/googleplay/android-developer/answer/9866151?hl=en-GB)
+und [Store-Eintrag](https://support.google.com/googleplay/android-developer/answer/9859152?hl=en).
+Die Grenzen vor einer späteren Lieferung erneut prüfen.
+
+## Eigene Arbeitsumgebung entfernen
+
+Nur den eigenen Emulator über `Device(serial).run('emu', 'kill')` beenden. Danach
+nur das in `raw/emulator-workspace.txt` protokollierte `sh-store-assets-*`-Verzeichnis
+entfernen. Vor der nächsten Sprache einen neuen AVD erstellen. Gemeinsame SDKs,
+Schlüssel, fremde AVDs und andere Apps bleiben erhalten. Nach erfolgreicher Übergabe
+eigene Demo-Backups und Layout-Arbeitsdateien entfernen. Lieferungen dauerhaft im
+Git-ignorierten `releases/international/build-<Code>/` erhalten. Nicht hochladen.

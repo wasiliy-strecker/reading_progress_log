@@ -1,0 +1,1 @@
+O app agora oferece alemão, inglês, espanhol, francês, italiano e português do Brasil. O idioma escolhido fica salvo. Números e datas seguem a região do dispositivo. Novos PDFs e lembretes usam o idioma selecionado.

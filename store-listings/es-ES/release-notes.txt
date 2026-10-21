@@ -1,0 +1,1 @@
+La app ahora está disponible en alemán, inglés, español, francés, italiano y portugués de Brasil. El idioma elegido se guarda. Los números y las fechas siguen la región del dispositivo. Los nuevos PDF y recordatorios utilizan el idioma seleccionado.

@@ -1,0 +1,36 @@
+{
+  "language": "Deutsch",
+  "choice": "de",
+  "region": "de-DE",
+  "eyebrow": "RAUM FÜR DEINE HANDARBEIT",
+  "tagline": "Dein Handwerk.\nDein Fortschritt.",
+  "heads": [
+    "Deine Projekte\nim Blick",
+    "Fortschritt und Fotos\nzusammen festhalten",
+    "Dein Fortschritt\nim Verlauf",
+    "Zeit für dein\nnächstes Projekt",
+    "Projektprotokolle\nals PDF teilen",
+    "Deine Sprache.\nDeine Datensicherung."
+  ],
+  "projects": [
+    [
+      "Winterset",
+      "Merinowolle · Salbei & Natur",
+      "4,5 mm",
+      "Schal und passende Mütze. Als Nächstes den Schal verlängern."
+    ],
+    [
+      "Granny-Decke",
+      "Baumwolle · Creme & Terrakotta",
+      "3,5 mm",
+      "Sechste Runde fertig. Danach die Fäden vernähen."
+    ],
+    [
+      "Häkelkörbchen",
+      "Baumwollkordel · Natur",
+      "6 mm",
+      "Der Boden ist fertig. Die Seitenwand wächst."
+    ]
+  ],
+  "locale": "de-DE"
+}

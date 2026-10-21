@@ -1,0 +1,1 @@
+Die App unterstützt jetzt Deutsch, Englisch, Spanisch, Französisch, Italienisch und Portugiesisch (Brasilien). Die Sprachwahl wird gespeichert. Zahlen und Datumsangaben folgen der Geräteregion. Neue PDFs und Erinnerungen verwenden die gewählte App-Sprache.

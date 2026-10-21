@@ -1,0 +1,13 @@
+Strick & Häkelbuch te acompaña en tus proyectos de punto y ganchillo, desde el primer punto hasta la pieza terminada. Guarda la fila o vuelta actual y retoma tu labor donde la dejaste.
+
+Crea proyectos con nombre, técnica, hilo y tamaño de agujas. Introduce manualmente números enteros de filas y vueltas, junto con la fecha, la hora y tus notas. Consulta el historial, compara los avances, busca entradas y edítalas cuando lo necesites.
+
+Documenta tu trabajo con fotos de la cámara o la galería. Añade y ordena varias imágenes por entrada. Las fotos sirven para documentar la labor. Tú introduces las filas y vueltas, sin reconocimiento ni recuento automático a partir de imágenes.
+
+Programa recordatorios para tus proyectos con una hora y un intervalo. Su entrega depende de los ajustes de notificaciones y batería de Android.
+
+Crea informes PDF de una entrada o del historial de un proyecto, en formato compacto o con las fotos actuales. Previsualiza, imprime y comparte tus informes para conservar o mostrar tus avances.
+
+Los datos de los proyectos se guardan localmente en tu dispositivo. Exporta y restaura copias de seguridad cifradas y protegidas con contraseña. Conserva tanto la copia como la contraseña en un lugar seguro.
+
+Elige Deutsch, English, Español, Français, Italiano o Português (Brasil) en los ajustes, o utiliza el idioma del sistema. Los números y las fechas siguen la región de tu dispositivo. Tus nombres y notas permanecen intactos.

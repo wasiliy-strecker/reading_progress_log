@@ -1,0 +1,36 @@
+{
+  "language": "Français",
+  "choice": "fr",
+  "region": "fr-FR",
+  "eyebrow": "UN ESPACE POUR VOS CRÉATIONS",
+  "tagline": "Votre savoir-faire.\nVos progrès.",
+  "heads": [
+    "Vos projets\nen un coup d’œil",
+    "Vos avancées\net vos photos réunies",
+    "Retrouvez toutes\nvos avancées",
+    "Du temps pour\nvotre prochain projet",
+    "Partagez vos\nrapports en PDF",
+    "Votre langue.\nVos sauvegardes."
+  ],
+  "projects": [
+    [
+      "Ensemble d’hiver",
+      "Laine mérinos · Sauge et naturel",
+      "4,5 mm",
+      "Écharpe et bonnet assorti. Allonger ensuite l’écharpe."
+    ],
+    [
+      "Couverture granny",
+      "Coton · Crème et terre cuite",
+      "3,5 mm",
+      "Sixième tour terminé. Rentrer les fils ensuite."
+    ],
+    [
+      "Panier au crochet",
+      "Cordon de coton · Naturel",
+      "6 mm",
+      "Le fond est terminé. Les côtés prennent forme."
+    ]
+  ],
+  "locale": "fr-FR"
+}

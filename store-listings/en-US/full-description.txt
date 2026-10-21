@@ -1,0 +1,13 @@
+Strick & Häkelbuch helps you keep track of your knitting and crochet projects, from the first stitch to the finished piece. Record your current row or round and pick up where you left off.
+
+Create projects with a name, technique, yarn and needle or hook size. Enter whole row and round counts manually, with a date, time and your own notes. Browse past entries, see changes in progress, search the history and edit entries when needed.
+
+Document your work with camera or gallery photos. Add and arrange several photos for each entry. Photos are for documentation. You enter the row and round counts yourself, with no automatic counting from images.
+
+Set project reminders with a time and repeat interval. Notification delivery depends on your Android notification and battery settings.
+
+Create PDF project reports for a single entry or a project history, either compact or with current photos. Preview, print and share reports to keep a record or show your progress.
+
+Project data stays locally on your device. Export and restore encrypted, password-protected backups. Keep both your backup and password safe.
+
+Choose Deutsch, English, Español, Français, Italiano or Português (Brasil) in settings, or follow the system language. Numbers and dates continue to follow your device region. Your own project names and notes remain unchanged.

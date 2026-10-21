@@ -34,6 +34,8 @@ if ! rg -q '^lib/x86_64/libapp.so$' "$output/raw/apk-entries.txt" || \
 fi
 sha256sum "$apk" > "$output/raw/source-apk.sha256"
 git rev-parse HEAD > "$output/raw/source-commit.txt"
+python3 scripts/store_assets/source_fingerprint.py > "$output/raw/source-tree.sha256"
+git status --short > "$output/raw/source-status.txt"
 work=$(mktemp -d /dev/shm/sh-store-assets-XXXXXX)
 name="sh_store_assets_$(date +%s)"
 printf '%s\n' "$name" > "$work/avd-name"
@@ -46,10 +48,10 @@ printf 'no\n' | "$sdk/cmdline-tools/latest/bin/avdmanager" create avd \
   --path "$work/avd/$name.avd" --device pixel_6
 "$sdk/emulator/emulator" -avd "$name" -port "$port" -no-window \
   -no-audio -no-snapshot -no-boot-anim -gpu swiftshader_indirect \
-  -memory 2048 -cores 4 -camera-back none -camera-front none \
+  -memory 3072 -cores 2 -camera-back none -camera-front none \
   >"$work/emulator.log" 2>&1 </dev/null &
 emulator_pid=$!
-for attempt in $(seq 1 120); do
+for attempt in $(seq 1 600); do
   if [[ $("$adb" -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r') == 1 ]]; then
     break
   fi

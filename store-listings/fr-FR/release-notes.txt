@@ -1,0 +1,1 @@
+L’app prend désormais en charge l’allemand, l’anglais, l’espagnol, le français, l’italien et le portugais du Brésil. Le choix de langue est enregistré. Les nombres et les dates suivent la région de l’appareil. Les nouveaux PDF et rappels utilisent la langue choisie.

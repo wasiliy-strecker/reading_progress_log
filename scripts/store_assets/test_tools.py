@@ -1,5 +1,6 @@
 import importlib.util
 import hashlib
+import json
 from pathlib import Path
 import subprocess
 from unittest.mock import patch
@@ -19,6 +20,16 @@ package = module("package")
 
 
 class StoreToolsTest(unittest.TestCase):
+    def test_only_identified_system_ui_dialog_may_be_dismissed(self):
+        button = {'resource-id': 'android:id/aerr_wait'}
+        title = {'resource-id': 'android:id/alertTitle',
+                 'text': "System UI isn't responding"}
+        self.assertIs(device.system_ui_wait_button([title, button]), button)
+        title['text'] = "Strick & Häkelbuch isn't responding"
+        self.assertIsNone(device.system_ui_wait_button([title, button]))
+        title['text'] = 'Unknown app failure'
+        self.assertIsNone(device.system_ui_wait_button([title, button]))
+
     def test_physical_device_and_implicit_target_rejected(self):
         for value in ["PHYSICAL123", "", "emulator-5580;echo", "localhost:5555"]:
             with self.assertRaises(ValueError):
@@ -54,7 +65,11 @@ class StoreToolsTest(unittest.TestCase):
                 package.validate(Path(folder))
 
     def test_alt_text_limits(self):
-        self.assertTrue(all(0 < len(text) <= 140 for text in package.PHONE_ALT + package.TABLET_ALT))
+        for path in Path(__file__).with_name('locales').glob('*.json'):
+            copy = json.loads(path.read_text())
+            self.assertEqual(len(copy['heads']), 6)
+            self.assertEqual(len(copy['projects']), 3)
+            self.assertTrue(all(0 < len(text) <= 140 for text in copy['heads']))
 
     def test_source_identity_and_apk_hash_must_match_capture(self):
         with tempfile.TemporaryDirectory(prefix="sh-source-test-") as folder:

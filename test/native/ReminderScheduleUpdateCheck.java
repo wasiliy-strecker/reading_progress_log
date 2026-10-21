@@ -10,7 +10,7 @@ class ReminderScheduleUpdateCheck {
     private static StoredReminder reminder(String interval, int day, Integer month,
             int hour, int minute, Long start, String label, String mode) {
         return new StoredReminder("saved", label, "other", "Test",
-                "123", "Einheiten", interval, day, month, hour, minute, mode, start);
+                "123", "Einheiten", interval, day, month, hour, minute, mode, start, null, null);
     }
 
     private static long instant(String value) {

@@ -1,0 +1,36 @@
+{
+  "language": "Italiano",
+  "choice": "it",
+  "region": "it-IT",
+  "eyebrow": "SPAZIO AI TUOI LAVORI CREATIVI",
+  "tagline": "La tua passione.\nI tuoi progressi.",
+  "heads": [
+    "I tuoi progetti\na colpo d’occhio",
+    "Progressi e foto\nsempre insieme",
+    "Ritrova tutti\ni tuoi progressi",
+    "Un momento per\nil prossimo progetto",
+    "Condividi\nresoconti PDF",
+    "La tua lingua.\nI tuoi backup."
+  ],
+  "projects": [
+    [
+      "Completo invernale",
+      "Lana merino · Salvia e naturale",
+      "4,5 mm",
+      "Sciarpa e berretto abbinato. Ora allungare la sciarpa."
+    ],
+    [
+      "Coperta granny",
+      "Cotone · Crema e terracotta",
+      "3,5 mm",
+      "Sesto giro completato. Poi fermare i fili."
+    ],
+    [
+      "Cestino all’uncinetto",
+      "Cordoncino di cotone · Naturale",
+      "6 mm",
+      "La base è pronta. I lati prendono forma."
+    ]
+  ],
+  "locale": "it-IT"
+}
