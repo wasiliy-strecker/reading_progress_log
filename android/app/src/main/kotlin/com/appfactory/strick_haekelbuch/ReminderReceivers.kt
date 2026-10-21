@@ -35,6 +35,10 @@ class MeterReminderReceiver : BroadcastReceiver() {
 
 class ReminderRescheduleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == Intent.ACTION_LOCALE_CHANGED) {
+            ReminderNotifier.refreshChannelNames(context)
+            return
+        }
         ReminderScheduler.rescheduleAll(
             context,
             clockChanged = intent.action == Intent.ACTION_TIME_CHANGED ||

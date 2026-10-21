@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../core/files/meter_photo_repository.dart';
@@ -118,7 +119,7 @@ class ReadingPhotoSession extends ChangeNotifier {
     if (busy || _closed) return const PhotoImportResult();
     busy = true;
     fields = formFields;
-    progress = 'Fotos werden vorbereitet …';
+    progress = appStrings.preparingPhotos;
     notifyListeners();
     try {
       await _persist(source: source, replacementId: replacementId);
@@ -149,7 +150,10 @@ class ReadingPhotoSession extends ChangeNotifier {
   }
 
   void _progress(int completed, int total) {
-    progress = 'Fotos werden vorbereitet: $completed von $total';
+    progress = appStrings.preparingPhotosOf(
+      (completed).toString(),
+      (total).toString(),
+    );
     if (!_closed) notifyListeners();
   }
 
@@ -204,7 +208,7 @@ class ReadingPhotoSession extends ChangeNotifier {
     final index = photos.indexWhere((photo) => photo.id == id);
     if (index < 0) return;
     busy = true;
-    progress = 'Foto wird entfernt …';
+    progress = appStrings.removingPhoto;
     final removed = photos.removeAt(index);
     notifyListeners();
     try {
@@ -230,9 +234,7 @@ class ReadingPhotoSession extends ChangeNotifier {
     if (orderedIds.length != photos.length ||
         orderedIds.toSet().length != photos.length ||
         !orderedIds.every(byId.containsKey)) {
-      throw ArgumentError(
-        'Die Fotoreihenfolge muss alle aktuellen Fotos enthalten.',
-      );
+      throw ArgumentError(appStrings.thePhotoOrderMustIncludeAllCurrentPhotos);
     }
     if (listEquals(orderedIds, photos.map((photo) => photo.id).toList())) {
       return;
@@ -240,7 +242,7 @@ class ReadingPhotoSession extends ChangeNotifier {
     final previous = List<ReadingPhotoVersion>.of(photos);
     fields = formFields;
     busy = true;
-    progress = 'Fotoreihenfolge wird gesichert …';
+    progress = appStrings.savingPhotoOrder;
     photos
       ..clear()
       ..addAll(orderedIds.map((id) => byId[id]!));
@@ -308,7 +310,7 @@ class ReadingPhotoSession extends ChangeNotifier {
   Future<void> discard() async {
     if (busy || _closed) return;
     busy = true;
-    progress = 'Ungespeicherte Fotos werden entfernt …';
+    progress = appStrings.removingUnsavedPhotos;
     notifyListeners();
     try {
       await _discard();

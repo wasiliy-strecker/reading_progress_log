@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -104,7 +105,7 @@ class _MeterHistoryScreenState extends ConsumerState<MeterHistoryScreen> {
       child: Scaffold(
         appBar: AppBar(
           leading: BackButton(onPressed: _leave),
-          title: const Text('Projektverlauf'),
+          title: Text(stringsOf(context).projectHistory),
         ),
         body: SafeArea(
           top: false,
@@ -141,12 +142,10 @@ class _MeterHistoryScreenState extends ConsumerState<MeterHistoryScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'Projektstände konnten nicht geladen werden.',
-                        ),
+                        Text(stringsOf(context).couldNotLoadProgressEntries),
                         TextButton(
                           onPressed: () => ref.invalidate(provider),
-                          child: const Text('Erneut versuchen'),
+                          child: Text(stringsOf(context).tryAgain),
                         ),
                       ],
                     ),
@@ -160,7 +159,10 @@ class _MeterHistoryScreenState extends ConsumerState<MeterHistoryScreen> {
                   child: Column(
                     children: [
                       Text(
-                        'Seite ${_offset ~/ _pageSize + 1} von ${(page.matchingCount / _pageSize).ceil()}',
+                        stringsOf(context).pageOf(
+                          (_offset ~/ _pageSize + 1).toString(),
+                          ((page.matchingCount / _pageSize).ceil()).toString(),
+                        ),
                         key: const ValueKey('history-page-number'),
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
@@ -172,14 +174,14 @@ class _MeterHistoryScreenState extends ConsumerState<MeterHistoryScreen> {
                             onPressed: !pageAsync.isLoading && _offset > 0
                                 ? () => _showPage(_offset - _pageSize)
                                 : null,
-                            child: const Text('Zurück'),
+                            child: Text(stringsOf(context).back),
                           ),
                           OutlinedButton(
                             key: const ValueKey('history-next-page'),
                             onPressed: !pageAsync.isLoading && page.hasMore
                                 ? () => _showPage(_offset + _pageSize)
                                 : null,
-                            child: const Text('Weiter'),
+                            child: Text(stringsOf(context).next),
                           ),
                         ],
                       ),
@@ -199,13 +201,22 @@ class _MeterHistoryScreenState extends ConsumerState<MeterHistoryScreen> {
         padding: const EdgeInsets.all(16),
         child: _query.isNotEmpty
             ? _EmptyHistorySearch(onClear: _clearSearch)
-            : const Center(child: Text('Noch keine Projektstände vorhanden.')),
+            : Center(child: Text(stringsOf(context).noProgressEntriesYet356)),
       );
     }
-    final countLabel = _query.isNotEmpty ? 'Treffern' : 'Projektständen';
+    final countLabel = _query.isNotEmpty
+        ? stringsOf(context).matches
+        : stringsOf(context).progressEntries;
     final resultLabel = page.matchingCount == 1
-        ? (_query.isNotEmpty ? '1 Treffer' : '1 Projektstand')
-        : '${page.offset + 1}–${page.offset + page.readings.length} von ${page.matchingCount} $countLabel';
+        ? (_query.isNotEmpty
+              ? stringsOf(context).matchCount(1)
+              : stringsOf(context).entryCount(1))
+        : stringsOf(context).of359(
+            (page.offset + 1).toString(),
+            (page.offset + page.readings.length).toString(),
+            (page.matchingCount).toString(),
+            (countLabel).toString(),
+          );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -268,13 +279,13 @@ class _HistorySearchField extends StatelessWidget {
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        labelText: 'Projektstände suchen',
-        hintText: 'Datum, Reihe/Runde oder Notiz',
+        labelText: stringsOf(context).searchProgressEntries,
+        hintText: stringsOf(context).dateRowRoundOrNote,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: controller.text.isEmpty
             ? null
             : IconButton(
-                tooltip: 'Suche löschen',
+                tooltip: stringsOf(context).clearSearch,
                 onPressed: onClear,
                 icon: const Icon(Icons.close),
               ),
@@ -298,21 +309,21 @@ class _EmptyHistorySearch extends StatelessWidget {
           children: [
             Icon(Icons.search_off_outlined, size: 36, color: colors.primary),
             const SizedBox(height: 10),
-            const Text(
-              'Kein passender Projektstand gefunden.',
+            Text(
+              stringsOf(context).noMatchingProgressEntryFound,
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Suche nach Datum, aktueller Reihe oder Runde oder einem Wort aus der Notiz.',
+            Text(
+              stringsOf(context).searchByDateCurrentRowOrRoundOrA,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             TextButton.icon(
               onPressed: onClear,
               icon: const Icon(Icons.close),
-              label: const Text('Suche löschen'),
+              label: Text(stringsOf(context).clearSearch),
             ),
           ],
         ),

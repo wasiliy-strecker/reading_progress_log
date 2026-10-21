@@ -1,3 +1,5 @@
+import '../core/utils/formatters.dart';
+import '../core/localization/locale_settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/files/meter_photo_repository.dart';
@@ -181,13 +183,14 @@ typedef MeterHistoryPageRequest = ({
 final meterHistoryPageProvider = StreamProvider.autoDispose
     .family<MeterReadingPage, MeterHistoryPageRequest>((ref, request) {
       ref.watch(restoreRevisionProvider);
+      ref.watch(appLocaleProvider);
       return ref
           .watch(meterReadingRepositoryProvider)
           .watchPageForMeter(
             request.meterId,
             limit: request.limit,
             offset: request.offset,
-            query: request.query,
+            query: normalizeHistoryQuery(request.query),
           );
     });
 

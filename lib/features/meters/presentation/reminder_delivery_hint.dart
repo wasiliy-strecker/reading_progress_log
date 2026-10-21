@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/widgets/app_snack_bar.dart';
@@ -22,21 +23,22 @@ class ReminderDeliveryHint extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final title = state.appBlocked
-        ? 'Benachrichtigungen sind ausgeschaltet'
+        ? stringsOf(context).notificationsAreTurnedOff269
         : state.channelBlocked
-        ? 'Diese Erinnerungsart ist ausgeschaltet'
-        : '„Nicht stören“ ist aktiv';
+        ? stringsOf(context).thisReminderCategoryIsTurnedOff270
+        : stringsOf(context).doNotDisturbIsOn;
     final message = state.appBlocked
-        ? 'Android blockiert Benachrichtigungen für Strick & Häkelbuch. '
-              'Du kannst sie in den Android-Einstellungen erlauben.'
+        ? stringsOf(context).androidIsBlockingNotificationsForStrickHKelbuchYou
         : state.channelBlocked
-        ? 'Android blockiert „${mode == ReminderDeliveryMode.normal ? 'Projekterinnerungen' : 'Pünktliche Projekterinnerungen'}“. '
-              'Du kannst diese Kategorie in den Android-Einstellungen einschalten.'
+        ? stringsOf(context).androidIsBlockingYouCanEnableThisCategoryIn(
+            (mode == ReminderDeliveryMode.normal
+                    ? stringsOf(context).projectReminders
+                    : stringsOf(context).onTimeProjectReminders)
+                .toString(),
+          )
         : mode == ReminderDeliveryMode.normal
-        ? 'Normale Erinnerungen können ohne Ton oder eingeblendetes Banner erscheinen. '
-              'Prüfe auch die Benachrichtigungsleiste.'
-        : 'Ob ein Alarmton oder Banner erscheint, hängt von deinen '
-              '„Nicht stören“-Einstellungen und der Alarmlautstärke ab.';
+        ? stringsOf(context).standardRemindersMayAppearWithoutSoundOrABanner
+        : stringsOf(context).alarmSoundAndBannersDependOnYourDoNot;
     return Container(
       key: const ValueKey('reminder-delivery-hint'),
       padding: const EdgeInsets.all(16),
@@ -86,8 +88,8 @@ class ReminderDeliveryHint extends StatelessWidget {
             icon: const Icon(Icons.settings_outlined),
             label: Text(
               state.blocked
-                  ? 'Android-Einstellungen öffnen'
-                  : '„Nicht stören“ öffnen',
+                  ? stringsOf(context).openAndroidSettings
+                  : stringsOf(context).openDoNotDisturb,
               textAlign: TextAlign.center,
             ),
           ),
@@ -115,11 +117,8 @@ Future<void> openReminderSettings({
   messenger.showSnackBar(
     AppSnackBar(
       message: doNotDisturb
-          ? 'Die Systemeinstellungen konnten nicht geöffnet werden. '
-                'Suche in den Einstellungen deines Smartphones nach „Nicht stören“.'
-          : 'Die Systemeinstellungen konnten nicht geöffnet werden. '
-                'Öffne in den Einstellungen deines Smartphones „Apps“, '
-                'dann „Strick & Häkelbuch“ und „Benachrichtigungen“.',
+          ? appStrings.couldNotOpenSystemSettingsSearchYourPhoneSettings
+          : appStrings.couldNotOpenSystemSettingsInYourPhoneSettings,
     ),
   );
 }

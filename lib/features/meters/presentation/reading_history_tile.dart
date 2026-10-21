@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:universal_io/io.dart';
@@ -31,7 +32,7 @@ class ReadingHistoryTile extends StatelessWidget {
         previous == null || previous!.meter.unit == reading.meter.unit;
     final delta = !showDelta || previous == null || !sameUnit
         ? null
-        : reading.value.difference(previous!.value).germanFormatted;
+        : formatReadingValue(reading.value.difference(previous!.value));
     return Card(
       key: ValueKey('reading-card-${reading.id}'),
       margin: const EdgeInsets.only(bottom: 10),
@@ -49,7 +50,9 @@ class ReadingHistoryTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Semantics(
-                label: 'Erfasst am ${formatDateTime(reading.capturedAt)} Uhr',
+                label: stringsOf(
+                  context,
+                ).recordedOn((formatDateTime(reading.capturedAt)).toString()),
                 child: SizedBox(
                   width: double.infinity,
                   child: DecoratedBox(
@@ -73,7 +76,9 @@ class ReadingHistoryTile extends StatelessWidget {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'Erfasst · ${formatDateTime(reading.capturedAt)} Uhr',
+                              stringsOf(context).recorded(
+                                (formatDateTime(reading.capturedAt)).toString(),
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.labelLarge
@@ -111,7 +116,7 @@ class ReadingHistoryTile extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           progressValueLabel(
-                            reading.value.displayText,
+                            formatReadingValue(reading.value),
                             reading.meter.unit,
                           ),
                           maxLines: 1,
@@ -121,13 +126,23 @@ class ReadingHistoryTile extends StatelessWidget {
                         ),
                         if (showDelta && previous != null && !sameUnit) ...[
                           const SizedBox(height: 8),
-                          const Text(
-                            'Einheit seit diesem Projektstand gewechselt',
+                          Text(
+                            stringsOf(
+                              context,
+                            ).countingUnitChangedSinceThisEntry,
                           ),
                         ] else if (delta != null) ...[
                           const SizedBox(height: 8),
                           Text(
-                            '${progressUnitSingular(reading.meter.unit)} ${previous!.value.displayText} → ${reading.value.displayText} = $delta ${reading.meter.unit} Fortschritt',
+                            stringsOf(context).progressChange(
+                              (progressUnitSingular(
+                                reading.meter.unit,
+                              )).toString(),
+                              (formatReadingValue(previous!.value)).toString(),
+                              (formatReadingValue(reading.value)).toString(),
+                              (delta).toString(),
+                              progressUnitLabel(reading.meter.unit),
+                            ),
                           ),
                         ],
                       ],
@@ -182,8 +197,13 @@ class _ReadingPhotoThumbnail extends StatelessWidget {
     final fallbackColor = Theme.of(context).colorScheme.primaryContainer;
     return Semantics(
       label: reading.hasPhoto
-          ? '${reading.currentPhotos.length} Fotos zum Projektstand ${reading.value.displayText}'
-          : 'Manuell erfasst: ${reading.value.displayText}',
+          ? stringsOf(context).photosForProgressEntry(
+              reading.currentPhotos.length,
+              (formatReadingValue(reading.value)).toString(),
+            )
+          : stringsOf(context).enteredManually159(
+              (formatReadingValue(reading.value)).toString(),
+            ),
       image: reading.hasPhoto,
       child: ClipRRect(
         key: ValueKey('reading-thumbnail-${reading.id}'),
@@ -225,7 +245,9 @@ class _ReadingPhotoThumbnail extends StatelessWidget {
                               vertical: 3,
                             ),
                             child: Text(
-                              '${reading.currentPhotos.length} Fotos',
+                              stringsOf(
+                                context,
+                              ).photoCount(reading.currentPhotos.length),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,

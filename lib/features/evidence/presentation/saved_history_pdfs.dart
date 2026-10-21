@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -92,18 +93,16 @@ class _SavedHistoryPdfsState extends ConsumerState<SavedHistoryPdfs>
             onExpansionChanged: (value) => setState(() => _expanded = value),
             leading: Icon(Icons.folder_copy_outlined, color: colors.primary),
             title: Text(
-              'Gespeicherte Projektprotokolle',
+              stringsOf(context).savedProjectReports,
               key: _headingKey,
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
             subtitle: Text(
               pageAsync.hasError
-                  ? 'Projektprotokolle konnten nicht geladen werden'
+                  ? stringsOf(context).couldNotLoadProjectReports
                   : page == null
-                  ? 'Projektprotokolle werden geladen …'
-                  : page.totalCount == 1
-                  ? '1 Projektprotokoll'
-                  : '${page.totalCount} Projektprotokolle',
+                  ? stringsOf(context).loadingProjectReports
+                  : stringsOf(context).reportCount(page.totalCount),
             ),
             tilePadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -123,8 +122,9 @@ class _SavedHistoryPdfsState extends ConsumerState<SavedHistoryPdfs>
                         child: Center(child: CircularProgressIndicator()),
                       ),
                       error: (_, _) => _RetryNotice(
-                        message:
-                            'Projektprotokolle konnten nicht geladen werden.',
+                        message: stringsOf(
+                          context,
+                        ).couldNotLoadProjectReports73,
                         onRetry: () =>
                             ref.invalidate(evidenceExportPageProvider(request)),
                       ),
@@ -142,7 +142,11 @@ class _SavedHistoryPdfsState extends ConsumerState<SavedHistoryPdfs>
                             ),
                           if (page.totalCount > _pageSize) ...[
                             Text(
-                              'Seite ${_offset ~/ _pageSize + 1} von ${(page.totalCount / _pageSize).ceil()}',
+                              stringsOf(context).pageOf(
+                                (_offset ~/ _pageSize + 1).toString(),
+                                ((page.totalCount / _pageSize).ceil())
+                                    .toString(),
+                              ),
                             ),
                             const SizedBox(height: 8),
                             AppActionRow(
@@ -155,7 +159,7 @@ class _SavedHistoryPdfsState extends ConsumerState<SavedHistoryPdfs>
                                       ? () => _showPage(_offset - _pageSize)
                                       : null,
                                   icon: const Icon(Icons.chevron_left),
-                                  label: const Text('Zurück'),
+                                  label: Text(stringsOf(context).back),
                                 ),
                                 OutlinedButton.icon(
                                   key: const ValueKey('history-pdfs-next-page'),
@@ -163,7 +167,7 @@ class _SavedHistoryPdfsState extends ConsumerState<SavedHistoryPdfs>
                                       ? () => _showPage(_offset + _pageSize)
                                       : null,
                                   icon: const Icon(Icons.chevron_right),
-                                  label: const Text('Weiter'),
+                                  label: Text(stringsOf(context).next),
                                 ),
                               ],
                             ),
@@ -200,7 +204,7 @@ class _HistoryExportTile extends ConsumerWidget {
     );
     return availability.when(
       skipLoadingOnRefresh: false,
-      loading: () => const Card(
+      loading: () => Card(
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Row(
@@ -210,15 +214,16 @@ class _HistoryExportTile extends ConsumerWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               SizedBox(width: 12),
-              Expanded(child: Text('PDF-Datei wird geprüft …')),
+              Expanded(child: Text(stringsOf(context).checkingPDFFile)),
             ],
           ),
         ),
       ),
       error: (_, _) => Card(
         child: _RetryNotice(
-          message:
-              'Dateistatus konnte nicht geprüft werden.\nProjektprotokoll vom ${formatDateTime(export.createdAt)} Uhr',
+          message: stringsOf(context).couldNotCheckFileStatusNProjectReportFrom(
+            (formatDateTime(export.createdAt)).toString(),
+          ),
           onRetry: () =>
               ref.invalidate(evidenceFileAvailableProvider(export.filePath)),
           onDelete: deleting ? null : onDelete,
@@ -226,9 +231,9 @@ class _HistoryExportTile extends ConsumerWidget {
       ),
       data: (available) => EvidenceExportCard(
         export: export,
-        title: 'Projektprotokoll · Projektverlauf',
+        title: stringsOf(context).projectReportHistory,
         detail:
-            '${export.readingIds.length == 1 ? '1 Projektstand enthalten' : '${export.readingIds.length} Projektstände enthalten'}\n${export.photoMode.labelFor(export.kind)}',
+            '${stringsOf(context).includedEntries(export.readingIds.length)}\n${export.photoMode.labelFor(export.kind)}',
         fileAvailable: available,
         onTap: available ? onOpen : null,
         deleting: deleting,
@@ -258,13 +263,13 @@ class _RetryNotice extends StatelessWidget {
         TextButton.icon(
           onPressed: onRetry,
           icon: const Icon(Icons.refresh),
-          label: const Text('Erneut versuchen'),
+          label: Text(stringsOf(context).tryAgain),
         ),
         if (onDelete != null)
           TextButton.icon(
             onPressed: onDelete,
             icon: const Icon(Icons.delete_outline),
-            label: const Text('Projektprotokoll löschen'),
+            label: Text(stringsOf(context).deleteProjectReport),
           ),
       ],
     ),

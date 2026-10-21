@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ class EvidencePreviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Projektprotokoll')),
+      appBar: AppBar(title: Text(stringsOf(context).projectReport)),
       body: Column(
         children: [
           Expanded(
@@ -44,13 +45,15 @@ class EvidencePreviewScreen extends StatelessWidget {
                           onLayout: (_) async => report.bytes,
                         ),
                         icon: const Icon(Icons.print_outlined),
-                        label: const Text('Drucken'),
+                        label: Text(stringsOf(context).print),
                       ),
                       FilledButton.icon(
                         onPressed: () => SharePlus.instance.share(
                           ShareParams(
-                            title: 'Projektprotokoll',
-                            text: 'Projektprotokoll aus Strick & Häkelbuch',
+                            title: stringsOf(context).projectReport,
+                            text: stringsOf(
+                              context,
+                            ).projectReportFromStrickHKelbuch,
                             files: [
                               XFile(
                                 File(report.record.filePath).path,
@@ -61,7 +64,7 @@ class EvidencePreviewScreen extends StatelessWidget {
                           ),
                         ),
                         icon: const Icon(Icons.ios_share_outlined),
-                        label: const Text('Teilen'),
+                        label: Text(stringsOf(context).share),
                       ),
                     ],
                   ),

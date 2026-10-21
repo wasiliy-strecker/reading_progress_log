@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from lib/l10n ARB catalogs. Do not edit. -->
+<resources>
+    <string name="l10n_knitting">Maglia</string>
+    <string name="l10n_crochet">Uncinetto</string>
+    <string name="l10n_rows">Righe</string>
+    <string name="l10n_rounds">Giri</string>
+    <string name="l10n_no_progress_entries_yet">Ancora nessuna voce di avanzamento</string>
+    <string name="l10n_project_reminders">Promemoria dei progetti</string>
+    <string name="l10n_on_time_project_reminders">Promemoria puntuali dei progetti</string>
+    <string name="l10n_normal_channel_description">Promemoria facoltativi per registrare regolarmente i progressi.</string>
+    <string name="l10n_exact_channel_description">Promemoria puntuali dei progetti con suono di sveglia.</string>
+    <string name="l10n_last_progress">Ultimo avanzamento: %1$s %2$s</string>
+    <string name="l10n_reminder_body">Annota la riga o il giro attuale e riprendi con calma più tardi.</string>
+    <string name="l10n_test_notification_title">Prova: %1$s · %2$s</string>
+    <string name="l10n_test_notification_app">Questo è un promemoria di prova. Tocca per aprire l’app.</string>
+    <string name="l10n_test_notification_project">Questo è un promemoria di prova. Tocca per aprire il progetto.</string>
+    <string name="l10n_strick_h_kelbuch_backup">Backup di Strick &amp; Häkelbuch</string>
+    <string name="l10n_unexpected_error">Impossibile completare l’operazione. Riprova.</string>
+    <string name="l10n_language_save_failed">Impossibile salvare la lingua. Riprova.</string>
+</resources>

@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:image_picker/image_picker.dart';
@@ -42,9 +43,7 @@ class DeviceMeterPhotoCaptureRepository implements MultiPhotoCaptureRepository {
   @override
   Future<StoredMeterPhoto?> capture(ReadingSource source) async {
     if (source == ReadingSource.manual) {
-      throw ArgumentError(
-        'Eine manuelle Erfassung verwendet keinen Fotozugriff.',
-      );
+      throw ArgumentError(appStrings.manualEntryDoesNotAccessPhotos);
     }
     final picked = await (_photoPicker != null
         ? _photoPicker(source)
@@ -166,6 +165,5 @@ class MeterPhotoProcessingException implements Exception {
   const MeterPhotoProcessingException();
 
   @override
-  String toString() =>
-      'Das Foto konnte nicht sicher optimiert werden. Bitte wähle es erneut aus.';
+  String toString() => appStrings.couldNotSafelyOptimizeThePhotoPleaseSelectIt;
 }

@@ -1,3 +1,5 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
+
 enum EvidenceExportKind { singleReading, meterHistory }
 
 enum EvidencePhotoMode {
@@ -6,9 +8,9 @@ enum EvidencePhotoMode {
   allPhotos;
 
   String labelFor(EvidenceExportKind kind) => switch (this) {
-    withoutPhotos => 'Kompakt ohne Fotos',
-    currentPhotos => 'Mit aktuellen Fotos',
-    allPhotos => 'Mit allen Fotos (ältere Version)',
+    withoutPhotos => appStrings.compactWithoutPhotos,
+    currentPhotos => appStrings.withCurrentPhotos,
+    allPhotos => appStrings.withAllPhotosOlderVersion,
   };
 
   static EvidencePhotoMode fromStoredName(Object? value) {

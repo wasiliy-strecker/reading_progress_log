@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -36,16 +37,16 @@ enum ReminderTestResult {
   };
 
   String message(DoNotDisturbStatus quietMode) => switch (this) {
-    posted =>
-      'Test-Erinnerung wurde an Android übergeben. '
-          'Ziehe die Benachrichtigungsleiste herunter. '
-          'Die Test-Erinnerung verschwindet nach einer Minute.'
-          '${quietMode == DoNotDisturbStatus.enabled ? ' „Nicht stören“ ist aktiv. Ton und Banner können unterdrückt werden.' : ''}',
-    appBlocked => 'Benachrichtigungen sind nicht erlaubt.',
-    channelBlocked => 'Diese Erinnerungsart ist in Android gesperrt.',
-    failed => 'Test-Erinnerung konnte nicht angezeigt werden.',
-    unsupported =>
-      'Test-Erinnerungen werden auf diesem Gerät nicht unterstützt.',
+    posted => appStrings.testReminderSentToAndroidOpenTheNotificationShade(
+      (quietMode == DoNotDisturbStatus.enabled
+              ? appStrings.doNotDisturbIsOnSoundAndBannersMay
+              : '')
+          .toString(),
+    ),
+    appBlocked => appStrings.notificationsAreNotAllowed,
+    channelBlocked => appStrings.thisReminderCategoryIsBlockedInAndroid,
+    failed => appStrings.couldNotShowTheTestReminder,
+    unsupported => appStrings.testRemindersAreNotSupportedOnThisDevice,
   };
 }
 
@@ -92,6 +93,8 @@ class MeterReminderTestRequest {
     this.meterId,
     this.latestValue,
     this.latestUnit,
+    this.latestDigits,
+    this.latestScale,
   });
 
   final String label;
@@ -100,6 +103,8 @@ class MeterReminderTestRequest {
   final String? meterId;
   final String? latestValue;
   final String? latestUnit;
+  final String? latestDigits;
+  final int? latestScale;
 }
 
 abstract interface class MeterReminderRepository {
@@ -342,6 +347,8 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
         'meterTypeLabel': meter.type.label,
         'latestValue': latestReading?.value.displayText,
         'latestUnit': latestReading?.meter.unit,
+        'latestDigits': latestReading?.value.digits,
+        'latestScale': latestReading?.value.scale,
         'interval': schedule.interval.name,
         if (schedule.startsAt != null)
           'startsAtMillis': schedule.startsAt!.millisecondsSinceEpoch,
@@ -491,6 +498,8 @@ class LocalNotificationReminderRepository implements MeterReminderRepository {
         'meterTypeLabel': request.meterType.label,
         'latestValue': request.latestValue,
         'latestUnit': request.latestUnit,
+        'latestDigits': request.latestDigits,
+        'latestScale': request.latestScale,
         'deliveryMode': request.deliveryMode.name,
       });
       return switch (result) {
@@ -528,9 +537,7 @@ DateTime nextReminderDate(ReadingReminderSchedule schedule, DateTime now) {
   if (schedule.interval == ReminderInterval.hourly) {
     final startsAt = schedule.startsAt;
     if (startsAt == null) {
-      throw ArgumentError(
-        'Die stündliche Erinnerung benötigt einen Startzeitpunkt.',
-      );
+      throw ArgumentError(appStrings.anHourlyReminderRequiresAStartTime);
     }
     final start = startsAt.toUtc();
     final current = now.toUtc();

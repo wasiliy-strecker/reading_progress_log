@@ -650,7 +650,7 @@ void main() {
     expect(delete, findsOneWidget);
     expect(find.byType(PopupMenuButton<String>), findsNothing);
     expect(
-      find.text('Erinnerung: wöchentlich am Freitag um 09:00 Uhr'),
+      find.text('Erinnerung: wöchentlich am Freitag um 09:00'),
       findsOneWidget,
     );
     expect(
@@ -981,7 +981,7 @@ void main() {
       await tester.pumpWidget(_testApp(meters: meters, reminders: reminders));
       await tester.pumpAndSettle();
 
-      expect(find.text('Erinnern: täglich um 06:00 Uhr'), findsOneWidget);
+      expect(find.text('Erinnern: täglich um 06:00'), findsOneWidget);
       final nextReminder = find.byKey(
         const ValueKey('next-reminder-active_reminder'),
       );

@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'meter.dart';
 import 'reading_value.dart';
 
@@ -5,9 +6,9 @@ enum ReadingSource { camera, gallery, manual }
 
 extension ReadingSourceX on ReadingSource {
   String get label => switch (this) {
-    ReadingSource.camera => 'Kameraaufnahme',
-    ReadingSource.gallery => 'Galerieimport',
-    ReadingSource.manual => 'Manuell erfasst',
+    ReadingSource.camera => appStrings.cameraPhoto,
+    ReadingSource.gallery => appStrings.galleryImport,
+    ReadingSource.manual => appStrings.enteredManually,
   };
 }
 
@@ -15,10 +16,10 @@ enum LowerReadingReason { meterReplacement, rollover, correction, other }
 
 extension LowerReadingReasonX on LowerReadingReason {
   String get label => switch (this) {
-    LowerReadingReason.meterReplacement => 'Neuer Projektabschnitt',
-    LowerReadingReason.rollover => 'Projekt neu begonnen',
-    LowerReadingReason.correction => 'Korrektur eines früheren Projektstands',
-    LowerReadingReason.other => 'Anderer Grund',
+    LowerReadingReason.meterReplacement => appStrings.newProjectSection,
+    LowerReadingReason.rollover => appStrings.projectRestarted,
+    LowerReadingReason.correction => appStrings.correctionOfAnEarlierEntry,
+    LowerReadingReason.other => appStrings.otherReason,
   };
 }
 

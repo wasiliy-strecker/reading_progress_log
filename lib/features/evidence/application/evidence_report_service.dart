@@ -1,3 +1,5 @@
+import '../../../core/utils/formatters.dart';
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/foundation.dart';
@@ -55,6 +57,7 @@ class EvidenceReportService {
     required List<ReadingRevision> revisions,
     EvidencePhotoMode photoMode = EvidencePhotoMode.currentPhotos,
   }) async {
+    final reportLocale = AppLocale.current;
     final reportMeter = reading.meter;
     final manifestSha = await _reportManifestHash(
       [reading],
@@ -62,6 +65,7 @@ class EvidenceReportService {
       reportMeter,
     );
     return _create(
+      reportLocale: reportLocale,
       readings: [reading],
       kind: EvidenceExportKind.singleReading,
       photoMode: photoMode,
@@ -76,13 +80,14 @@ class EvidenceReportService {
     required Map<String, List<ReadingRevision>> revisions,
     EvidencePhotoMode photoMode = EvidencePhotoMode.currentPhotos,
   }) async {
+    final reportLocale = AppLocale.current;
     if (readings.isEmpty) {
-      throw StateError('Für dieses Projekt gibt es noch keine Projektstände.');
+      throw StateError(appStrings.thisProjectHasNoProgressEntriesYet);
     }
     final sortedReadings = [...readings]
       ..sort((left, right) => left.capturedAt.compareTo(right.capturedAt));
     if (sortedReadings.any((reading) => reading.meterId != meter.id)) {
-      throw StateError('Die Projektstände gehören nicht zu diesem Projekt.');
+      throw StateError(appStrings.theProgressEntriesDoNotBelongToThisProject);
     }
     final reportMeter = MeterSnapshot.fromMeter(meter);
     final manifestSha = await _reportManifestHash(
@@ -93,6 +98,7 @@ class EvidenceReportService {
     // Keep the existing manifest normalization separate from presentation.
     sortedReadings.sort(compareReadingsNewestFirst);
     return _create(
+      reportLocale: reportLocale,
       readings: sortedReadings,
       kind: EvidenceExportKind.meterHistory,
       photoMode: photoMode,
@@ -102,6 +108,7 @@ class EvidenceReportService {
   }
 
   Future<GeneratedEvidenceReport> _create({
+    required AppLocaleData reportLocale,
     required List<MeterReading> readings,
     required EvidenceExportKind kind,
     required EvidencePhotoMode photoMode,
@@ -119,6 +126,7 @@ class EvidenceReportService {
       photoMode: photoMode,
     );
     final buildResult = await compute(_buildPdfInBackground, <String, Object?>{
+      'locale': reportLocale.toMessage(),
       'readings': readings.map((reading) => reading.toJson()).toList(),
       'kind': kind.name,
       'photoMode': photoMode.name,
@@ -137,13 +145,13 @@ class EvidenceReportService {
     final stamp = DateFormat('yyyyMMdd_HHmmss').format(createdAt);
     final uniqueSuffix = id.substring(id.length - 6);
     final variant = switch (photoMode) {
-      EvidencePhotoMode.withoutPhotos => 'kompakt',
-      EvidencePhotoMode.currentPhotos => 'mit_fotos',
-      EvidencePhotoMode.allPhotos => 'alle_fotos',
+      EvidencePhotoMode.withoutPhotos => appStrings.compactFilePart,
+      EvidencePhotoMode.currentPhotos => appStrings.photosFilePart,
+      EvidencePhotoMode.allPhotos => reportLocale.strings.photosFilePart,
     };
     final fileName = kind == EvidenceExportKind.singleReading
-        ? 'lesestand_${safeLabel}_${variant}_${stamp}_$uniqueSuffix.pdf'
-        : 'leseverlauf_${safeLabel}_${variant}_${stamp}_$uniqueSuffix.pdf';
+        ? '${reportLocale.strings.reportFilePrefix}_${safeLabel}_${variant}_${stamp}_$uniqueSuffix.pdf'
+        : '${reportLocale.strings.historyFilePrefix}_${safeLabel}_${variant}_${stamp}_$uniqueSuffix.pdf';
     final directory = Directory(
       p.join((await _documentsDirectoryProvider()).path, 'evidence_reports'),
     );
@@ -211,6 +219,14 @@ class EvidenceReportService {
   static Future<Map<String, Object?>> _buildPdfInBackground(
     Map<String, Object?> message,
   ) async {
+    await AppLocale.initialize();
+    final locale = AppLocaleData.fromMessage(message['locale']! as Map);
+    return AppLocale.runWith(locale, () => _buildLocalizedPdf(message));
+  }
+
+  static Future<Map<String, Object?>> _buildLocalizedPdf(
+    Map<String, Object?> message,
+  ) async {
     final readings = (message['readings']! as List)
         .map(
           (json) =>
@@ -238,11 +254,11 @@ class EvidenceReportService {
     );
     final manifestSha = message['manifestSha256']! as String;
     final document = pw.Document(
-      title: 'Projektprotokoll',
+      title: appStrings.projectReport,
       author: 'Strick & Häkelbuch',
-      subject: 'Private Dokumentation eines Projektstands',
+      subject: appStrings.personalRecordOfProjectProgress,
     );
-    final date = DateFormat('dd.MM.yyyy, HH:mm');
+    final date = regionalDateTimeFormat();
 
     document.addPage(
       pw.MultiPage(
@@ -276,7 +292,10 @@ class EvidenceReportService {
                 ),
               ),
               pw.Text(
-                'Seite ${context.pageNumber} von ${context.pagesCount}',
+                appStrings.pageOf(
+                  (context.pageNumber).toString(),
+                  (context.pagesCount).toString(),
+                ),
                 style: const pw.TextStyle(
                   fontSize: 9,
                   color: PdfColors.grey700,
@@ -295,19 +314,22 @@ class EvidenceReportService {
         build: (_) => [
           pw.SizedBox(height: 16),
           pw.Text(
-            'Projektprotokoll',
+            appStrings.projectReport,
             style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 4),
           pw.Text(
             kind == EvidenceExportKind.singleReading
-                ? 'Einzelner Projektstand'
-                : 'Projektverlauf',
+                ? appStrings.singleProgressEntry
+                : appStrings.projectHistory,
             style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey700),
           ),
           pw.SizedBox(height: 6),
           pw.Text(
-            'PDF erstellt am ${date.format(createdAt)} · ${photoMode.labelFor(kind)}',
+            appStrings.pdfCreatedOn(
+              (date.format(createdAt)).toString(),
+              (photoMode.labelFor(kind)).toString(),
+            ),
             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
           ),
           pw.SizedBox(height: 18),
@@ -380,17 +402,19 @@ class EvidenceReportService {
     pw.NewPage(freeSpace: 80),
     pw.Text(
       kind == EvidenceExportKind.meterHistory
-          ? 'Aktuelle Projektangaben'
-          : 'Projektangaben bei Erfassung',
+          ? appStrings.currentProjectDetails
+          : appStrings.projectDetailsWhenRecorded,
       style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
     ),
     pw.SizedBox(height: 6),
     _dataTable([
-      ['Technik', meter.type.label],
-      ['Projektname', meter.label],
-      if (meter.meterNumber.trim().isNotEmpty) ['Garn', meter.meterNumber],
-      if (meter.location.trim().isNotEmpty) ['Nadelstärke', meter.location],
-      ['Zählweise', meter.unit],
+      [appStrings.technique, meter.type.label],
+      [appStrings.projectName, meter.label],
+      if (meter.meterNumber.trim().isNotEmpty)
+        [appStrings.yarn, meter.meterNumber],
+      if (meter.location.trim().isNotEmpty)
+        [appStrings.needleOrHookSize, meter.location],
+      [appStrings.countingUnit, progressUnitLabel(meter.unit)],
     ]),
   ];
 
@@ -410,7 +434,12 @@ class EvidenceReportService {
   static pw.Widget _historyTable(List<MeterReading> readings, DateFormat date) {
     final rows = historyTableData(readings, date);
     return pw.TableHelper.fromTextArray(
-      headers: const ['Nr.', 'Zeitpunkt', 'Projektstand', 'Fortschritt'],
+      headers: [
+        appStrings.no,
+        appStrings.dateAndTime,
+        appStrings.progressEntry,
+        appStrings.progress,
+      ],
       headerStyle: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
       cellStyle: const pw.TextStyle(fontSize: 12),
       headerDecoration: pw.BoxDecoration(color: PdfColor.fromHex('#E4EBDF')),
@@ -433,7 +462,7 @@ class EvidenceReportService {
             '${readings.length - index}',
             rows[index][0],
             progressValueLabel(
-              readings[index].value.displayText,
+              formatReadingValue(readings[index].value),
               readings[index].meter.unit,
             ),
             index < readings.length - 1 &&
@@ -459,7 +488,9 @@ class EvidenceReportService {
       text: pw.TextSpan(
         style: const pw.TextStyle(fontSize: 12),
         children: [
-          pw.TextSpan(text: '$pagePrefix${previous.value.displayText} '),
+          pw.TextSpan(
+            text: '$pagePrefix${formatReadingValue(previous.value)} ',
+          ),
           // The bundled Roboto font has no arrow glyph.
           pw.WidgetSpan(
             baseline: 2,
@@ -471,7 +502,10 @@ class EvidenceReportService {
             ),
           ),
           pw.TextSpan(
-            text: ' ${reading.value.displayText} = $progress Fortschritt',
+            text: appStrings.progressEquation(
+              (formatReadingValue(reading.value)).toString(),
+              (progress).toString(),
+            ),
           ),
         ],
       ),
@@ -486,12 +520,12 @@ class EvidenceReportService {
     for (var index = 0; index < readings.length; index++)
       [
         readingTimeText(readings[index], date),
-        '${readings[index].value.displayText} ${readings[index].meter.unit}',
+        '${formatReadingValue(readings[index].value)} ${progressUnitLabel(readings[index].meter.unit)}',
         index == readings.length - 1
             ? '–'
             : readings[index].meter.unit != readings[index + 1].meter.unit
-            ? '– (Einheit gewechselt)'
-            : '${readings[index].value.difference(readings[index + 1].value).germanFormatted} ${readings[index].meter.unit}',
+            ? appStrings.unitChanged
+            : '${formatReadingValue(readings[index].value.difference(readings[index + 1].value))} ${progressUnitLabel(readings[index].meter.unit)}',
       ],
   ];
 
@@ -510,14 +544,18 @@ class EvidenceReportService {
     MeterSnapshot current,
   ) => [
     for (final field in [
-      ('Technik', original.type.label, current.type.label),
-      ('Projektname', original.label, current.label),
-      ('Garn', original.meterNumber, current.meterNumber),
-      ('Nadelstärke', original.location, current.location),
-      ('Zählweise', original.unit, current.unit),
+      (appStrings.technique, original.type.label, current.type.label),
+      (appStrings.projectName, original.label, current.label),
+      (appStrings.yarn, original.meterNumber, current.meterNumber),
+      (appStrings.needleOrHookSize, original.location, current.location),
+      (
+        appStrings.countingUnit,
+        progressUnitLabel(original.unit),
+        progressUnitLabel(current.unit),
+      ),
     ])
       if (field.$2 != field.$3)
-        [field.$1, field.$2.isEmpty ? 'Nicht angegeben' : field.$2],
+        [field.$1, field.$2.isEmpty ? appStrings.notSpecified : field.$2],
   ];
 
   static bool _hasReadingDetails(
@@ -550,7 +588,7 @@ class EvidenceReportService {
       _keepTogether([
         if (currentMeter != null) pw.SizedBox(height: 18),
         pw.Text(
-          'Projektstand $number',
+          appStrings.progressEntry53((number).toString()),
           style: pw.TextStyle(
             fontSize: 17,
             fontWeight: pw.FontWeight.bold,
@@ -562,9 +600,9 @@ class EvidenceReportService {
         _dataTable([
           [
             currentProgressLabel(reading.meter.unit),
-            '${reading.value.displayText} ${reading.meter.unit}',
+            '${formatReadingValue(reading.value)} ${progressUnitLabel(reading.meter.unit)}',
           ],
-          ['Zeitpunkt des Projektstands', readingTimeText(reading, date)],
+          [appStrings.progressDateAndTime, readingTimeText(reading, date)],
         ]),
         if (showPhoto) ...[
           pw.SizedBox(height: 10),
@@ -576,7 +614,14 @@ class EvidenceReportService {
           _keepTogether([
             pw.SizedBox(height: 12),
             pw.Text(
-              'Projektstand $number · ${progressValueLabel(reading.value.displayText, reading.meter.unit)} · ${readingTimeText(reading, date)}',
+              appStrings.progressEntry55(
+                (number).toString(),
+                (progressValueLabel(
+                  formatReadingValue(reading.value),
+                  reading.meter.unit,
+                )).toString(),
+                (readingTimeText(reading, date)).toString(),
+              ),
               style: const pw.TextStyle(fontSize: 10),
             ),
             pw.SizedBox(height: 6),
@@ -586,7 +631,7 @@ class EvidenceReportService {
         pw.NewPage(freeSpace: 80),
         pw.SizedBox(height: 10),
         pw.Text(
-          'Projektangaben bei Erfassung',
+          appStrings.projectDetailsWhenRecorded,
           style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
         ),
         pw.SizedBox(height: 6),
@@ -594,13 +639,13 @@ class EvidenceReportService {
       ],
       if (reading.lowerReadingReason case final reason?) ...[
         pw.SizedBox(height: 8),
-        _flowingText('Niedrigerer Stand: ${reason.label}'),
+        _flowingText(appStrings.lowerCount((reason.label).toString())),
       ],
       if (reading.note.trim().isNotEmpty) ...[
         pw.NewPage(freeSpace: 45),
         pw.SizedBox(height: 10),
         pw.Text(
-          'Notiz',
+          appStrings.note,
           style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
         ),
         pw.SizedBox(height: 4),
@@ -612,7 +657,7 @@ class EvidenceReportService {
           _keepTogether([
             pw.SizedBox(height: 12),
             pw.Text(
-              'Früheres Foto ${index + 1}',
+              appStrings.earlierPhoto((index + 1).toString()),
               style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 6),
@@ -646,7 +691,10 @@ class EvidenceReportService {
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
                   pw.Text(
-                    'Foto ${index + 1} von ${photos.length}',
+                    appStrings.photoOf(
+                      (index + 1).toString(),
+                      (photos.length).toString(),
+                    ),
                     style: pw.TextStyle(
                       fontSize: 11,
                       fontWeight: pw.FontWeight.bold,
@@ -704,7 +752,7 @@ class EvidenceReportService {
         alignment: pw.Alignment.center,
         padding: const pw.EdgeInsets.symmetric(vertical: 12),
         child: pw.Text(
-          'Projektstandfoto konnte nicht eingebettet werden.',
+          appStrings.couldNotEmbedTheProgressPhoto,
           style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
         ),
       );
@@ -767,7 +815,7 @@ class _PdfPhotoAssets {
     return _images.putIfAbsent(originalPath, () {
       final preparedPath = preparedPaths[originalPath];
       if (preparedPath == null) {
-        throw StateError('Keine vorbereitete Fotodatei vorhanden.');
+        throw StateError(appStrings.noPreparedPhotoFileAvailable);
       }
       return pw.MemoryImage(File(preparedPath).readAsBytesSync());
     });

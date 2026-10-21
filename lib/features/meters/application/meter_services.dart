@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'dart:async';
 
 import 'package:universal_io/io.dart';
@@ -67,9 +68,7 @@ class MeterService {
 
   Future<void> delete(String meterId) async {
     if (await reminders.cancel(meterId) == ReminderOperationResult.failed) {
-      throw StateError(
-        'Die Erinnerung konnte nicht ausgeschaltet werden. Bitte erneut versuchen.',
-      );
+      throw StateError(appStrings.couldNotTurnOffTheReminderPleaseTryAgain);
     }
     final meterReadings = await readings.loadForMeter(meterId);
     final evidenceExports = await exports.loadForMeter(meterId);
@@ -121,7 +120,7 @@ class MeterReadingService {
     required String note,
   }) {
     if (photo.source == ReadingSource.manual) {
-      throw ArgumentError('Ein Foto benötigt eine Kamera- oder Galeriequelle.');
+      throw ArgumentError(appStrings.aPhotoRequiresACameraOrGallerySource);
     }
     return _create(
       meter: meter,
@@ -211,11 +210,11 @@ class MeterReadingService {
     List<ReadingPhotoVersion>? photos,
   }) async {
     if (replacementPhoto?.source == ReadingSource.manual) {
-      throw ArgumentError('Ein Foto benötigt eine Kamera- oder Galeriequelle.');
+      throw ArgumentError(appStrings.aPhotoRequiresACameraOrGallerySource);
     }
     if (photos != null && replacementPhoto != null) {
       throw ArgumentError(
-        'Fotos und Einzelfoto-Ersatz nicht gleichzeitig übergeben.',
+        appStrings.doNotSupplyPhotosAndASinglePhotoReplacement,
       );
     }
     final nextPhotos =
@@ -237,7 +236,7 @@ class MeterReadingService {
           (previous != null &&
               integrity.canonicalJson(previous.toJson()) !=
                   integrity.canonicalJson(photo.toJson()))) {
-        throw ArgumentError('Ein geändertes Foto benötigt eine neue Foto-ID.');
+        throw ArgumentError(appStrings.aChangedPhotoRequiresANewPhotoID);
       }
     }
     final beforeIds = existing.currentPhotos.map((photo) => photo.id).toList();
@@ -390,7 +389,7 @@ class MeterReadingService {
               photo.source == ReadingSource.manual,
         )) {
       throw ArgumentError(
-        'Fotos benötigen eindeutige IDs, Dateien und eine Fotoquelle.',
+        appStrings.photosRequireUniqueIDsFilesAndAPhotoSource,
       );
     }
   }
@@ -404,7 +403,7 @@ class MeterReadingService {
     }
     final parsed = ReadingValue.tryParseWhole(value.displayText);
     if (parsed == null || value.scale != 0 || parsed.digits != value.digits) {
-      throw const FormatException('Bitte eine ganze Zahl ab 0 eingeben.');
+      throw FormatException(appStrings.enterAWholeNumberOf0OrMore);
     }
     return parsed;
   }

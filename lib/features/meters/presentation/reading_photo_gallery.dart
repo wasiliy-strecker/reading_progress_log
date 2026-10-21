@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -81,7 +82,10 @@ class _ReadingPhotoGalleryState extends State<ReadingPhotoGallery> {
   Widget _tile(ReadingPhotoVersion photo, int index) => Column(
     children: [
       Semantics(
-        label: 'Foto ${index + 1} von ${widget.photos.length} ansehen',
+        label: stringsOf(context).viewPhotoOf(
+          (index + 1).toString(),
+          (widget.photos.length).toString(),
+        ),
         button: true,
         child: InkWell(
           onTap: () => Navigator.of(context).push(
@@ -104,13 +108,16 @@ class _ReadingPhotoGalleryState extends State<ReadingPhotoGallery> {
       Row(
         children: [
           Expanded(
-            child: Text('Foto ${index + 1}', textAlign: TextAlign.center),
+            child: Text(
+              stringsOf(context).photo((index + 1).toString()),
+              textAlign: TextAlign.center,
+            ),
           ),
           if (widget.onReplace != null || widget.onRemove != null || _sortable)
             PopupMenuButton<String>(
               key: ValueKey('photo-menu-${photo.id}'),
               enabled: widget.enabled,
-              tooltip: 'Foto ${index + 1} bearbeiten',
+              tooltip: stringsOf(context).editPhoto((index + 1).toString()),
               onSelected: (action) {
                 switch (action) {
                   case 'replace':
@@ -128,23 +135,23 @@ class _ReadingPhotoGalleryState extends State<ReadingPhotoGallery> {
                   PopupMenuItem(
                     value: 'earlier',
                     enabled: index > 0,
-                    child: const Text('Nach vorne'),
+                    child: Text(stringsOf(context).moveEarlier),
                   ),
                   PopupMenuItem(
                     value: 'later',
                     enabled: index + 1 < widget.photos.length,
-                    child: const Text('Nach hinten'),
+                    child: Text(stringsOf(context).moveLater),
                   ),
                 ],
                 if (widget.onReplace != null)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'replace',
-                    child: Text('Foto ersetzen'),
+                    child: Text(stringsOf(context).replacePhoto),
                   ),
                 if (widget.onRemove != null)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'remove',
-                    child: Text('Foto entfernen'),
+                    child: Text(stringsOf(context).removePhoto),
                   ),
               ],
             ),
@@ -206,7 +213,7 @@ class _ReadingPhotoGalleryState extends State<ReadingPhotoGallery> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.photos.isEmpty) return const Text('Keine aktuellen Fotos');
+    if (widget.photos.isEmpty) return Text(stringsOf(context).noCurrentPhotos);
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = widget.photos.length == 1
@@ -246,14 +253,17 @@ class ReadingPhotoImage extends StatelessWidget {
     cacheWidth: thumbnail ? 600 : null,
     errorBuilder: (_, _, _) => ColoredBox(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: const Center(
+      child: Center(
         child: Padding(
           padding: EdgeInsets.all(8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.broken_image_outlined),
-              Text('Foto nicht verfügbar', textAlign: TextAlign.center),
+              Text(
+                stringsOf(context).photoUnavailable,
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
@@ -288,7 +298,11 @@ class _ReadingPhotoViewerState extends State<ReadingPhotoViewer> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text('Foto ${_index + 1} von ${widget.photos.length}'),
+      title: Text(
+        stringsOf(
+          context,
+        ).photoOf((_index + 1).toString(), (widget.photos.length).toString()),
+      ),
     ),
     body: PageView.builder(
       controller: _pages,
@@ -305,7 +319,7 @@ class _ReadingPhotoViewerState extends State<ReadingPhotoViewer> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           IconButton(
-            tooltip: 'Vorheriges Foto',
+            tooltip: stringsOf(context).previousPhoto,
             onPressed: _index == 0
                 ? null
                 : () => _pages.previousPage(
@@ -316,7 +330,7 @@ class _ReadingPhotoViewerState extends State<ReadingPhotoViewer> {
           ),
           Text('${_index + 1} / ${widget.photos.length}'),
           IconButton(
-            tooltip: 'Nächstes Foto',
+            tooltip: stringsOf(context).nextPhoto,
             onPressed: _index + 1 == widget.photos.length
                 ? null
                 : () => _pages.nextPage(
@@ -360,16 +374,14 @@ class ReadingPhotoEditor extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Aktuelle Fotos (${photos.length})',
+            stringsOf(context).currentPhotos((photos.length).toString()),
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           if (photos.length > 1 && onReorder != null) ...[
             const SizedBox(height: 6),
-            const Text(
-              'Zum Sortieren ein Foto länger gedrückt halten und verschieben.',
-            ),
+            Text(stringsOf(context).touchAndHoldAPhotoThenDragItTo),
           ],
           const SizedBox(height: 10),
           ReadingPhotoGallery(
@@ -384,7 +396,9 @@ class ReadingPhotoEditor extends StatelessWidget {
             onPressed: busy ? null : onCamera,
             icon: const Icon(Icons.add_a_photo_outlined),
             label: Text(
-              photos.isEmpty ? 'Foto aufnehmen' : 'Weiteres Foto aufnehmen',
+              photos.isEmpty
+                  ? stringsOf(context).takePhoto
+                  : stringsOf(context).takeAnotherPhoto,
               textAlign: TextAlign.center,
             ),
           ),
@@ -392,8 +406,8 @@ class ReadingPhotoEditor extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: busy ? null : onGallery,
             icon: const Icon(Icons.photo_library_outlined),
-            label: const Text(
-              'Fotos aus Galerie hinzufügen',
+            label: Text(
+              stringsOf(context).addPhotosFromGallery,
               textAlign: TextAlign.center,
             ),
           ),
@@ -402,7 +416,7 @@ class ReadingPhotoEditor extends StatelessWidget {
             const LinearProgressIndicator(),
             const SizedBox(height: 8),
             Text(
-              progress.isEmpty ? 'Fotos werden vorbereitet …' : progress,
+              progress.isEmpty ? stringsOf(context).preparingPhotos : progress,
               textAlign: TextAlign.center,
             ),
           ],
@@ -420,15 +434,15 @@ Future<ReadingSource?> choosePhotoReplacementSource(BuildContext context) =>
         child: ListView(
           shrinkWrap: true,
           children: [
-            const ListTile(title: Text('Foto ersetzen')),
+            ListTile(title: Text(stringsOf(context).replacePhoto)),
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Neu fotografieren'),
+              title: Text(stringsOf(context).retakePhoto),
               onTap: () => Navigator.pop(context, ReadingSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Aus Galerie wählen'),
+              title: Text(stringsOf(context).chooseFromGallery),
               onTap: () => Navigator.pop(context, ReadingSource.gallery),
             ),
           ],

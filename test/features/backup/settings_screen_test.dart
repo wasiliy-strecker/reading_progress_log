@@ -29,7 +29,13 @@ void main() {
       ),
     );
     final button = find.byKey(const ValueKey('open-privacy-policy'));
-    await tester.ensureVisible(button);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      button,
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(button);
     await tester.pumpAndSettle();
     expect(opened, [
@@ -59,7 +65,13 @@ void main() {
         ),
       );
       final button = find.byKey(const ValueKey('open-privacy-policy'));
-      await tester.ensureVisible(button);
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        button,
+        240,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(button);
       await tester.pumpAndSettle();
       expect(

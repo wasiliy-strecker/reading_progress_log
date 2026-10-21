@@ -1,28 +1,26 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 
-const projectPhotoExamples = [
+List<({String asset, String label, String tip})> get projectPhotoExamples => [
   (
-    label: 'Stricken · Schal',
+    label: appStrings.knittingScarf,
     asset: 'assets/examples/project_photos/01_stricken_schal.png',
-    tip:
-        'Lege dein Projekt flach hin, damit Form und Muster gut sichtbar sind.',
+    tip: appStrings.layYourProjectFlatSoItsShapeAndPattern,
   ),
   (
-    label: 'Stricken · Mütze in Runden',
+    label: appStrings.knittingHatInTheRound,
     asset: 'assets/examples/project_photos/02_stricken_muetze.png',
-    tip: 'Zeige auch die aktive Nadel und den markierten Rundenanfang.',
+    tip: appStrings.includeTheWorkingNeedleAndTheMarkedStartOf,
   ),
   (
-    label: 'Häkeln · Granny Square',
+    label: appStrings.crochetGrannySquare,
     asset: 'assets/examples/project_photos/03_haekeln_granny_square.png',
-    tip:
-        'Fotografiere das ganze Motiv mit der Stelle, an der du weiterhäkelst.',
+    tip: appStrings.photographTheWholeMotifIncludingWhereYouWillContinue,
   ),
   (
-    label: 'Häkeln · Körbchen in Runden',
+    label: appStrings.crochetBasketInTheRound,
     asset: 'assets/examples/project_photos/04_haekeln_koerbchen.png',
-    tip:
-        'Ein leicht schräger Blick zeigt den Boden, die Höhe und den Arbeitsrand.',
+    tip: appStrings.aSlightlyAngledViewShowsTheBaseHeightAnd,
   ),
 ];
 
@@ -55,7 +53,10 @@ class _ProjectPhotoExamplesButtonState
           ),
         ),
         icon: const Icon(Icons.collections_outlined, size: 20),
-        label: const Text('Beispiele ansehen', textAlign: TextAlign.center),
+        label: Text(
+          stringsOf(context).viewExamples,
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
@@ -122,7 +123,7 @@ class _ProjectPhotoExamplesGalleryState
                 children: [
                   Expanded(
                     child: Text(
-                      'Beispielfotos',
+                      stringsOf(context).examplePhotos,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -130,15 +131,16 @@ class _ProjectPhotoExamplesGalleryState
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    tooltip: 'Schließen',
+                    tooltip: stringsOf(context).close,
                     icon: const Icon(Icons.close),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
-              const Text(
-                'Halte dein Projekt bei gutem Licht fest. '
-                'Deine aktuelle Reihe oder Runde trägst du selbst ein.',
+              Text(
+                stringsOf(
+                  context,
+                ).photographYourProjectInGoodLightEnterTheCurrent,
               ),
               const SizedBox(height: 16),
               SizedBox(
@@ -159,12 +161,14 @@ class _ProjectPhotoExamplesGalleryState
                             example.asset,
                             fit: BoxFit.contain,
                             cacheWidth: 768,
-                            semanticLabel: 'Beispielfoto: ${example.label}',
-                            errorBuilder: (_, _, _) => const Center(
+                            semanticLabel: stringsOf(
+                              context,
+                            ).examplePhoto((example.label).toString()),
+                            errorBuilder: (_, _, _) => Center(
                               child: Padding(
                                 padding: EdgeInsets.all(16),
                                 child: Text(
-                                  'Beispiel konnte nicht geladen werden.',
+                                  stringsOf(context).couldNotLoadExample,
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -195,14 +199,17 @@ class _ProjectPhotoExamplesGalleryState
                 children: [
                   IconButton(
                     onPressed: _index > 0 ? () => _goTo(_index - 1) : null,
-                    tooltip: 'Vorheriges Beispiel',
+                    tooltip: stringsOf(context).previousExample,
                     icon: const Icon(Icons.chevron_left),
                   ),
                   Flexible(
                     child: Semantics(
                       liveRegion: true,
                       child: Text(
-                        '${_index + 1} von ${projectPhotoExamples.length}',
+                        stringsOf(context).positionOfTotal(
+                          (_index + 1).toString(),
+                          (projectPhotoExamples.length).toString(),
+                        ),
                       ),
                     ),
                   ),
@@ -210,13 +217,13 @@ class _ProjectPhotoExamplesGalleryState
                     onPressed: _index < projectPhotoExamples.length - 1
                         ? () => _goTo(_index + 1)
                         : null,
-                    tooltip: 'Nächstes Beispiel',
+                    tooltip: stringsOf(context).nextExample,
                     icon: const Icon(Icons.chevron_right),
                   ),
                 ],
               ),
               Text(
-                'KI-generierte Beispiele · nur zur Ansicht',
+                stringsOf(context).examplePhotoDisclaimer,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,

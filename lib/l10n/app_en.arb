@@ -1,0 +1,2317 @@
+{
+  "@@locale": "en",
+  "delete": "Delete",
+  "@delete": {
+    "description": "Löschen Context: lib/app/widgets/confirm_dialog.dart"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Abbrechen Context: lib/app/widgets/confirm_dialog.dart"
+  },
+  "discardChanges": "Discard changes",
+  "@discardChanges": {
+    "description": "Änderungen verwerfen Context: lib/app/widgets/confirm_dialog.dart"
+  },
+  "continueEditing": "Continue editing",
+  "@continueEditing": {
+    "description": "Weiter bearbeiten Context: lib/app/widgets/confirm_dialog.dart"
+  },
+  "creatingProjectReport": "Creating project report",
+  "@creatingProjectReport": {
+    "description": "Projektprotokoll wird erstellt Context: lib/app/widgets/pdf_export_progress_dialog.dart"
+  },
+  "pleaseWait": "Please wait…",
+  "@pleaseWait": {
+    "description": "Bitte kurz warten … Context: lib/app/widgets/pdf_export_progress_dialog.dart"
+  },
+  "testReminderSentToAndroidOpenTheNotificationShade": "Test reminder sent to Android. Open the notification shade. The test reminder disappears after one minute.{p0}",
+  "@testReminderSentToAndroidOpenTheNotificationShade": {
+    "description": "Test-Erinnerung wurde an Android übergeben. Ziehe die Benachrichtigungsleiste herunter. Die Test-Erinnerung verschwindet nach einer Minute.{p0} Context: lib/core/reminders/local_notification_reminder_repository.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "doNotDisturbIsOnSoundAndBannersMay": " Do Not Disturb is on. Sound and banners may be suppressed.",
+  "@doNotDisturbIsOnSoundAndBannersMay": {
+    "description": " „Nicht stören“ ist aktiv. Ton und Banner können unterdrückt werden. Context: lib/core/reminders/local_notification_reminder_repository.dart"
+  },
+  "notificationsAreNotAllowed": "Notifications are not allowed.",
+  "@notificationsAreNotAllowed": {
+    "description": "Benachrichtigungen sind nicht erlaubt. Context: lib/core/reminders/local_notification_reminder_repository.dart"
+  },
+  "thisReminderCategoryIsBlockedInAndroid": "This reminder category is blocked in Android.",
+  "@thisReminderCategoryIsBlockedInAndroid": {
+    "description": "Diese Erinnerungsart ist in Android gesperrt. Context: lib/core/reminders/local_notification_reminder_repository.dart"
+  },
+  "couldNotShowTheTestReminder": "Could not show the test reminder.",
+  "@couldNotShowTheTestReminder": {
+    "description": "Test-Erinnerung konnte nicht angezeigt werden. Context: lib/core/reminders/local_notification_reminder_repository.dart"
+  },
+  "testRemindersAreNotSupportedOnThisDevice": "Test reminders are not supported on this device.",
+  "@testRemindersAreNotSupportedOnThisDevice": {
+    "description": "Test-Erinnerungen werden auf diesem Gerät nicht unterstützt. Context: lib/core/reminders/local_notification_reminder_repository.dart"
+  },
+  "anHourlyReminderRequiresAStartTime": "An hourly reminder requires a start time.",
+  "@anHourlyReminderRequiresAStartTime": {
+    "description": "Die stündliche Erinnerung benötigt einen Startzeitpunkt. Context: lib/core/reminders/local_notification_reminder_repository.dart"
+  },
+  "dataSavedCouldNotTurnOffTheReminderOpen": "Data saved. Could not turn off the reminder. Open the reminder and save again.",
+  "@dataSavedCouldNotTurnOffTheReminderOpen": {
+    "description": "Daten gespeichert. Die Erinnerung konnte nicht ausgeschaltet werden. Öffne die Erinnerung und speichere erneut. Context: lib/core/reminders/reminder_save_feedback.dart"
+  },
+  "dataSavedRemindersAreBlockedInAndroidOpenThe": "Data saved. Reminders are blocked in Android. Open the reminder, then Android settings.",
+  "@dataSavedRemindersAreBlockedInAndroidOpenThe": {
+    "description": "Daten gespeichert. Erinnerungen sind in Android blockiert. Öffne die Erinnerung und dann die Android-Einstellungen. Context: lib/core/reminders/reminder_save_feedback.dart"
+  },
+  "dataSavedRemindersAreNotSupportedOnThisDevice": "Data saved. Reminders are not supported on this device.",
+  "@dataSavedRemindersAreNotSupportedOnThisDevice": {
+    "description": "Daten gespeichert. Erinnerungen werden auf diesem Gerät nicht unterstützt. Context: lib/core/reminders/reminder_save_feedback.dart"
+  },
+  "dataSavedTheReminderCouldNotBeConfirmedOpen": "Data saved. The reminder could not be confirmed. Open the reminder and save again.",
+  "@dataSavedTheReminderCouldNotBeConfirmedOpen": {
+    "description": "Daten gespeichert. Die Erinnerung konnte nicht bestätigt werden. Öffne die Erinnerung und speichere erneut. Context: lib/core/reminders/reminder_save_feedback.dart"
+  },
+  "dataSavedForAnOnTimeReminderOpenAlarms": "Data saved. For an on-time reminder, open Alarms & reminders in Android settings.",
+  "@dataSavedForAnOnTimeReminderOpenAlarms": {
+    "description": "Daten gespeichert. Für eine pünktliche Erinnerung öffne „Alarme & Erinnerungen“ in den Android-Einstellungen. Context: lib/core/reminders/reminder_save_feedback.dart"
+  },
+  "dataSavedCouldNotCheckReminderStatusOpenThe": "Data saved. Could not check reminder status. Open the reminder and save again.",
+  "@dataSavedCouldNotCheckReminderStatusOpenThe": {
+    "description": "Daten gespeichert. Der Erinnerungsstatus konnte nicht geprüft werden. Öffne die Erinnerung und speichere erneut. Context: lib/core/reminders/reminder_save_feedback.dart"
+  },
+  "whatIsTheProjectReportFor": "What is the project report for?",
+  "@whatIsTheProjectReportFor": {
+    "description": "Wozu dient das Projektprotokoll? Context: lib/core/integrity/integrity_copy.dart"
+  },
+  "beforeCreatingItChooseACompactReportWithoutPhotos": "Before creating it, choose a compact report without photos or one with all current photos. Both include progress, dates and notes, ready to save, print or share.",
+  "@beforeCreatingItChooseACompactReportWithoutPhotos": {
+    "description": "Du wählst vor dem Erstellen: kompakt ohne Fotos oder mit allen aktuellen Fotos. Projektstand, Zeitpunkt und Notizen sind in beiden Varianten enthalten – zum Speichern, Drucken oder Teilen. Context: lib/core/integrity/integrity_copy.dart"
+  },
+  "itRecordsYourProjectProgressUsingTheInformationYou": "It records your project progress using the information you confirmed.",
+  "@itRecordsYourProjectProgressUsingTheInformationYou": {
+    "description": "Es dokumentiert deinen Projektfortschritt anhand deiner bestätigten Angaben. Context: lib/core/integrity/integrity_copy.dart"
+  },
+  "thePDFBringsTogetherAllProgressEntriesAndNotes": "The PDF brings together all progress entries and notes. Choose a compact report without photos or include all current photos for each entry, ready to save, print or share.",
+  "@thePDFBringsTogetherAllProgressEntriesAndNotes": {
+    "description": "Die PDF bündelt alle Projektstände mit Fortschritt und Notizen. Du wählst: kompakt ohne Fotos oder mit allen aktuellen Fotos jedes Projektstands – zum Speichern, Drucken oder Teilen. Context: lib/core/integrity/integrity_copy.dart"
+  },
+  "personalRecordOfYourProjectProgress": "Personal record of your project progress.",
+  "@personalRecordOfYourProjectProgress": {
+    "description": "Private Dokumentation deines Projektfortschritts. Context: lib/core/integrity/integrity_copy.dart"
+  },
+  "couldNotSaveThePhotoDraft": "Could not save the photo draft.",
+  "@couldNotSaveThePhotoDraft": {
+    "description": "Der Foto-Zwischenstand konnte nicht gesichert werden. Context: lib/core/files/photo_draft_store.dart"
+  },
+  "couldNotRemoveThePhotoDraft": "Could not remove the photo draft.",
+  "@couldNotRemoveThePhotoDraft": {
+    "description": "Der Foto-Zwischenstand konnte nicht entfernt werden. Context: lib/core/files/photo_draft_store.dart"
+  },
+  "manualEntryDoesNotAccessPhotos": "Manual entry does not access photos.",
+  "@manualEntryDoesNotAccessPhotos": {
+    "description": "Eine manuelle Erfassung verwendet keinen Fotozugriff. Context: lib/core/files/meter_photo_store.dart"
+  },
+  "couldNotSafelyOptimizeThePhotoPleaseSelectIt": "Could not safely optimize the photo. Please select it again.",
+  "@couldNotSafelyOptimizeThePhotoPleaseSelectIt": {
+    "description": "Das Foto konnte nicht sicher optimiert werden. Bitte wähle es erneut aus. Context: lib/core/files/meter_photo_store.dart"
+  },
+  "compactWithoutPhotos": "Compact, without photos",
+  "@compactWithoutPhotos": {
+    "description": "Kompakt ohne Fotos Context: lib/features/evidence/domain/evidence_export.dart"
+  },
+  "withCurrentPhotos": "With current photos",
+  "@withCurrentPhotos": {
+    "description": "Mit aktuellen Fotos Context: lib/features/evidence/domain/evidence_export.dart"
+  },
+  "withAllPhotosOlderVersion": "With all photos (older version)",
+  "@withAllPhotosOlderVersion": {
+    "description": "Mit allen Fotos (ältere Version) Context: lib/features/evidence/domain/evidence_export.dart"
+  },
+  "thisProjectHasNoProgressEntriesYet": "This project has no progress entries yet.",
+  "@thisProjectHasNoProgressEntriesYet": {
+    "description": "Für dieses Projekt gibt es noch keine Projektstände. Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "theProgressEntriesDoNotBelongToThisProject": "The progress entries do not belong to this project.",
+  "@theProgressEntriesDoNotBelongToThisProject": {
+    "description": "Die Projektstände gehören nicht zu diesem Projekt. Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "projectReport": "Project report",
+  "@projectReport": {
+    "description": "Projektprotokoll Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "personalRecordOfProjectProgress": "Personal record of project progress",
+  "@personalRecordOfProjectProgress": {
+    "description": "Private Dokumentation eines Projektstands Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "pageOf": "Page {p0} of {p1}",
+  "@pageOf": {
+    "description": "Seite {p0} von {p1} Context: lib/features/evidence/application/evidence_report_service.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "singleProgressEntry": "Single progress entry",
+  "@singleProgressEntry": {
+    "description": "Einzelner Projektstand Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "projectHistory": "Project history",
+  "@projectHistory": {
+    "description": "Projektverlauf Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "pdfCreatedOn": "PDF created on {p0} · {p1}",
+  "@pdfCreatedOn": {
+    "description": "PDF erstellt am {p0} · {p1} Context: lib/features/evidence/application/evidence_report_service.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "currentProjectDetails": "Current project details",
+  "@currentProjectDetails": {
+    "description": "Aktuelle Projektangaben Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "projectDetailsWhenRecorded": "Project details when recorded",
+  "@projectDetailsWhenRecorded": {
+    "description": "Projektangaben bei Erfassung Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "technique": "Technique",
+  "@technique": {
+    "description": "Technik Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "projectName": "Project name",
+  "@projectName": {
+    "description": "Projektname Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "yarn": "Yarn",
+  "@yarn": {
+    "description": "Garn Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "needleOrHookSize": "Needle or hook size",
+  "@needleOrHookSize": {
+    "description": "Nadelstärke Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "countingUnit": "Counting unit",
+  "@countingUnit": {
+    "description": "Zählweise Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "no": "No.",
+  "@no": {
+    "description": "Nr. Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "dateAndTime": "Date and time",
+  "@dateAndTime": {
+    "description": "Zeitpunkt Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "progressEntry": "Progress entry",
+  "@progressEntry": {
+    "description": "Projektstand Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "progress": "Progress",
+  "@progress": {
+    "description": "Fortschritt Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "notSpecified": "Not specified",
+  "@notSpecified": {
+    "description": "Nicht angegeben Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "progressEntry53": "Progress entry {p0}",
+  "@progressEntry53": {
+    "description": "Projektstand {p0} Context: lib/features/evidence/application/evidence_report_service.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "progressDateAndTime": "Progress date and time",
+  "@progressDateAndTime": {
+    "description": "Zeitpunkt des Projektstands Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "progressEntry55": "Progress entry {p0} · {p1} · {p2}",
+  "@progressEntry55": {
+    "description": "Projektstand {p0} · {p1} · {p2} Context: lib/features/evidence/application/evidence_report_service.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      }
+    }
+  },
+  "lowerCount": "Lower count: {p0}",
+  "@lowerCount": {
+    "description": "Niedrigerer Stand: {p0} Context: lib/features/evidence/application/evidence_report_service.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "note": "Note",
+  "@note": {
+    "description": "Notiz Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "earlierPhoto": "Earlier photo {p0}",
+  "@earlierPhoto": {
+    "description": "Früheres Foto {p0} Context: lib/features/evidence/application/evidence_report_service.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "photoOf": "Photo {p0} of {p1}",
+  "@photoOf": {
+    "description": "Foto {p0} von {p1} Context: lib/features/evidence/application/evidence_report_service.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotEmbedTheProgressPhoto": "Could not embed the progress photo.",
+  "@couldNotEmbedTheProgressPhoto": {
+    "description": "Projektstandfoto konnte nicht eingebettet werden. Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "noPreparedPhotoFileAvailable": "No prepared photo file available.",
+  "@noPreparedPhotoFileAvailable": {
+    "description": "Keine vorbereitete Fotodatei vorhanden. Context: lib/features/evidence/application/evidence_report_service.dart"
+  },
+  "createdOn": "Created on {p0}",
+  "@createdOn": {
+    "description": "Erstellt am {p0} Uhr Context: lib/features/evidence/presentation/evidence_export_card.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "savedLocally": "Saved locally",
+  "@savedLocally": {
+    "description": "Lokal gespeichert Context: lib/features/evidence/presentation/evidence_export_card.dart"
+  },
+  "fileMissing": "File missing",
+  "@fileMissing": {
+    "description": "Datei fehlt Context: lib/features/evidence/presentation/evidence_export_card.dart"
+  },
+  "deleteProjectReport": "Delete project report",
+  "@deleteProjectReport": {
+    "description": "Projektprotokoll löschen Context: lib/features/evidence/presentation/evidence_export_card.dart"
+  },
+  "savedProjectReports": "Saved project reports",
+  "@savedProjectReports": {
+    "description": "Gespeicherte Projektprotokolle Context: lib/features/evidence/presentation/saved_history_pdfs.dart"
+  },
+  "couldNotLoadProjectReports": "Could not load project reports",
+  "@couldNotLoadProjectReports": {
+    "description": "Projektprotokolle konnten nicht geladen werden Context: lib/features/evidence/presentation/saved_history_pdfs.dart"
+  },
+  "loadingProjectReports": "Loading project reports…",
+  "@loadingProjectReports": {
+    "description": "Projektprotokolle werden geladen … Context: lib/features/evidence/presentation/saved_history_pdfs.dart"
+  },
+  "couldNotLoadProjectReports73": "Could not load project reports.",
+  "@couldNotLoadProjectReports73": {
+    "description": "Projektprotokolle konnten nicht geladen werden. Context: lib/features/evidence/presentation/saved_history_pdfs.dart"
+  },
+  "back": "Back",
+  "@back": {
+    "description": "Zurück Context: lib/features/evidence/presentation/saved_history_pdfs.dart"
+  },
+  "next": "Next",
+  "@next": {
+    "description": "Weiter Context: lib/features/evidence/presentation/saved_history_pdfs.dart"
+  },
+  "checkingPDFFile": "Checking PDF file…",
+  "@checkingPDFFile": {
+    "description": "PDF-Datei wird geprüft … Context: lib/features/evidence/presentation/saved_history_pdfs.dart"
+  },
+  "couldNotCheckFileStatusNProjectReportFrom": "Could not check file status.\nProject report from {p0}",
+  "@couldNotCheckFileStatusNProjectReportFrom": {
+    "description": "Dateistatus konnte nicht geprüft werden.\nProjektprotokoll vom {p0} Uhr Context: lib/features/evidence/presentation/saved_history_pdfs.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "projectReportHistory": "Project report · History",
+  "@projectReportHistory": {
+    "description": "Projektprotokoll · Projektverlauf Context: lib/features/evidence/presentation/saved_history_pdfs.dart"
+  },
+  "progressEntriesIncluded": "{p0} progress entries included",
+  "@progressEntriesIncluded": {
+    "description": "{p0} Projektstände enthalten Context: lib/features/evidence/presentation/saved_history_pdfs.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "tryAgain": "Try again",
+  "@tryAgain": {
+    "description": "Erneut versuchen Context: lib/features/evidence/presentation/saved_history_pdfs.dart"
+  },
+  "print": "Print",
+  "@print": {
+    "description": "Drucken Context: lib/features/evidence/presentation/evidence_preview_screen.dart"
+  },
+  "projectReportFromStrickHKelbuch": "Project report from Strick & Häkelbuch",
+  "@projectReportFromStrickHKelbuch": {
+    "description": "Projektprotokoll aus Strick & Häkelbuch Context: lib/features/evidence/presentation/evidence_preview_screen.dart"
+  },
+  "share": "Share",
+  "@share": {
+    "description": "Teilen Context: lib/features/evidence/presentation/evidence_preview_screen.dart"
+  },
+  "choosePDFContent": "Choose PDF content",
+  "@choosePDFContent": {
+    "description": "PDF-Inhalt wählen Context: lib/features/evidence/presentation/evidence_photo_mode_sheet.dart"
+  },
+  "chooseWhatToIncludeInYourPDF": "Choose what to include in your PDF.",
+  "@chooseWhatToIncludeInYourPDF": {
+    "description": "Wähle, welche Inhalte deine PDF enthalten soll. Context: lib/features/evidence/presentation/evidence_photo_mode_sheet.dart"
+  },
+  "progressEntriesDatesAndNotesCompactWithoutPhotos": "Progress entries, dates and notes, compact without photos.",
+  "@progressEntriesDatesAndNotesCompactWithoutPhotos": {
+    "description": "Projektstände, Zeitpunkte und Notizen – kompakt ohne Fotos. Context: lib/features/evidence/presentation/evidence_photo_mode_sheet.dart"
+  },
+  "includesAllPhotosCurrentlyAttachedToThisProgressEntry": "Includes all photos currently attached to this progress entry.",
+  "@includesAllPhotosCurrentlyAttachedToThisProgressEntry": {
+    "description": "Enthält alle aktuell zugeordneten Fotos dieses Projektstands. Context: lib/features/evidence/presentation/evidence_photo_mode_sheet.dart"
+  },
+  "includesAllPhotosCurrentlyAttachedToEachProgressEntry": "Includes all photos currently attached to each progress entry.",
+  "@includesAllPhotosCurrentlyAttachedToEachProgressEntry": {
+    "description": "Enthält alle aktuell zugeordneten Fotos jedes Projektstands. Context: lib/features/evidence/presentation/evidence_photo_mode_sheet.dart"
+  },
+  "noCurrentPhotosAvailable": "No current photos available.",
+  "@noCurrentPhotosAvailable": {
+    "description": "Keine aktuellen Fotos vorhanden. Context: lib/features/evidence/presentation/evidence_photo_mode_sheet.dart"
+  },
+  "cameraPhoto": "Camera photo",
+  "@cameraPhoto": {
+    "description": "Kameraaufnahme Context: lib/features/meters/domain/meter_reading.dart"
+  },
+  "galleryImport": "Gallery import",
+  "@galleryImport": {
+    "description": "Galerieimport Context: lib/features/meters/domain/meter_reading.dart"
+  },
+  "enteredManually": "Entered manually",
+  "@enteredManually": {
+    "description": "Manuell erfasst Context: lib/features/meters/domain/meter_reading.dart"
+  },
+  "newProjectSection": "New project section",
+  "@newProjectSection": {
+    "description": "Neuer Projektabschnitt Context: lib/features/meters/domain/meter_reading.dart"
+  },
+  "projectRestarted": "Project restarted",
+  "@projectRestarted": {
+    "description": "Projekt neu begonnen Context: lib/features/meters/domain/meter_reading.dart"
+  },
+  "correctionOfAnEarlierEntry": "Correction of an earlier entry",
+  "@correctionOfAnEarlierEntry": {
+    "description": "Korrektur eines früheren Projektstands Context: lib/features/meters/domain/meter_reading.dart"
+  },
+  "otherReason": "Other reason",
+  "@otherReason": {
+    "description": "Anderer Grund Context: lib/features/meters/domain/meter_reading.dart"
+  },
+  "knitting": "Knitting",
+  "@knitting": {
+    "description": "Stricken Context: lib/features/meters/domain/meter.dart"
+  },
+  "crochet": "Crochet",
+  "@crochet": {
+    "description": "Häkeln Context: lib/features/meters/domain/meter.dart"
+  },
+  "rows": "Rows",
+  "@rows": {
+    "description": "Reihen Context: lib/features/meters/domain/meter.dart"
+  },
+  "rounds": "Rounds",
+  "@rounds": {
+    "description": "Runden Context: lib/features/meters/domain/meter.dart"
+  },
+  "round": "Round",
+  "@round": {
+    "description": "Runde Context: lib/features/meters/domain/meter.dart"
+  },
+  "row": "Row",
+  "@row": {
+    "description": "Reihe Context: lib/features/meters/domain/meter.dart"
+  },
+  "current": "Current {p0}",
+  "@current": {
+    "description": "Aktuelle {p0} Context: lib/features/meters/domain/meter.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "everyMinuteDev": "Every minute (Dev)",
+  "@everyMinuteDev": {
+    "description": "Minütlich (Dev) Context: lib/features/meters/domain/meter.dart"
+  },
+  "hourly": "Hourly",
+  "@hourly": {
+    "description": "Stündlich Context: lib/features/meters/domain/meter.dart"
+  },
+  "daily": "Daily",
+  "@daily": {
+    "description": "Täglich Context: lib/features/meters/domain/meter.dart"
+  },
+  "weekly": "Weekly",
+  "@weekly": {
+    "description": "Wöchentlich Context: lib/features/meters/domain/meter.dart"
+  },
+  "monthly": "Monthly",
+  "@monthly": {
+    "description": "Monatlich Context: lib/features/meters/domain/meter.dart"
+  },
+  "yearly": "Yearly",
+  "@yearly": {
+    "description": "Jährlich Context: lib/features/meters/domain/meter.dart"
+  },
+  "standardReminder": "Standard reminder",
+  "@standardReminder": {
+    "description": "Normale Erinnerung Context: lib/features/meters/domain/meter.dart"
+  },
+  "onTimeWithSound": "On time with sound",
+  "@onTimeWithSound": {
+    "description": "Pünktlich mit Ton Context: lib/features/meters/domain/meter.dart"
+  },
+  "monday": "Monday",
+  "@monday": {
+    "description": "Montag Context: lib/features/meters/domain/meter.dart"
+  },
+  "tuesday": "Tuesday",
+  "@tuesday": {
+    "description": "Dienstag Context: lib/features/meters/domain/meter.dart"
+  },
+  "wednesday": "Wednesday",
+  "@wednesday": {
+    "description": "Mittwoch Context: lib/features/meters/domain/meter.dart"
+  },
+  "thursday": "Thursday",
+  "@thursday": {
+    "description": "Donnerstag Context: lib/features/meters/domain/meter.dart"
+  },
+  "friday": "Friday",
+  "@friday": {
+    "description": "Freitag Context: lib/features/meters/domain/meter.dart"
+  },
+  "saturday": "Saturday",
+  "@saturday": {
+    "description": "Samstag Context: lib/features/meters/domain/meter.dart"
+  },
+  "sunday": "Sunday",
+  "@sunday": {
+    "description": "Sonntag Context: lib/features/meters/domain/meter.dart"
+  },
+  "preparingPhotos": "Preparing photos…",
+  "@preparingPhotos": {
+    "description": "Fotos werden vorbereitet … Context: lib/features/meters/application/reading_photo_session.dart"
+  },
+  "preparingPhotosOf": "Preparing photos: {p0} of {p1}",
+  "@preparingPhotosOf": {
+    "description": "Fotos werden vorbereitet: {p0} von {p1} Context: lib/features/meters/application/reading_photo_session.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "removingPhoto": "Removing photo…",
+  "@removingPhoto": {
+    "description": "Foto wird entfernt … Context: lib/features/meters/application/reading_photo_session.dart"
+  },
+  "thePhotoOrderMustIncludeAllCurrentPhotos": "The photo order must include all current photos.",
+  "@thePhotoOrderMustIncludeAllCurrentPhotos": {
+    "description": "Die Fotoreihenfolge muss alle aktuellen Fotos enthalten. Context: lib/features/meters/application/reading_photo_session.dart"
+  },
+  "savingPhotoOrder": "Saving photo order…",
+  "@savingPhotoOrder": {
+    "description": "Fotoreihenfolge wird gesichert … Context: lib/features/meters/application/reading_photo_session.dart"
+  },
+  "removingUnsavedPhotos": "Removing unsaved photos…",
+  "@removingUnsavedPhotos": {
+    "description": "Ungespeicherte Fotos werden entfernt … Context: lib/features/meters/application/reading_photo_session.dart"
+  },
+  "couldNotTurnOffTheReminderPleaseTryAgain": "Could not turn off the reminder. Please try again.",
+  "@couldNotTurnOffTheReminderPleaseTryAgain": {
+    "description": "Die Erinnerung konnte nicht ausgeschaltet werden. Bitte erneut versuchen. Context: lib/features/meters/application/meter_services.dart"
+  },
+  "aPhotoRequiresACameraOrGallerySource": "A photo requires a camera or gallery source.",
+  "@aPhotoRequiresACameraOrGallerySource": {
+    "description": "Ein Foto benötigt eine Kamera- oder Galeriequelle. Context: lib/features/meters/application/meter_services.dart"
+  },
+  "doNotSupplyPhotosAndASinglePhotoReplacement": "Do not supply photos and a single-photo replacement together.",
+  "@doNotSupplyPhotosAndASinglePhotoReplacement": {
+    "description": "Fotos und Einzelfoto-Ersatz nicht gleichzeitig übergeben. Context: lib/features/meters/application/meter_services.dart"
+  },
+  "aChangedPhotoRequiresANewPhotoID": "A changed photo requires a new photo ID.",
+  "@aChangedPhotoRequiresANewPhotoID": {
+    "description": "Ein geändertes Foto benötigt eine neue Foto-ID. Context: lib/features/meters/application/meter_services.dart"
+  },
+  "photosRequireUniqueIDsFilesAndAPhotoSource": "Photos require unique IDs, files and a photo source.",
+  "@photosRequireUniqueIDsFilesAndAPhotoSource": {
+    "description": "Fotos benötigen eindeutige IDs, Dateien und eine Fotoquelle. Context: lib/features/meters/application/meter_services.dart"
+  },
+  "enterAWholeNumberOf0OrMore": "Enter a whole number of 0 or more.",
+  "@enterAWholeNumberOf0OrMore": {
+    "description": "Bitte eine ganze Zahl ab 0 eingeben. Context: lib/features/meters/application/meter_services.dart"
+  },
+  "couldNotTurnOff": "Could not turn off",
+  "@couldNotTurnOff": {
+    "description": "Ausschalten fehlgeschlagen Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "openTheReminderAndSaveAgain": "Open the reminder and save again.",
+  "@openTheReminderAndSaveAgain": {
+    "description": "Bitte öffne die Erinnerung und speichere erneut. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "reminderBlocked": "Reminder blocked",
+  "@reminderBlocked": {
+    "description": "Erinnerung blockiert Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "notificationsAreTurnedOff": "Notifications are turned off.",
+  "@notificationsAreTurnedOff": {
+    "description": "Benachrichtigungen sind ausgeschaltet. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "thisReminderCategoryIsTurnedOff": "This reminder category is turned off.",
+  "@thisReminderCategoryIsTurnedOff": {
+    "description": "Diese Erinnerungsart ist ausgeschaltet. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "remindersNotSupported": "Reminders not supported",
+  "@remindersNotSupported": {
+    "description": "Erinnerungen nicht unterstützt Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "thisDeviceCannotShowReminders": "This device cannot show reminders.",
+  "@thisDeviceCannotShowReminders": {
+    "description": "Auf diesem Gerät können keine Erinnerungen angezeigt werden. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "reminderNotScheduled": "Reminder not scheduled",
+  "@reminderNotScheduled": {
+    "description": "Erinnerung nicht geplant Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "exactTimingNotAllowed": "Exact timing not allowed",
+  "@exactTimingNotAllowed": {
+    "description": "Pünktlichkeit nicht erlaubt Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "allowAlarmsRemindersInAndroidUntilThenTheReminder": "Allow Alarms & reminders in Android. Until then, the reminder may arrive late.",
+  "@allowAlarmsRemindersInAndroidUntilThenTheReminder": {
+    "description": "Erlaube „Alarme & Erinnerungen“ in Android. Bis dahin kann die Erinnerung verspätet erscheinen. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "exactSchedulingPending": "Exact scheduling pending",
+  "@exactSchedulingPending": {
+    "description": "Pünktliche Planung ausstehend Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "theScheduledTimeIsStillApproximateOpenTheReminder": "The scheduled time is still approximate. Open the reminder and save again.",
+  "@theScheduledTimeIsStillApproximateOpenTheReminder": {
+    "description": "Der Termin ist noch ungenau geplant. Öffne die Erinnerung und speichere erneut. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "lastDeliveryFailed": "Last delivery failed",
+  "@lastDeliveryFailed": {
+    "description": "Letzte Zustellung fehlgeschlagen Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "openTheReminderAndChooseTestReminderNow": "Open the reminder and choose Test reminder now.",
+  "@openTheReminderAndChooseTestReminderNow": {
+    "description": "Bitte öffne die Erinnerung und nutze „Erinnerung jetzt testen“. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "schedulingStatusUnknown": "Scheduling status unknown",
+  "@schedulingStatusUnknown": {
+    "description": "Planungsstatus unbekannt Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "couldNotConfirmReminderStatusOpenTheReminderTo": "Could not confirm reminder status. Open the reminder to check.",
+  "@couldNotConfirmReminderStatusOpenTheReminderTo": {
+    "description": "Der Erinnerungsstatus konnte nicht bestätigt werden. Öffne die Erinnerung zum Prüfen. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "reminderStillPending": "Reminder still pending",
+  "@reminderStillPending": {
+    "description": "Erinnerung steht noch aus Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "nextReminder": "Next reminder",
+  "@nextReminder": {
+    "description": "Nächste Erinnerung Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "openSettings": "Open settings",
+  "@openSettings": {
+    "description": "Einstellungen öffnen Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "editReminder": "Edit reminder",
+  "@editReminder": {
+    "description": "Erinnerung bearbeiten Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "couldNotOpenSettingsSearchYourPhoneSettingsFor": "Could not open settings. Search your phone settings for Alarms & reminders and select this app.",
+  "@couldNotOpenSettingsSearchYourPhoneSettingsFor": {
+    "description": "Die Einstellungen konnten nicht geöffnet werden. Suche in den Einstellungen deines Smartphones nach „Alarme & Erinnerungen“ und wähle diese App. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "couldNotOpenSettingsOpenAppsInYourPhone": "Could not open settings. Open Apps in your phone settings, select this app, then Notifications.",
+  "@couldNotOpenSettingsOpenAppsInYourPhone": {
+    "description": "Die Einstellungen konnten nicht geöffnet werden. Öffne in den Einstellungen deines Smartphones „Apps“, wähle diese App und dann „Benachrichtigungen“. Context: lib/features/meters/presentation/reminder_schedule_status.dart"
+  },
+  "recordedOn": "Recorded on {p0}",
+  "@recordedOn": {
+    "description": "Erfasst am {p0} Uhr Context: lib/features/meters/presentation/reading_history_tile.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "recorded": "Recorded · {p0}",
+  "@recorded": {
+    "description": "Erfasst · {p0} Uhr Context: lib/features/meters/presentation/reading_history_tile.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "countingUnitChangedSinceThisEntry": "Counting unit changed since this entry",
+  "@countingUnitChangedSinceThisEntry": {
+    "description": "Einheit seit diesem Projektstand gewechselt Context: lib/features/meters/presentation/reading_history_tile.dart"
+  },
+  "photosForProgressEntry": "{p0, plural, =0{0 photos for progress entry {p1}} one{One photo for progress entry {p1}} other{{p0} photos for progress entry {p1}}}",
+  "@photosForProgressEntry": {
+    "description": "{p0} Fotos zum Projektstand {p1} Context: lib/features/meters/presentation/reading_history_tile.dart",
+    "placeholders": {
+      "p0": {
+        "type": "int"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "enteredManually159": "Entered manually: {p0}",
+  "@enteredManually159": {
+    "description": "Manuell erfasst: {p0} Context: lib/features/meters/presentation/reading_history_tile.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "photos": "{p0} photos",
+  "@photos": {
+    "description": "{p0} Fotos Context: lib/features/meters/presentation/reading_history_tile.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "viewPhotoOf": "View photo {p0} of {p1}",
+  "@viewPhotoOf": {
+    "description": "Foto {p0} von {p1} ansehen Context: lib/features/meters/presentation/reading_photo_gallery.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "photo": "Photo {p0}",
+  "@photo": {
+    "description": "Foto {p0} Context: lib/features/meters/presentation/reading_photo_gallery.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "editPhoto": "Edit photo {p0}",
+  "@editPhoto": {
+    "description": "Foto {p0} bearbeiten Context: lib/features/meters/presentation/reading_photo_gallery.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "moveEarlier": "Move earlier",
+  "@moveEarlier": {
+    "description": "Nach vorne Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "moveLater": "Move later",
+  "@moveLater": {
+    "description": "Nach hinten Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "replacePhoto": "Replace photo",
+  "@replacePhoto": {
+    "description": "Foto ersetzen Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "removePhoto": "Remove photo",
+  "@removePhoto": {
+    "description": "Foto entfernen Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "noCurrentPhotos": "No current photos",
+  "@noCurrentPhotos": {
+    "description": "Keine aktuellen Fotos Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "photoUnavailable": "Photo unavailable",
+  "@photoUnavailable": {
+    "description": "Foto nicht verfügbar Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "previousPhoto": "Previous photo",
+  "@previousPhoto": {
+    "description": "Vorheriges Foto Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "nextPhoto": "Next photo",
+  "@nextPhoto": {
+    "description": "Nächstes Foto Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "currentPhotos": "Current photos ({p0})",
+  "@currentPhotos": {
+    "description": "Aktuelle Fotos ({p0}) Context: lib/features/meters/presentation/reading_photo_gallery.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "touchAndHoldAPhotoThenDragItTo": "Touch and hold a photo, then drag it to reorder.",
+  "@touchAndHoldAPhotoThenDragItTo": {
+    "description": "Zum Sortieren ein Foto länger gedrückt halten und verschieben. Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "takePhoto": "Take photo",
+  "@takePhoto": {
+    "description": "Foto aufnehmen Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "takeAnotherPhoto": "Take another photo",
+  "@takeAnotherPhoto": {
+    "description": "Weiteres Foto aufnehmen Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "addPhotosFromGallery": "Add photos from gallery",
+  "@addPhotosFromGallery": {
+    "description": "Fotos aus Galerie hinzufügen Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "retakePhoto": "Retake photo",
+  "@retakePhoto": {
+    "description": "Neu fotografieren Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "chooseFromGallery": "Choose from gallery",
+  "@chooseFromGallery": {
+    "description": "Aus Galerie wählen Context: lib/features/meters/presentation/reading_photo_gallery.dart"
+  },
+  "couldNotLoadProgressEntry": "Could not load progress entry.",
+  "@couldNotLoadProgressEntry": {
+    "description": "Projektstand konnte nicht geladen werden. Context: lib/features/meters/presentation/edit_reading_screen.dart"
+  },
+  "progressEntryNotFound": "Progress entry not found.",
+  "@progressEntryNotFound": {
+    "description": "Projektstand nicht gefunden. Context: lib/features/meters/presentation/edit_reading_screen.dart"
+  },
+  "editProgressEntry": "Edit progress entry",
+  "@editProgressEntry": {
+    "description": "Projektstand bearbeiten Context: lib/features/meters/presentation/edit_reading_screen.dart"
+  },
+  "saveChanges": "Save changes",
+  "@saveChanges": {
+    "description": "Änderungen speichern Context: lib/features/meters/presentation/edit_reading_screen.dart"
+  },
+  "discardChanges183": "Discard changes?",
+  "@discardChanges183": {
+    "description": "Änderungen verwerfen? Context: lib/features/meters/presentation/edit_reading_screen.dart"
+  },
+  "yourChangesToThisProgressEntryHaveNotBeen": "Your changes to this progress entry have not been saved.",
+  "@yourChangesToThisProgressEntryHaveNotBeen": {
+    "description": "Deine Änderungen an diesem Projektstand wurden noch nicht gespeichert. Context: lib/features/meters/presentation/edit_reading_screen.dart"
+  },
+  "couldNotDiscardChanges": "Could not discard changes: {p0}",
+  "@couldNotDiscardChanges": {
+    "description": "Änderungen konnten nicht verworfen werden: {p0} Context: lib/features/meters/presentation/edit_reading_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "photosAddedNotProcessed": "{p0, plural, =0{No photos added.} one{One photo added.} other{{p0} photos added.}} Not processed: {p1}",
+  "@photosAddedNotProcessed": {
+    "description": "{p0} Fotos hinzugefügt. Nicht verarbeitet: {p1} Context: lib/features/meters/presentation/edit_reading_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "int"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotAddPhotos": "Could not add photos: {p0}",
+  "@couldNotAddPhotos": {
+    "description": "Fotos konnten nicht hinzugefügt werden: {p0} Context: lib/features/meters/presentation/edit_reading_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotRemovePhoto": "Could not remove photo: {p0}",
+  "@couldNotRemovePhoto": {
+    "description": "Foto konnte nicht entfernt werden: {p0} Context: lib/features/meters/presentation/edit_reading_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotSavePhotoOrder": "Could not save photo order: {p0}",
+  "@couldNotSavePhotoOrder": {
+    "description": "Fotoreihenfolge konnte nicht gespeichert werden: {p0} Context: lib/features/meters/presentation/edit_reading_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotRestorePhotoDraft": "Could not restore photo draft: {p0}",
+  "@couldNotRestorePhotoDraft": {
+    "description": "Foto-Zwischenstand konnte nicht wiederhergestellt werden: {p0} Context: lib/features/meters/presentation/edit_reading_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "changesSaved": "Changes saved.",
+  "@changesSaved": {
+    "description": "Änderungen gespeichert. Context: lib/features/meters/presentation/edit_reading_screen.dart"
+  },
+  "noChangesToSave": "No changes to save.",
+  "@noChangesToSave": {
+    "description": "Keine Änderungen vorhanden. Context: lib/features/meters/presentation/edit_reading_screen.dart"
+  },
+  "couldNotSaveChanges": "Could not save changes: {p0}",
+  "@couldNotSaveChanges": {
+    "description": "Änderungen konnten nicht gespeichert werden: {p0} Context: lib/features/meters/presentation/edit_reading_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Einstellungen Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "createProject": "Create project",
+  "@createProject": {
+    "description": "Projekt anlegen Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "lastEdited": "Last edited",
+  "@lastEdited": {
+    "description": "Zuletzt bearbeitet Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "nameAZ": "Name A–Z",
+  "@nameAZ": {
+    "description": "Name A–Z Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "yourProjects": "Your projects",
+  "@yourProjects": {
+    "description": "Deine Projekte Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "yourProjectsYourPaceRememberWhereToPickUp": "Your projects, your pace. Remember where to pick up.",
+  "@yourProjectsYourPaceRememberWhereToPickUp": {
+    "description": "Deine Projekte, dein Tempo. Merke dir, wo du weitermachst. Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "searchProjects": "Search projects",
+  "@searchProjects": {
+    "description": "Projekte suchen Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "nameTechniqueYarnOrNeedleSize": "Name, technique, yarn or needle size",
+  "@nameTechniqueYarnOrNeedleSize": {
+    "description": "Name, Technik, Garn oder Nadelstärke Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "clearSearch": "Clear search",
+  "@clearSearch": {
+    "description": "Suche löschen Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "text1Project": "1 project",
+  "@text1Project": {
+    "description": "1 Projekt Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "projects": "{p0} projects",
+  "@projects": {
+    "description": "{p0} Projekte Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "noProgressEntriesYet": "No progress entries yet",
+  "@noProgressEntriesYet": {
+    "description": "Noch kein Projektstand Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "lastEdited206": "Last edited: {p0}",
+  "@lastEdited206": {
+    "description": "Zuletzt bearbeitet: {p0} Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "reminder": "Reminder: {p0}",
+  "@reminder": {
+    "description": "Erinnern: {p0} Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "lastReminderNoneYet": "Last reminder: none yet",
+  "@lastReminderNoneYet": {
+    "description": "Letzte Erinnerung: noch keine Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "lastReminder": "Last reminder: {p0}",
+  "@lastReminder": {
+    "description": "Letzte Erinnerung: {p0} Uhr Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "everyMinuteDev210": "every minute (Dev)",
+  "@everyMinuteDev210": {
+    "description": "minütlich (Dev) Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "hourlyFrom": "hourly from {p0}",
+  "@hourlyFrom": {
+    "description": "stündlich ab {p0} Uhr Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "dailyAt": "daily at {p0}",
+  "@dailyAt": {
+    "description": "täglich um {p0} Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "weeklyOnAt": "weekly on {p0} at {p1}",
+  "@weeklyOnAt": {
+    "description": "wöchentlich am {p0} um {p1} Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "monthlyOnDayAt": "monthly on day {p0} at {p1}",
+  "@monthlyOnDayAt": {
+    "description": "monatlich am {p0}. um {p1} Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "yearlyOnAt": "yearly on {p0}/{p1} at {p2}",
+  "@yearlyOnAt": {
+    "description": "jährlich am {p0}.{p1}. um {p2} Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      }
+    }
+  },
+  "onTimeWithSound216": "{p0} · on time with sound",
+  "@onTimeWithSound216": {
+    "description": "{p0} · pünktlich mit Ton Context: lib/features/meters/presentation/home_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "noMatchingProjectsFound": "No matching projects found.",
+  "@noMatchingProjectsFound": {
+    "description": "Keine passenden Projekte gefunden. Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "createYourFirstProject": "Create your first project",
+  "@createYourFirstProject": {
+    "description": "Erstes Projekt anlegen Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "fromTheFirstStitchToTheLastRememberWhich": "From the first stitch to the last: remember which row or round to continue with, using photos and notes just for you.",
+  "@fromTheFirstStitchToTheLastRememberWhich": {
+    "description": "Vom ersten Anschlag bis zur letzten Masche: Halte fest, bei welcher Reihe oder Runde du weitermachst – mit Fotos und Notizen, ganz für dich. Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "reload": "Reload",
+  "@reload": {
+    "description": "Erneut laden Context: lib/features/meters/presentation/home_screen.dart"
+  },
+  "couldNotLoadProject": "Could not load project.",
+  "@couldNotLoadProject": {
+    "description": "Projekt konnte nicht geladen werden. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "projectNotFound": "Project not found.",
+  "@projectNotFound": {
+    "description": "Projekt nicht gefunden. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "editProject": "Edit project",
+  "@editProject": {
+    "description": "Projekt bearbeiten Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "projectName224": "Project name *",
+  "@projectName224": {
+    "description": "Projektname * Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "enterAProjectName": "Enter a project name.",
+  "@enterAProjectName": {
+    "description": "Bitte einen Projektname eingeben. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "yarnOptional": "Yarn (optional)",
+  "@yarnOptional": {
+    "description": "Garn (optional) Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "needleOrHookSizeOptional": "Needle or hook size (optional)",
+  "@needleOrHookSizeOptional": {
+    "description": "Nadelstärke (optional) Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "countingUnit228": "Counting unit *",
+  "@countingUnit228": {
+    "description": "Zählweise * Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "projectReminder": "Project reminder",
+  "@projectReminder": {
+    "description": "Projekterinnerung Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "optionalAndOnlyOnThisDevice": "Optional and only on this device",
+  "@optionalAndOnlyOnThisDevice": {
+    "description": "Optional und nur lokal auf diesem Gerät Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "interval": "Interval",
+  "@interval": {
+    "description": "Intervall Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "month": "Month",
+  "@month": {
+    "description": "Monat Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "dayOfWeek": "Day of week",
+  "@dayOfWeek": {
+    "description": "Wochentag Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "day": "Day",
+  "@day": {
+    "description": "Tag Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "devModeTheNextReminderIsScheduledForThe": "Dev mode: the next reminder is scheduled for the start of the next minute. Standard reminders may arrive slightly late.",
+  "@devModeTheNextReminderIsScheduledForThe": {
+    "description": "Dev-Modus: Die nächste Erinnerung wird zum Beginn der nächsten Minute geplant. Normale Erinnerungen können leicht verzögert erscheinen. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "startDate": "Start date",
+  "@startDate": {
+    "description": "Startdatum Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "changeDate": "Change date",
+  "@changeDate": {
+    "description": "Datum ändern Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "startTime": "Start time",
+  "@startTime": {
+    "description": "Startzeit Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "changeTime": "Change time",
+  "@changeTime": {
+    "description": "Uhrzeit ändern Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "every60MinutesFromTheSelectedStartNextReminder": "Every 60 minutes from the selected start. Next reminder: {p0}.",
+  "@every60MinutesFromTheSelectedStartNextReminder": {
+    "description": "Ab dem gewählten Start alle 60 Minuten. Nächste Erinnerung: {p0} Uhr. Context: lib/features/meters/presentation/meter_form_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "time": "Time",
+  "@time": {
+    "description": "Uhrzeit Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "reminderType": "Reminder type",
+  "@reminderType": {
+    "description": "Art der Erinnerung Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "mayArriveSlightlyLateRespectsTheSystemDoNot": "May arrive slightly late. Respects the system Do Not Disturb setting.",
+  "@mayArriveSlightlyLateRespectsTheSystemDoNot": {
+    "description": "Kann leicht verzögert erscheinen. Die Systemeinstellung „Nicht stören“ wird berücksichtigt. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "triggersAsCloseAsPossibleToTheSelectedTime": "Triggers as close as possible to the selected time, like an alarm.",
+  "@triggersAsCloseAsPossibleToTheSelectedTime": {
+    "description": "Wird möglichst genau zur gewählten Uhrzeit wie ein Alarm ausgelöst. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "openAlarmsReminders": "Open Alarms & reminders",
+  "@openAlarmsReminders": {
+    "description": "„Alarme & Erinnerungen“ öffnen Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "testReminderNow": "Test reminder now",
+  "@testReminderNow": {
+    "description": "Erinnerung jetzt testen Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "checkTheNotificationShadeDuringTheTestTheTest": "Check the notification shade during the test. The test reminder is automatically removed after one minute.",
+  "@checkTheNotificationShadeDuringTheTestTheTest": {
+    "description": "Prüfe beim Test die Benachrichtigungsleiste. Die Test-Erinnerung wird nach einer Minute automatisch entfernt. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "theReminderIsNotConfirmedSavingWillSetIt": "The reminder is not confirmed. Saving will set it up again.",
+  "@theReminderIsNotConfirmedSavingWillSetIt": {
+    "description": "Die Erinnerung ist nicht bestätigt. Mit Speichern wird sie erneut eingerichtet. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "saving": "Saving…",
+  "@saving": {
+    "description": "Wird gespeichert … Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "everythingSaved": "Everything saved",
+  "@everythingSaved": {
+    "description": "Alles gespeichert Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "saveReminderAgain": "Save reminder again",
+  "@saveReminderAgain": {
+    "description": "Erinnerung erneut speichern Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "saveProject": "Save project",
+  "@saveProject": {
+    "description": "Projekt speichern Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "discardInput": "Discard input?",
+  "@discardInput": {
+    "description": "Eingaben verwerfen? Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "yourChangesToThisProjectHaveNotBeenSaved": "Your changes to this project have not been saved.",
+  "@yourChangesToThisProjectHaveNotBeenSaved": {
+    "description": "Deine Änderungen an diesem Projekt wurden noch nicht gespeichert. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "yourNewProjectDetailsHaveNotBeenSaved": "Your new project details have not been saved.",
+  "@yourNewProjectDetailsHaveNotBeenSaved": {
+    "description": "Deine Eingaben für das neue Projekt wurden noch nicht gespeichert. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "discardInput256": "Discard input",
+  "@discardInput256": {
+    "description": "Eingaben verwerfen Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "androidPermissionForOnTimeWithSoundIsMissing": "Android permission for On time with sound is missing. Select the mode again and grant permission.",
+  "@androidPermissionForOnTimeWithSoundIsMissing": {
+    "description": "Für „Pünktlich mit Ton“ fehlt die Android-Berechtigung. Bitte den Modus erneut auswählen und erlauben. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "projectSavedRemindersAreBlockedInAndroid": "Project saved. Reminders are blocked in Android.",
+  "@projectSavedRemindersAreBlockedInAndroid": {
+    "description": "Projekt gespeichert. Erinnerungen sind in Android blockiert. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "projectSavedYouCanNowAddYourFirstProgress": "Project saved. You can now add your first progress entry.",
+  "@projectSavedYouCanNowAddYourFirstProgress": {
+    "description": "Projekt gespeichert. Als Nächstes kannst du den ersten Projektstand erfassen. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "projectChangesSaved": "Project changes saved.",
+  "@projectChangesSaved": {
+    "description": "Änderungen am Projekt gespeichert. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "couldNotSave": "Could not save: {p0}",
+  "@couldNotSave": {
+    "description": "Speichern fehlgeschlagen: {p0} Context: lib/features/meters/presentation/meter_form_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "thisTimeIsUnavailableDueToTheDaylightSaving": "This time is unavailable due to the daylight saving change. Choose another time.",
+  "@thisTimeIsUnavailableDueToTheDaylightSaving": {
+    "description": "Diese Uhrzeit ist wegen der Zeitumstellung nicht verfügbar. Bitte wähle eine andere Uhrzeit. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "couldNotOpenAndroidAlarmsRemindersSettingsOnTime": "Could not open Android Alarms & reminders settings. On time with sound remains selected.",
+  "@couldNotOpenAndroidAlarmsRemindersSettingsOnTime": {
+    "description": "Die Android-Einstellung „Alarme & Erinnerungen“ konnte nicht geöffnet werden. „Pünktlich mit Ton“ bleibt ausgewählt. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "androidAlarmsRemindersSettingsAreUnavailableOnThisDevice": "Android Alarms & reminders settings are unavailable on this device.",
+  "@androidAlarmsRemindersSettingsAreUnavailableOnThisDevice": {
+    "description": "Die Android-Einstellung „Alarme & Erinnerungen“ ist auf diesem Gerät nicht verfügbar. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "afterSavingUse": "After saving, use ",
+  "@afterSavingUse": {
+    "description": "Nach dem Speichern kannst du unter  Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "toAddAndRecordYourFirstProgressEntry": " to add and record your first progress entry.",
+  "@toAddAndRecordYourFirstProgressEntry": {
+    "description": " deinen ersten Projektstand erfassen und protokollieren. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "androidMustAllowAlarmsRemindersForOnTimeReminders": "Android must allow Alarms & reminders for on-time reminders. Grant access so the reminder can sound at the selected time.",
+  "@androidMustAllowAlarmsRemindersForOnTimeReminders": {
+    "description": "Für pünktliche Erinnerungen muss Android „Alarme & Erinnerungen“ erlauben. Aktiviere die Freigabe, damit die Erinnerung zuverlässig zur gewählten Zeit mit Ton erscheint. Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "allowAlarmsReminders": "Allow Alarms & reminders",
+  "@allowAlarmsReminders": {
+    "description": "Alarme & Erinnerungen erlauben Context: lib/features/meters/presentation/meter_form_screen.dart"
+  },
+  "notificationsAreTurnedOff269": "Notifications are turned off",
+  "@notificationsAreTurnedOff269": {
+    "description": "Benachrichtigungen sind ausgeschaltet Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "thisReminderCategoryIsTurnedOff270": "This reminder category is turned off",
+  "@thisReminderCategoryIsTurnedOff270": {
+    "description": "Diese Erinnerungsart ist ausgeschaltet Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "doNotDisturbIsOn": "Do Not Disturb is on",
+  "@doNotDisturbIsOn": {
+    "description": "„Nicht stören“ ist aktiv Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "androidIsBlockingNotificationsForStrickHKelbuchYou": "Android is blocking notifications for Strick & Häkelbuch. You can allow them in Android settings.",
+  "@androidIsBlockingNotificationsForStrickHKelbuchYou": {
+    "description": "Android blockiert Benachrichtigungen für Strick & Häkelbuch. Du kannst sie in den Android-Einstellungen erlauben. Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "androidIsBlockingYouCanEnableThisCategoryIn": "Android is blocking “{p0}”. You can enable this category in Android settings.",
+  "@androidIsBlockingYouCanEnableThisCategoryIn": {
+    "description": "Android blockiert „{p0}“. Du kannst diese Kategorie in den Android-Einstellungen einschalten. Context: lib/features/meters/presentation/reminder_delivery_hint.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "projectReminders": "Project reminders",
+  "@projectReminders": {
+    "description": "Projekterinnerungen Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "onTimeProjectReminders": "On-time project reminders",
+  "@onTimeProjectReminders": {
+    "description": "Pünktliche Projekterinnerungen Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "standardRemindersMayAppearWithoutSoundOrABanner": "Standard reminders may appear without sound or a banner. Check the notification shade too.",
+  "@standardRemindersMayAppearWithoutSoundOrABanner": {
+    "description": "Normale Erinnerungen können ohne Ton oder eingeblendetes Banner erscheinen. Prüfe auch die Benachrichtigungsleiste. Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "alarmSoundAndBannersDependOnYourDoNot": "Alarm sound and banners depend on your Do Not Disturb settings and alarm volume.",
+  "@alarmSoundAndBannersDependOnYourDoNot": {
+    "description": "Ob ein Alarmton oder Banner erscheint, hängt von deinen „Nicht stören“-Einstellungen und der Alarmlautstärke ab. Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "openAndroidSettings": "Open Android settings",
+  "@openAndroidSettings": {
+    "description": "Android-Einstellungen öffnen Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "openDoNotDisturb": "Open Do Not Disturb",
+  "@openDoNotDisturb": {
+    "description": "„Nicht stören“ öffnen Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "couldNotOpenSystemSettingsSearchYourPhoneSettings": "Could not open system settings. Search your phone settings for Do Not Disturb.",
+  "@couldNotOpenSystemSettingsSearchYourPhoneSettings": {
+    "description": "Die Systemeinstellungen konnten nicht geöffnet werden. Suche in den Einstellungen deines Smartphones nach „Nicht stören“. Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "couldNotOpenSystemSettingsInYourPhoneSettings": "Could not open system settings. In your phone settings, open Apps, then Strick & Häkelbuch, then Notifications.",
+  "@couldNotOpenSystemSettingsInYourPhoneSettings": {
+    "description": "Die Systemeinstellungen konnten nicht geöffnet werden. Öffne in den Einstellungen deines Smartphones „Apps“, dann „Strick & Häkelbuch“ und „Benachrichtigungen“. Context: lib/features/meters/presentation/reminder_delivery_hint.dart"
+  },
+  "sortPhotos": "Sort photos",
+  "@sortPhotos": {
+    "description": "Fotos sortieren Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "projectReportSingleEntry": "Project report · Single entry",
+  "@projectReportSingleEntry": {
+    "description": "Projektprotokoll · Einzelner Projektstand Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "preparingTheProgressEntryAndNotesForTheCompact": "Preparing the progress entry and notes for the compact PDF.",
+  "@preparingTheProgressEntryAndNotesForTheCompact": {
+    "description": "Projektstand und Notizen werden für die kompakte PDF zusammengestellt. Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "preparingCurrentPhotosProgressAndNotesForThePDF": "Preparing current photos, progress and notes for the PDF.",
+  "@preparingCurrentPhotosProgressAndNotesForThePDF": {
+    "description": "Die aktuellen Fotos, der Projektstand und die Notizen werden für die PDF zusammengestellt. Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "couldNotCreatePDF": "Could not create PDF: {p0}",
+  "@couldNotCreatePDF": {
+    "description": "PDF konnte nicht erstellt werden: {p0} Context: lib/features/meters/presentation/reading_detail_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "theSavedPDFFileIsMissing": "The saved PDF file is missing.",
+  "@theSavedPDFFileIsMissing": {
+    "description": "Die gespeicherte PDF-Datei fehlt. Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "deleteProjectReport288": "Delete project report?",
+  "@deleteProjectReport288": {
+    "description": "Projektprotokoll löschen? Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "thePDFWillBePermanentlyDeletedFromStrickH": "The PDF will be permanently deleted from Strick & Häkelbuch. Copies already shared or saved outside the app will remain.",
+  "@thePDFWillBePermanentlyDeletedFromStrickH": {
+    "description": "Die PDF wird dauerhaft aus Strick & Häkelbuch gelöscht. Bereits geteilte oder außerhalb der App gespeicherte Kopien bleiben erhalten. Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "projectReportDeleted": "Project report deleted.",
+  "@projectReportDeleted": {
+    "description": "Projektprotokoll gelöscht. Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "couldNotDeleteProjectReportPleaseTryAgain": "Could not delete project report. Please try again.",
+  "@couldNotDeleteProjectReportPleaseTryAgain": {
+    "description": "Projektprotokoll konnte nicht gelöscht werden. Bitte versuche es erneut. Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "deleteProgressEntry": "Delete progress entry?",
+  "@deleteProgressEntry": {
+    "description": "Projektstand löschen? Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "thisEntryItsAttachmentsAndItsIndividualPDFsWill": "This entry, its attachments and its individual PDFs will be permanently deleted. Saved history PDFs and copies outside the app will remain.",
+  "@thisEntryItsAttachmentsAndItsIndividualPDFsWill": {
+    "description": "Projektstand, alle zugehörigen Anhänge und Einzel-PDFs dieses Projektstands werden dauerhaft gelöscht. Gespeicherte Verlaufs-PDFs bleiben erhalten. Bereits außerhalb der App gespeicherte Kopien bleiben bestehen. Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "progressEntryDeleted": "Progress entry deleted.",
+  "@progressEntryDeleted": {
+    "description": "Projektstand gelöscht. Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "couldNotCompletelyDeleteTheProgressEntryPleaseTry": "Could not completely delete the progress entry. Please try again.",
+  "@couldNotCompletelyDeleteTheProgressEntryPleaseTry": {
+    "description": "Projektstand konnte nicht vollständig gelöscht werden. Bitte versuche es erneut. Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "reportForThisProgressEntry": "Report for this progress entry",
+  "@reportForThisProgressEntry": {
+    "description": "Projektprotokoll dieses Projektstands Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "createProjectReportAsPDF": "Create project report as PDF",
+  "@createProjectReportAsPDF": {
+    "description": "Projektprotokoll als PDF erstellen Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Bearbeiten Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "deleteProgressEntry299": "Delete progress entry",
+  "@deleteProgressEntry299": {
+    "description": "Projektstand löschen Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "source": "Source",
+  "@source": {
+    "description": "Quelle Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "lowerCount301": "Lower count",
+  "@lowerCount301": {
+    "description": "Niedrigerer Stand Context: lib/features/meters/presentation/reading_detail_screen.dart"
+  },
+  "project": "Project",
+  "@project": {
+    "description": "Projekt Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "couldNotLoadProgressEntries": "Could not load progress entries.",
+  "@couldNotLoadProgressEntries": {
+    "description": "Projektstände konnten nicht geladen werden. Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "recordProgress": "Record progress",
+  "@recordProgress": {
+    "description": "Projektstand erfassen Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "ofProgressEntries": "{p0} of {p1} progress entries",
+  "@ofProgressEntries": {
+    "description": "{p0} von {p1} Projektständen Context: lib/features/meters/presentation/meter_detail_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "showAllProgressEntries": "Show all progress entries",
+  "@showAllProgressEntries": {
+    "description": "Alle Projektstände anzeigen Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "preparingProgressEntriesAndNotesForTheCompactPDF": "Preparing progress entries and notes for the compact PDF.",
+  "@preparingProgressEntriesAndNotesForTheCompactPDF": {
+    "description": "Projektstände und Notizen werden für die kompakte PDF zusammengestellt. Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "preparingProgressEntriesCurrentPhotosAndNotesForThe": "Preparing progress entries, current photos and notes for the PDF.",
+  "@preparingProgressEntriesCurrentPhotosAndNotesForThe": {
+    "description": "Projektstände, aktuelle Fotos und Notizen werden für die PDF zusammengestellt. Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "deleteProject": "Delete project?",
+  "@deleteProject": {
+    "description": "Projekt löschen? Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "allProgressEntriesProgressPhotosAndLocallySavedReports": "All progress entries, progress photos and locally saved reports for this project will be permanently removed. Files already shared outside the app will remain.",
+  "@allProgressEntriesProgressPhotosAndLocallySavedReports": {
+    "description": "Alle Projektstände, Projektstandfotos und lokal gespeicherten Projektprotokolle dieses Projekts werden dauerhaft entfernt. Bereits extern geteilte Dateien bleiben bestehen. Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "projectDeleted": "Project deleted.",
+  "@projectDeleted": {
+    "description": "Projekt gelöscht. Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "couldNotCompletelyDeleteTheProjectPleaseTryAgain": "Could not completely delete the project. Please try again.",
+  "@couldNotCompletelyDeleteTheProjectPleaseTryAgain": {
+    "description": "Projekt konnte nicht vollständig gelöscht werden. Bitte versuche es erneut. Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "editProjectReminder": "Edit project & reminder",
+  "@editProjectReminder": {
+    "description": "Projekt & Erinnerung bearbeiten Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "deleteProject314": "Delete project",
+  "@deleteProject314": {
+    "description": "Projekt löschen Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "createReportForProjectHistory": "Create report for project history",
+  "@createReportForProjectHistory": {
+    "description": "Projektprotokoll für den Projektverlauf erstellen Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "lastRecordedOn": "Last recorded on {p0}",
+  "@lastRecordedOn": {
+    "description": "Zuletzt am {p0} Context: lib/features/meters/presentation/meter_detail_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "yarn317": "Yarn: {p0}",
+  "@yarn317": {
+    "description": "Garn: {p0} Context: lib/features/meters/presentation/meter_detail_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "needleOrHookSize318": "Needle or hook size: {p0}",
+  "@needleOrHookSize318": {
+    "description": "Nadelstärke: {p0} Context: lib/features/meters/presentation/meter_detail_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "reminder319": "Reminder: {p0}",
+  "@reminder319": {
+    "description": "Erinnerung: {p0} Context: lib/features/meters/presentation/meter_detail_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "noProgressEntryYetEnterYourCurrentRowOr": "No progress entry yet. Enter your current row or round, with or without a project photo.",
+  "@noProgressEntryYetEnterYourCurrentRowOr": {
+    "description": "Noch kein Projektstand. Trage deine aktuelle Reihe oder Runde ein – mit oder ohne Projektfoto. Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "recordFirstProgressEntry": "Record first progress entry",
+  "@recordFirstProgressEntry": {
+    "description": "Ersten Projektstand erfassen Context: lib/features/meters/presentation/meter_detail_screen.dart"
+  },
+  "changeDateTime": "Change date & time",
+  "@changeDateTime": {
+    "description": "Datum & Uhrzeit ändern Context: lib/features/meters/presentation/editable_reading_time_card.dart"
+  },
+  "enterProgress": "Enter progress",
+  "@enterProgress": {
+    "description": "Stand eintragen Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "photographProject": "Photograph project",
+  "@photographProject": {
+    "description": "Projekt fotografieren Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "photosFromGallery": "Photos from gallery",
+  "@photosFromGallery": {
+    "description": "Fotos aus Galerie Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "preparingPhoto": "Preparing photo…",
+  "@preparingPhoto": {
+    "description": "Foto wird vorbereitet … Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "enterWhereYouLeftOff": "Enter where you left off.",
+  "@enterWhereYouLeftOff": {
+    "description": "Trage ein, wo du gerade aufgehört hast. Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "optionalEGStartedTheSleeve": "Optional, e.g. started the sleeve",
+  "@optionalEGStartedTheSleeve": {
+    "description": "Optional, z. B. mit dem Ärmel begonnen Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "saveProgressEntry": "Save progress entry",
+  "@saveProgressEntry": {
+    "description": "Projektstand speichern Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "confirmAndSaveProgress": "Confirm and save progress",
+  "@confirmAndSaveProgress": {
+    "description": "Projektstand bestätigen und speichern Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "discardProgressEntry": "Discard progress entry?",
+  "@discardProgressEntry": {
+    "description": "Projektstand verwerfen? Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "yourProgressEntryAndSelectedPhotosHaveNotBeen": "Your progress entry and selected photos have not been saved.",
+  "@yourProgressEntryAndSelectedPhotosHaveNotBeen": {
+    "description": "Dein Projektstand und die ausgewählten Fotos wurden noch nicht gespeichert. Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "discardProgressEntry333": "Discard progress entry",
+  "@discardProgressEntry333": {
+    "description": "Projektstand verwerfen Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "couldNotRemoveUnsavedPhotosPleaseTryAgain": "Could not remove unsaved photos. Please try again.",
+  "@couldNotRemoveUnsavedPhotosPleaseTryAgain": {
+    "description": "Die ungespeicherten Fotos konnten nicht entfernt werden. Bitte versuche es erneut. Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "progressEntrySaved": "Progress entry saved.",
+  "@progressEntrySaved": {
+    "description": "Projektstand gespeichert. Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "pickUpFromHere": "Pick up from here",
+  "@pickUpFromHere": {
+    "description": "Hier machst du weiter Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "rememberYourCurrentRowOrRoundPhotosCaptureHow": "Remember your current row or round. Photos capture how your project looks right now.",
+  "@rememberYourCurrentRowOrRoundPhotosCaptureHow": {
+    "description": "Merke dir deine aktuelle Reihe oder Runde. Fotos halten fest, wie dein Projekt gerade aussieht. Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "youEnterYourProgressYourselfPhotosAndNotesStay": "You enter your progress yourself. Photos and notes stay on your device.",
+  "@youEnterYourProgressYourselfPhotosAndNotesStay": {
+    "description": "Deinen Stand trägst du selbst ein. Fotos und Notizen bleiben auf deinem Gerät. Context: lib/features/meters/presentation/capture_reading_screen.dart"
+  },
+  "knittingScarf": "Knitting · Scarf",
+  "@knittingScarf": {
+    "description": "Stricken · Schal Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "layYourProjectFlatSoItsShapeAndPattern": "Lay your project flat so its shape and pattern are clearly visible.",
+  "@layYourProjectFlatSoItsShapeAndPattern": {
+    "description": "Lege dein Projekt flach hin, damit Form und Muster gut sichtbar sind. Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "knittingHatInTheRound": "Knitting · Hat in the round",
+  "@knittingHatInTheRound": {
+    "description": "Stricken · Mütze in Runden Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "includeTheWorkingNeedleAndTheMarkedStartOf": "Include the working needle and the marked start of the round.",
+  "@includeTheWorkingNeedleAndTheMarkedStartOf": {
+    "description": "Zeige auch die aktive Nadel und den markierten Rundenanfang. Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "crochetGrannySquare": "Crochet · Granny square",
+  "@crochetGrannySquare": {
+    "description": "Häkeln · Granny Square Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "photographTheWholeMotifIncludingWhereYouWillContinue": "Photograph the whole motif, including where you will continue.",
+  "@photographTheWholeMotifIncludingWhereYouWillContinue": {
+    "description": "Fotografiere das ganze Motiv mit der Stelle, an der du weiterhäkelst. Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "crochetBasketInTheRound": "Crochet · Basket in the round",
+  "@crochetBasketInTheRound": {
+    "description": "Häkeln · Körbchen in Runden Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "aSlightlyAngledViewShowsTheBaseHeightAnd": "A slightly angled view shows the base, height and working edge.",
+  "@aSlightlyAngledViewShowsTheBaseHeightAnd": {
+    "description": "Ein leicht schräger Blick zeigt den Boden, die Höhe und den Arbeitsrand. Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "viewExamples": "View examples",
+  "@viewExamples": {
+    "description": "Beispiele ansehen Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "examplePhotos": "Example photos",
+  "@examplePhotos": {
+    "description": "Beispielfotos Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Schließen Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "photographYourProjectInGoodLightEnterTheCurrent": "Photograph your project in good light. Enter the current row or round yourself.",
+  "@photographYourProjectInGoodLightEnterTheCurrent": {
+    "description": "Halte dein Projekt bei gutem Licht fest. Deine aktuelle Reihe oder Runde trägst du selbst ein. Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "examplePhoto": "Example photo: {p0}",
+  "@examplePhoto": {
+    "description": "Beispielfoto: {p0} Context: lib/features/meters/presentation/project_photo_examples.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotLoadExample": "Could not load example.",
+  "@couldNotLoadExample": {
+    "description": "Beispiel konnte nicht geladen werden. Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "previousExample": "Previous example",
+  "@previousExample": {
+    "description": "Vorheriges Beispiel Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "nextExample": "Next example",
+  "@nextExample": {
+    "description": "Nächstes Beispiel Context: lib/features/meters/presentation/project_photo_examples.dart"
+  },
+  "noProgressEntriesYet356": "No progress entries yet.",
+  "@noProgressEntriesYet356": {
+    "description": "Noch keine Projektstände vorhanden. Context: lib/features/meters/presentation/meter_history_screen.dart"
+  },
+  "matches": "matches",
+  "@matches": {
+    "description": "Treffern Context: lib/features/meters/presentation/meter_history_screen.dart"
+  },
+  "progressEntries": "progress entries",
+  "@progressEntries": {
+    "description": "Projektständen Context: lib/features/meters/presentation/meter_history_screen.dart"
+  },
+  "of359": "{p0}–{p1} of {p2} {p3}",
+  "@of359": {
+    "description": "{p0}–{p1} von {p2} {p3} Context: lib/features/meters/presentation/meter_history_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      },
+      "p3": {
+        "type": "String"
+      }
+    }
+  },
+  "searchProgressEntries": "Search progress entries",
+  "@searchProgressEntries": {
+    "description": "Projektstände suchen Context: lib/features/meters/presentation/meter_history_screen.dart"
+  },
+  "dateRowRoundOrNote": "Date, row/round or note",
+  "@dateRowRoundOrNote": {
+    "description": "Datum, Reihe/Runde oder Notiz Context: lib/features/meters/presentation/meter_history_screen.dart"
+  },
+  "noMatchingProgressEntryFound": "No matching progress entry found.",
+  "@noMatchingProgressEntryFound": {
+    "description": "Kein passender Projektstand gefunden. Context: lib/features/meters/presentation/meter_history_screen.dart"
+  },
+  "searchByDateCurrentRowOrRoundOrA": "Search by date, current row or round, or a word in the note.",
+  "@searchByDateCurrentRowOrRoundOrA": {
+    "description": "Suche nach Datum, aktueller Reihe oder Runde oder einem Wort aus der Notiz. Context: lib/features/meters/presentation/meter_history_screen.dart"
+  },
+  "choosingASaveLocationIsNotYetAvailableOn": "Choosing a save location is not yet available on this platform.",
+  "@choosingASaveLocationIsNotYetAvailableOn": {
+    "description": "Die direkte Speicherortwahl ist auf dieser Plattform noch nicht verfügbar. Context: lib/features/backup/application/backup_file_exporter.dart"
+  },
+  "strickHKelbuchBackup": "Strick & Häkelbuch backup",
+  "@strickHKelbuchBackup": {
+    "description": "Strick & Häkelbuch Backup Context: lib/features/backup/application/backup_file_exporter.dart"
+  },
+  "projects366": "Projects",
+  "@projects366": {
+    "description": "Projekte Context: lib/features/backup/application/backup_file_exporter.dart"
+  },
+  "progressEntries367": "Progress entries",
+  "@progressEntries367": {
+    "description": "Projektstände Context: lib/features/backup/application/backup_file_exporter.dart"
+  },
+  "backup": "Backup",
+  "@backup": {
+    "description": "Datensicherung Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "createEncryptedBackup": "Create encrypted backup",
+  "@createEncryptedBackup": {
+    "description": "Verschlüsseltes Backup erstellen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "projectsPhotosAndProjectReports": "Projects, photos and project reports",
+  "@projectsPhotosAndProjectReports": {
+    "description": "Projekte, Fotos, Projektprotokolle und Korrekturverläufe Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "restoreBackup": "Restore backup",
+  "@restoreBackup": {
+    "description": "Backup wiederherstellen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "newerExistingEntriesArePreserved": "Newer existing entries are preserved",
+  "@newerExistingEntriesArePreserved": {
+    "description": "Vorhandene neuere Einträge bleiben erhalten Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "privacy": "Privacy",
+  "@privacy": {
+    "description": "Datenschutz Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "photosProgressEntriesAndPDFsAreProcessedLocallyOn": "Photos, progress entries and PDFs are processed locally on your device. The app does not send your project data to a server.",
+  "@photosProgressEntriesAndPDFsAreProcessedLocallyOn": {
+    "description": "Fotos, Projektstände und PDFs werden lokal auf deinem Gerät verarbeitet. Die App überträgt deine Projektdaten nicht an einen Server. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "yourDataStaysOnYourDeviceUntilYouDelete": "Your data stays on your device until you delete it in the app or remove the app data.",
+  "@yourDataStaysOnYourDeviceUntilYouDelete": {
+    "description": "Deine Daten bleiben lokal auf deinem Gerät gespeichert, bis du sie in der App löschst oder die App-Daten entfernst. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "developerAndPrivacyContactNWasiliyStreckerAppFabrikAI": "Developer and privacy contact\nWasiliy Strecker · AppFabrik AI",
+  "@developerAndPrivacyContactNWasiliyStreckerAppFabrikAI": {
+    "description": "Entwickler und Datenschutzkontakt\nWasiliy Strecker · AppFabrik AI Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "openPrivacyPolicy": "Open privacy policy",
+  "@openPrivacyPolicy": {
+    "description": "Datenschutzerklärung öffnen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "aboutStrickHKelbuch": "About Strick & Häkelbuch",
+  "@aboutStrickHKelbuch": {
+    "description": "Über Strick & Häkelbuch Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "openSourceMPL20": "Open source · MPL 2.0",
+  "@openSourceMPL20": {
+    "description": "Open Source · MPL 2.0 Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "couldNotOpenThePrivacyPolicyPleaseTryAgain": "Could not open the privacy policy. Please try again.",
+  "@couldNotOpenThePrivacyPolicyPleaseTryAgain": {
+    "description": "Die Datenschutzerklärung konnte nicht geöffnet werden. Bitte versuche es erneut. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "preparingFiles": "Preparing files…",
+  "@preparingFiles": {
+    "description": "Dateien werden vorbereitet … Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "couldNotCreateBackup": "Could not create backup: {p0}",
+  "@couldNotCreateBackup": {
+    "description": "Backup konnte nicht erstellt werden: {p0} Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "savingBackup": "Saving backup…",
+  "@savingBackup": {
+    "description": "Backup wird gespeichert … Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "couldNotShareBackup": "Could not share backup: {p0}",
+  "@couldNotShareBackup": {
+    "description": "Backup konnte nicht geteilt werden: {p0} Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSaved": "Backup saved",
+  "@backupSaved": {
+    "description": "Backup gespeichert Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "wasSavedToTheSelectedLocation": "{p0} was saved to the selected location.",
+  "@wasSavedToTheSelectedLocation": {
+    "description": "{p0} wurde im gewählten Speicherort abgelegt. Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "nMBCreatedOn": "{p0} · {p1} · {p2}\n{p3} MB · Created on {p4}",
+  "@nMBCreatedOn": {
+    "description": "{p0} · {p1} · {p2}\n{p3} MB · Erstellt am {p4} Uhr Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      },
+      "p3": {
+        "type": "String"
+      },
+      "p4": {
+        "type": "String"
+      }
+    }
+  },
+  "projectReports": "Project reports",
+  "@projectReports": {
+    "description": "Projektprotokolle Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "done": "Done",
+  "@done": {
+    "description": "Fertig Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "couldNotSaveBackup": "Could not save backup",
+  "@couldNotSaveBackup": {
+    "description": "Backup konnte nicht gespeichert werden Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "backupNotSavedYet": "Backup not saved yet",
+  "@backupNotSavedYet": {
+    "description": "Backup noch nicht gespeichert Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "theEncryptedFileIsOnlyStoredTemporarilyInThe": "The encrypted file is only stored temporarily in the app. Choose a save location to keep the backup.",
+  "@theEncryptedFileIsOnlyStoredTemporarilyInThe": {
+    "description": "Die verschlüsselte Datei liegt nur vorübergehend in der App. Wähle einen Speicherort, damit das Backup erhalten bleibt. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "discardBackup": "Discard backup",
+  "@discardBackup": {
+    "description": "Backup verwerfen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "chooseSaveLocation": "Choose save location",
+  "@chooseSaveLocation": {
+    "description": "Speicherort wählen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "chooseAStrickHKelbuchBackupFileShbackup": "Choose a Strick & Häkelbuch backup file (.shbackup).",
+  "@chooseAStrickHKelbuchBackupFileShbackup": {
+    "description": "Bitte wähle eine Strick & Häkelbuch-Backup-Datei (.shbackup). Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "couldNotOpenTheSelectedBackupFile": "Could not open the selected backup file.",
+  "@couldNotOpenTheSelectedBackupFile": {
+    "description": "Die ausgewählte Backup-Datei konnte nicht geöffnet werden. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "couldNotSelectBackupFile": "Could not select backup file: {p0}",
+  "@couldNotSelectBackupFile": {
+    "description": "Backup-Datei konnte nicht ausgewählt werden: {p0} Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "checkingBackup": "Checking backup…",
+  "@checkingBackup": {
+    "description": "Backup wird geprüft … Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "restoreBackup402": "Restore backup?",
+  "@restoreBackup402": {
+    "description": "Backup wiederherstellen? Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "andWillBeImportedNewerLocalEntriesWillNot": "{p0}, {p1} and {p2} will be imported. Newer local entries will not be overwritten.",
+  "@andWillBeImportedNewerLocalEntriesWillNot": {
+    "description": "{p0}, {p1} und {p2} werden importiert. Neuere lokale Einträge werden nicht überschrieben. Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      }
+    }
+  },
+  "restore": "Restore",
+  "@restore": {
+    "description": "Wiederherstellen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "restoringBackup": "Restoring backup…",
+  "@restoringBackup": {
+    "description": "Backup wird wiederhergestellt … Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "restoredAndSkippedUnchangedOrNewerEntries": "Restored {p0} and {p1}. Skipped {p2} unchanged or newer entries.{p3}{p4}",
+  "@restoredAndSkippedUnchangedOrNewerEntries": {
+    "description": "{p0} und {p1} wiederhergestellt. {p2} unveränderte oder neuere Einträge übersprungen.{p3}{p4} Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      },
+      "p3": {
+        "type": "String"
+      },
+      "p4": {
+        "type": "String"
+      }
+    }
+  },
+  "photo407": "Photo",
+  "@photo407": {
+    "description": "Foto Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "photos408": "Photos",
+  "@photos408": {
+    "description": "Fotos Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "remindersCouldNotBeConfirmedForEntriesCheckReminders": " Reminders could not be confirmed for {p0} entries. Check reminders in the overview.",
+  "@remindersCouldNotBeConfirmedForEntriesCheckReminders": {
+    "description": " Bei {p0} Einträgen konnte die Erinnerung nicht bestätigt werden. Bitte prüfe die Erinnerungen in der Übersicht. Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotRestoreBackup": "Could not restore backup: {p0}",
+  "@couldNotRestoreBackup": {
+    "description": "Backup konnte nicht wiederhergestellt werden: {p0} Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "thePasswordMustHaveAtLeast6Characters": "The password must have at least 6 characters.",
+  "@thePasswordMustHaveAtLeast6Characters": {
+    "description": "Das Passwort muss mindestens 6 Zeichen lang sein. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "thePasswordIsIncorrectOrTheBackupHasBeen": "The password is incorrect or the backup has been changed.",
+  "@thePasswordIsIncorrectOrTheBackupHasBeen": {
+    "description": "Das Passwort ist falsch oder das Backup wurde verändert. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "aFileToBackUpIsMissing": "A file to back up is missing: {p0}",
+  "@aFileToBackUpIsMissing": {
+    "description": "Eine zu sichernde Datei fehlt: {p0} Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "aFileInTheBackupIsDamagedOrIncomplete": "A file in the backup is damaged or incomplete.",
+  "@aFileInTheBackupIsDamagedOrIncomplete": {
+    "description": "Eine Datei im Backup ist beschädigt oder unvollständig. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "thisBackupVersionIsNotSupported": "This backup version is not supported.",
+  "@thisBackupVersionIsNotSupported": {
+    "description": "Diese Backup-Version wird nicht unterstützt. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "theSelectedFileIsNotAValidStrickH": "The selected file is not a valid Strick & Häkelbuch backup.",
+  "@theSelectedFileIsNotAValidStrickH": {
+    "description": "Die ausgewählte Datei ist kein gültiges Strick & Häkelbuch-Backup. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "preparingFiles417": "Preparing files",
+  "@preparingFiles417": {
+    "description": "Dateien werden vorbereitet Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "encryptingBackup": "Encrypting backup",
+  "@encryptingBackup": {
+    "description": "Backup wird verschlüsselt Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "finishingBackup": "Finishing backup",
+  "@finishingBackup": {
+    "description": "Backup wird abgeschlossen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "backupReady": "Backup ready",
+  "@backupReady": {
+    "description": "Backup ist bereit Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "pleaseWaitAMoment": "Please wait a moment.",
+  "@pleaseWaitAMoment": {
+    "description": "Bitte einen Moment warten. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "gatheringPhotosAndProjectReports": "Gathering photos and project reports.",
+  "@gatheringPhotosAndProjectReports": {
+    "description": "Fotos und Projektprotokolle werden zusammengestellt. Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "ofFiles": "{p0} of {p1} files",
+  "@ofFiles": {
+    "description": "{p0} von {p1} Dateien Context: lib/features/backup/presentation/settings_screen.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "setBackupPassword": "Set backup password",
+  "@setBackupPassword": {
+    "description": "Backup-Passwort festlegen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Passwort Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "atLeast6Characters": "At least 6 characters",
+  "@atLeast6Characters": {
+    "description": "Mindestens 6 Zeichen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "repeatPassword": "Repeat password",
+  "@repeatPassword": {
+    "description": "Passwort wiederholen Context: lib/features/backup/presentation/settings_screen.dart"
+  },
+  "progressEquation": " {p0} = {p1} progress",
+  "@progressEquation": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "unitChanged": "– (unit changed)",
+  "@unitChanged": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "reportCount": "{count, plural, one{{count} project report} other{{count} project reports}}",
+  "@reportCount": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entryCount": "{count, plural, one{{count} progress entry} other{{count} progress entries}}",
+  "@entryCount": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectCount": "{count, plural, one{{count} project} other{{count} projects}}",
+  "@projectCount": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photoCount": "{count, plural, one{{count} photo} other{{count} photos}}",
+  "@photoCount": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matchCount": "{count, plural, one{{count} match} other{{count} matches}}",
+  "@matchCount": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "includedEntries": "{count, plural, one{{count} progress entry included} other{{count} progress entries included}}",
+  "@includedEntries": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reminderDeadline": "{p0}{p1}",
+  "@reminderDeadline": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderNotProcessed": ". Android has not processed this reminder yet.",
+  "@reminderNotProcessed": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "progressChange": "{p0} {p1} → {p2} = {p3} {p4} progress",
+  "@progressChange": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      },
+      "p3": {
+        "type": "String"
+      },
+      "p4": {
+        "type": "String"
+      }
+    }
+  },
+  "projectNameExample": "e.g. My sage sweater",
+  "@projectNameExample": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "yarnExample": "e.g. Merino wool, sage",
+  "@yarnExample": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "needleSizeExample": "e.g. {size} mm",
+  "@needleSizeExample": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "recordProgressQuoted": "“Record progress”",
+  "@recordProgressQuoted": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "examplePhotoDisclaimer": "AI-generated examples · for viewing only",
+  "@examplePhotoDisclaimer": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "repairedFiles": " Repaired {p0}.",
+  "@repairedFiles": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "backupPassword": "Backup password",
+  "@backupPassword": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "systemLanguage": "System language",
+  "@systemLanguage": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "languageHelp": "Numbers and dates continue to follow your device region.",
+  "@languageHelp": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "languageSaveFailed": "Could not save the language. Please try again.",
+  "@languageSaveFailed": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "unexpectedError": "Could not complete the operation. Please try again.",
+  "@unexpectedError": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "passwordMismatch": "The passwords do not match.",
+  "@passwordMismatch": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "currentRow": "Current row",
+  "@currentRow": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "currentRound": "Current round",
+  "@currentRound": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "lastProgress": "Last progress: {value} {unit}",
+  "@lastProgress": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderBody": "Record your current row or round and pick up comfortably later.",
+  "@reminderBody": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "testNotificationTitle": "Test: {technique} · {name}",
+  "@testNotificationTitle": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "technique": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "testNotificationApp": "This is a test reminder. Tap to open the app.",
+  "@testNotificationApp": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "testNotificationProject": "This is a test reminder. Tap to open the project.",
+  "@testNotificationProject": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "normalChannelDescription": "Optional reminders to record project progress regularly.",
+  "@normalChannelDescription": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "exactChannelDescription": "On-time project reminders with an alarm sound.",
+  "@exactChannelDescription": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "reportFilePrefix": "progress",
+  "@reportFilePrefix": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "historyFilePrefix": "project_history",
+  "@historyFilePrefix": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "compactFilePart": "compact",
+  "@compactFilePart": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "photosFilePart": "with_photos",
+  "@photosFilePart": {
+    "description": "Application text. Preserve the meaning of placeholders."
+  },
+  "annualReminder": "yearly on {date} at {time}",
+  "@annualReminder": {
+    "description": "Application text. Preserve the meaning of placeholders.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "positionOfTotal": "{p0} of {p1}",
+  "@positionOfTotal": {
+    "description": "{p0} von {p1} Context: lib/features/meters/presentation/project_photo_examples.dart",
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  }
+}

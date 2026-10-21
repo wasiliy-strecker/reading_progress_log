@@ -1,19 +1,33 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
+
 enum MeterType { knitting, crochet }
 
 extension MeterTypeX on MeterType {
   String get wireName => name;
   String get label => switch (this) {
-    MeterType.knitting => 'Stricken',
-    MeterType.crochet => 'Häkeln',
+    MeterType.knitting => appStrings.knitting,
+    MeterType.crochet => appStrings.crochet,
   };
   List<String> get availableUnits => const ['Reihen', 'Runden'];
   String get defaultUnit => 'Reihen';
 }
 
-String progressUnitSingular(String unit) =>
-    unit == 'Runden' ? 'Runde' : 'Reihe';
-String currentProgressLabel(String unit) =>
-    'Aktuelle ${progressUnitSingular(unit)}';
+String progressUnitSingular(String unit) => switch (unit) {
+  'Runden' => appStrings.round,
+  'Reihen' => appStrings.row,
+  _ => unit,
+};
+String progressUnitLabel(String unit, {AppLocalizations? strings}) =>
+    switch (unit) {
+      'Runden' => (strings ?? appStrings).rounds,
+      'Reihen' => (strings ?? appStrings).rows,
+      _ => unit,
+    };
+String currentProgressLabel(String unit) => unit == 'Runden'
+    ? appStrings.currentRound
+    : unit == 'Reihen'
+    ? appStrings.currentRow
+    : unit;
 String progressValueLabel(String value, String unit) =>
     '${progressUnitSingular(unit)} $value';
 
@@ -21,12 +35,12 @@ enum ReminderInterval { minutely, hourly, daily, weekly, monthly, yearly }
 
 extension ReminderIntervalLabel on ReminderInterval {
   String get label => switch (this) {
-    ReminderInterval.minutely => 'Minütlich (Dev)',
-    ReminderInterval.hourly => 'Stündlich',
-    ReminderInterval.daily => 'Täglich',
-    ReminderInterval.weekly => 'Wöchentlich',
-    ReminderInterval.monthly => 'Monatlich',
-    ReminderInterval.yearly => 'Jährlich',
+    ReminderInterval.minutely => appStrings.everyMinuteDev,
+    ReminderInterval.hourly => appStrings.hourly,
+    ReminderInterval.daily => appStrings.daily,
+    ReminderInterval.weekly => appStrings.weekly,
+    ReminderInterval.monthly => appStrings.monthly,
+    ReminderInterval.yearly => appStrings.yearly,
   };
 }
 
@@ -34,20 +48,20 @@ enum ReminderDeliveryMode { normal, punctualWithSound }
 
 extension ReminderDeliveryModeLabel on ReminderDeliveryMode {
   String get label => switch (this) {
-    ReminderDeliveryMode.normal => 'Normale Erinnerung',
-    ReminderDeliveryMode.punctualWithSound => 'Pünktlich mit Ton',
+    ReminderDeliveryMode.normal => appStrings.standardReminder,
+    ReminderDeliveryMode.punctualWithSound => appStrings.onTimeWithSound,
   };
 }
 
 String reminderWeekdayLabel(int weekday) => switch (weekday) {
-  DateTime.monday => 'Montag',
-  DateTime.tuesday => 'Dienstag',
-  DateTime.wednesday => 'Mittwoch',
-  DateTime.thursday => 'Donnerstag',
-  DateTime.friday => 'Freitag',
-  DateTime.saturday => 'Samstag',
-  DateTime.sunday => 'Sonntag',
-  _ => 'Montag',
+  DateTime.monday => appStrings.monday,
+  DateTime.tuesday => appStrings.tuesday,
+  DateTime.wednesday => appStrings.wednesday,
+  DateTime.thursday => appStrings.thursday,
+  DateTime.friday => appStrings.friday,
+  DateTime.saturday => appStrings.saturday,
+  DateTime.sunday => appStrings.sunday,
+  _ => appStrings.monday,
 };
 
 class ReadingReminderSchedule {
@@ -85,9 +99,7 @@ class ReadingReminderSchedule {
         ? null
         : DateTime.parse(json['startsAt'] as String).toUtc();
     if (interval == ReminderInterval.hourly && startsAt == null) {
-      throw const FormatException(
-        'Die stündliche Erinnerung benötigt einen Startzeitpunkt.',
-      );
+      throw FormatException(appStrings.anHourlyReminderRequiresAStartTime);
     }
     return ReadingReminderSchedule(
       interval: interval,

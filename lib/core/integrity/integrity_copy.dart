@@ -1,13 +1,15 @@
-const pdfPurposeTitle = 'Wozu dient das Projektprotokoll?';
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 
-const pdfPurposeText =
-    'Du wählst vor dem Erstellen: kompakt ohne Fotos oder mit allen aktuellen Fotos. Projektstand, Zeitpunkt und Notizen sind in beiden Varianten enthalten – zum Speichern, Drucken oder Teilen.';
+String get pdfPurposeTitle => appStrings.whatIsTheProjectReportFor;
 
-const privateDocumentationText =
-    'Es dokumentiert deinen Projektfortschritt anhand deiner bestätigten Angaben.';
+String get pdfPurposeText =>
+    appStrings.beforeCreatingItChooseACompactReportWithoutPhotos;
 
-const historyPdfPurposeText =
-    'Die PDF bündelt alle Projektstände mit Fortschritt und Notizen. Du wählst: kompakt ohne Fotos oder mit allen aktuellen Fotos jedes Projektstands – zum Speichern, Drucken oder Teilen.';
+String get privateDocumentationText =>
+    appStrings.itRecordsYourProjectProgressUsingTheInformationYou;
 
-const pdfPrivateDocumentationText =
-    'Private Dokumentation deines Projektfortschritts.';
+String get historyPdfPurposeText =>
+    appStrings.thePDFBringsTogetherAllProgressEntriesAndNotes;
+
+String get pdfPrivateDocumentationText =>
+    appStrings.personalRecordOfYourProjectProgress;

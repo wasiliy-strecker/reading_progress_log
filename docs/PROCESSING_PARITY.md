@@ -243,3 +243,14 @@ Die Projektstand-Detailseite zeigt bei mehreren aktuellen Fotos jetzt direkt
 über der Galerie „Fotos sortieren“. Die Aktion öffnet den bestehenden
 Korrektureditor. Erst dessen Speichern übernimmt die Reihenfolge und schreibt
 die Revision. Die Anzeige allein verändert keine Daten.
+
+## Internationalisierung vom 21.10.2026
+
+Die eingefrorenen Quell-Hashes bleiben unverändert. Die nachvollziehbaren lokalen
+Ausnahmen ergänzen übersetzte Fehlermeldungen im Fotoimport, übersetzte PDF-
+Anzeigenamen und regionale Formatierung in `formatters.dart`. Diese Änderungen
+betreffen die Darstellung. Dateiverarbeitung, gespeicherte Enum-Werte, Ziffern und
+Skala sowie vorhandene Prüfsummen bleiben erhalten. Lokalisierungstests decken
+insbesondere sehr große exakte Werte, alte Dezimalwerte, regionale Datumseingabe
+und unveränderte vorhandene PDF-Dateien ab. Die bisherigen Backup-, Foto- und
+Datenbanktests bleiben verbindlich.

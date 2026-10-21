@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
@@ -46,19 +47,17 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
       },
       child: meterAsync.when(
         loading: () => Scaffold(
-          appBar: _appBar('Projekt'),
+          appBar: _appBar(stringsOf(context).project),
           body: const Center(child: CircularProgressIndicator()),
         ),
         error: (_, _) => Scaffold(
-          appBar: _appBar('Projekt'),
-          body: const Center(
-            child: Text('Projekt konnte nicht geladen werden.'),
-          ),
+          appBar: _appBar(stringsOf(context).project),
+          body: Center(child: Text(stringsOf(context).couldNotLoadProject)),
         ),
         data: (meter) => meter == null
             ? Scaffold(
-                appBar: _appBar('Projekt'),
-                body: const Center(child: Text('Projekt nicht gefunden.')),
+                appBar: _appBar(stringsOf(context).project),
+                body: Center(child: Text(stringsOf(context).projectNotFound)),
               )
             : _buildContent(meter),
       ),
@@ -97,9 +96,8 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
       appBar: _appBar(meter.label),
       body: historyPageAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const Center(
-          child: Text('Projektstände konnten nicht geladen werden.'),
-        ),
+        error: (_, _) =>
+            Center(child: Text(stringsOf(context).couldNotLoadProgressEntries)),
         data: (page) {
           return ListView.builder(
             padding: EdgeInsets.fromLTRB(
@@ -108,7 +106,7 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
               16,
               AppFloatingActionButton.contentBottomPadding(
                 context,
-                'Projektstand erfassen',
+                stringsOf(context).recordProgress,
               ),
             ),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -145,7 +143,7 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Projektverlauf',
+                      stringsOf(context).projectHistory,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -154,8 +152,11 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
                       const SizedBox(height: 8),
                       Text(
                         page.totalCount == 1
-                            ? '1 Projektstand'
-                            : '${page.readings.length} von ${page.totalCount} Projektständen',
+                            ? stringsOf(context).entryCount(1)
+                            : stringsOf(context).ofProgressEntries(
+                                (page.readings.length).toString(),
+                                (page.totalCount).toString(),
+                              ),
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                     ],
@@ -190,7 +191,7 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
                         pathParameters: {'id': meter.id},
                       ),
                       icon: const Icon(Icons.manage_search_outlined),
-                      label: const Text('Alle Projektstände anzeigen'),
+                      label: Text(stringsOf(context).showAllProgressEntries),
                     ),
                   ],
                 ],
@@ -202,7 +203,7 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
       floatingActionButton: AppFloatingActionButton(
         onPressed: captureReading,
         icon: Icons.add_a_photo_outlined,
-        label: 'Projektstand erfassen',
+        label: stringsOf(context).recordProgress,
       ),
     );
   }
@@ -224,8 +225,12 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
       final report = await runWithPdfExportProgress(
         context,
         description: photoMode == EvidencePhotoMode.withoutPhotos
-            ? 'Projektstände und Notizen werden für die kompakte PDF zusammengestellt.'
-            : 'Projektstände, aktuelle Fotos und Notizen werden für die PDF zusammengestellt.',
+            ? stringsOf(
+                context,
+              ).preparingProgressEntriesAndNotesForTheCompactPDF
+            : stringsOf(
+                context,
+              ).preparingProgressEntriesCurrentPhotosAndNotesForThe,
         operation: () async {
           final revisionLists = await Future.wait(
             readings.map((reading) => repository.loadRevisions(reading.id)),
@@ -254,7 +259,11 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'PDF konnte nicht erstellt werden: $error'),
+          AppSnackBar(
+            message: stringsOf(
+              context,
+            ).couldNotCreatePDF(userErrorMessage(error)),
+          ),
         );
       }
     } finally {
@@ -268,7 +277,7 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
       ref.invalidate(evidenceFileAvailableProvider(record.filePath));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'Die gespeicherte PDF-Datei fehlt.'),
+          AppSnackBar(message: stringsOf(context).theSavedPDFFileIsMissing),
         );
       }
       return;
@@ -284,9 +293,8 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
     if (_deletingExportIds.contains(record.id)) return;
     final confirmed = await confirmDestructiveAction(
       context,
-      title: 'Projektprotokoll löschen?',
-      message:
-          'Die PDF wird dauerhaft aus Strick & Häkelbuch gelöscht. Bereits geteilte oder außerhalb der App gespeicherte Kopien bleiben erhalten.',
+      title: stringsOf(context).deleteProjectReport288,
+      message: stringsOf(context).thePDFWillBePermanentlyDeletedFromStrickH,
     );
     if (!confirmed || !mounted) return;
     setState(() => _deletingExportIds.add(record.id));
@@ -296,16 +304,17 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
       ref.invalidate(evidenceExportPageProvider);
       ref.invalidate(evidenceFileAvailableProvider(record.filePath));
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(AppSnackBar(message: 'Projektprotokoll gelöscht.'));
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(message: stringsOf(context).projectReportDeleted),
+        );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message:
-                'Projektprotokoll konnte nicht gelöscht werden. Bitte versuche es erneut.',
+            message: stringsOf(
+              context,
+            ).couldNotDeleteProjectReportPleaseTryAgain,
           ),
         );
       }
@@ -319,9 +328,10 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
   Future<void> _deleteMeter(Meter meter) async {
     final confirmed = await confirmDestructiveAction(
       context,
-      title: 'Projekt löschen?',
-      message:
-          'Alle Projektstände, Projektstandfotos und lokal gespeicherten Projektprotokolle dieses Projekts werden dauerhaft entfernt. Bereits extern geteilte Dateien bleiben bestehen.',
+      title: stringsOf(context).deleteProject,
+      message: stringsOf(
+        context,
+      ).allProgressEntriesProgressPhotosAndLocallySavedReports,
     );
     if (!confirmed || !mounted) return;
     try {
@@ -335,15 +345,16 @@ class _MeterDetailScreenState extends ConsumerState<MeterDetailScreen> {
       }
       messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(AppSnackBar(message: 'Projekt gelöscht.'));
+        ..showSnackBar(AppSnackBar(message: stringsOf(context).projectDeleted));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           AppSnackBar(
-            message:
-                'Projekt konnte nicht vollständig gelöscht werden. Bitte versuche es erneut.',
+            message: stringsOf(
+              context,
+            ).couldNotCompletelyDeleteTheProjectPleaseTryAgain,
           ),
         );
     }
@@ -365,7 +376,7 @@ class _MeterActions extends StatelessWidget {
         OutlinedButton.icon(
           onPressed: onEdit,
           icon: const Icon(Icons.edit_outlined),
-          label: const Text('Projekt & Erinnerung bearbeiten'),
+          label: Text(stringsOf(context).editProjectReminder),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
@@ -375,7 +386,7 @@ class _MeterActions extends StatelessWidget {
           ),
           onPressed: onDelete,
           icon: const Icon(Icons.delete_outline),
-          label: const Text('Projekt löschen'),
+          label: Text(stringsOf(context).deleteProject314),
         ),
       ],
     );
@@ -403,12 +414,12 @@ class _HistoryPdfAction extends StatelessWidget {
               children: [
                 Icon(Icons.picture_as_pdf_outlined, color: colors.primary),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Projektprotokoll · Projektverlauf',
+                        stringsOf(context).projectReportHistory,
                         style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                       SizedBox(height: 4),
@@ -422,8 +433,8 @@ class _HistoryPdfAction extends StatelessWidget {
             FilledButton.icon(
               onPressed: exporting ? null : onPressed,
               icon: const Icon(Icons.picture_as_pdf_outlined),
-              label: const Text(
-                'Projektprotokoll für den Projektverlauf erstellen',
+              label: Text(
+                stringsOf(context).createReportForProjectHistory,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -487,22 +498,36 @@ class _MeterHeader extends StatelessWidget {
               const SizedBox(height: 14),
               Text(
                 latest == null
-                    ? 'Noch kein Projektstand'
-                    : '${latest.value.displayText} ${latest.meter.unit}',
+                    ? stringsOf(context).noProgressEntriesYet
+                    : '${formatReadingValue(latest.value)} ${progressUnitLabel(latest.meter.unit)}',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: color,
                   fontWeight: FontWeight.w900,
                 ),
               ),
               if (latest != null)
-                Text('Zuletzt am ${formatDateTime(latest.capturedAt)}'),
+                Text(
+                  stringsOf(context).lastRecordedOn(
+                    (formatDateTime(latest.capturedAt)).toString(),
+                  ),
+                ),
               const SizedBox(height: 10),
               if (meter.meterNumber.isNotEmpty)
-                Text('Garn: ${meter.meterNumber}'),
+                Text(
+                  stringsOf(context).yarn317((meter.meterNumber).toString()),
+                ),
               if (meter.location.isNotEmpty)
-                Text('Nadelstärke: ${meter.location}'),
+                Text(
+                  stringsOf(
+                    context,
+                  ).needleOrHookSize318((meter.location).toString()),
+                ),
               if (meter.reminder != null)
-                Text('Erinnerung: ${_reminderSummary(meter.reminder!)}'),
+                Text(
+                  stringsOf(
+                    context,
+                  ).reminder319((_reminderSummary(meter.reminder!)).toString()),
+                ),
             ],
           ),
         ),
@@ -512,21 +537,28 @@ class _MeterHeader extends StatelessWidget {
 }
 
 String _reminderSummary(ReadingReminderSchedule reminder) {
-  final time =
-      '${reminder.hour.toString().padLeft(2, '0')}:${reminder.minute.toString().padLeft(2, '0')} Uhr';
+  final time = formatClockTime(reminder.hour, reminder.minute);
   final schedule = switch (reminder.interval) {
-    ReminderInterval.minutely => 'minütlich (Dev)',
-    ReminderInterval.hourly =>
-      'stündlich ab ${formatDateTime(reminder.startsAt!)} Uhr',
-    ReminderInterval.daily => 'täglich um $time',
-    ReminderInterval.weekly =>
-      'wöchentlich am ${reminderWeekdayLabel(reminder.day)} um $time',
-    ReminderInterval.monthly => 'monatlich am ${reminder.day}. um $time',
-    ReminderInterval.yearly =>
-      'jährlich am ${reminder.day}.${(reminder.month ?? 1).toString().padLeft(2, '0')}. um $time',
+    ReminderInterval.minutely => appStrings.everyMinuteDev210,
+    ReminderInterval.hourly => appStrings.hourlyFrom(
+      (formatDateTime(reminder.startsAt!)).toString(),
+    ),
+    ReminderInterval.daily => appStrings.dailyAt((time).toString()),
+    ReminderInterval.weekly => appStrings.weeklyOnAt(
+      (reminderWeekdayLabel(reminder.day)).toString(),
+      (time).toString(),
+    ),
+    ReminderInterval.monthly => appStrings.monthlyOnDayAt(
+      (reminder.day).toString(),
+      (time).toString(),
+    ),
+    ReminderInterval.yearly => appStrings.annualReminder(
+      formatMonthDay(reminder.month ?? 1, reminder.day),
+      time,
+    ),
   };
   return reminder.deliveryMode == ReminderDeliveryMode.punctualWithSound
-      ? '$schedule · pünktlich mit Ton'
+      ? appStrings.onTimeWithSound216((schedule).toString())
       : schedule;
 }
 
@@ -552,8 +584,8 @@ class _EmptyReadings extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Noch kein Projektstand. Trage deine aktuelle Reihe oder Runde ein – mit oder ohne Projektfoto.',
+              Text(
+                stringsOf(context).noProgressEntryYetEnterYourCurrentRowOr,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 14),
@@ -562,7 +594,7 @@ class _EmptyReadings extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      'Ersten Projektstand erfassen',
+                      stringsOf(context).recordFirstProgressEntry,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,

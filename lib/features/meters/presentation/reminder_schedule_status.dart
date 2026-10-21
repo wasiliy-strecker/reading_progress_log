@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,42 +62,47 @@ class ReminderScheduleStatus extends ConsumerWidget {
     final String title;
     final String description;
     if (cancelFailed) {
-      title = 'Ausschalten fehlgeschlagen';
-      description = 'Bitte öffne die Erinnerung und speichere erneut.';
+      title = stringsOf(context).couldNotTurnOff;
+      description = stringsOf(context).openTheReminderAndSaveAgain;
     } else if (availability.isBlocked) {
-      title = 'Erinnerung blockiert';
+      title = stringsOf(context).reminderBlocked;
       description = availability == ReminderAvailability.appBlocked
-          ? 'Benachrichtigungen sind ausgeschaltet.'
-          : 'Diese Erinnerungsart ist ausgeschaltet.';
+          ? stringsOf(context).notificationsAreTurnedOff
+          : stringsOf(context).thisReminderCategoryIsTurnedOff;
     } else if (availability == ReminderAvailability.unsupported) {
-      title = 'Erinnerungen nicht unterstützt';
-      description =
-          'Auf diesem Gerät können keine Erinnerungen angezeigt werden.';
+      title = stringsOf(context).remindersNotSupported;
+      description = stringsOf(context).thisDeviceCannotShowReminders;
     } else if (failed) {
-      title = 'Erinnerung nicht geplant';
-      description = 'Bitte öffne die Erinnerung und speichere erneut.';
+      title = stringsOf(context).reminderNotScheduled;
+      description = stringsOf(context).openTheReminderAndSaveAgain;
     } else if (exactMissing) {
-      title = 'Pünktlichkeit nicht erlaubt';
-      description =
-          'Erlaube „Alarme & Erinnerungen“ in Android. Bis dahin kann die Erinnerung verspätet erscheinen.';
+      title = stringsOf(context).exactTimingNotAllowed;
+      description = stringsOf(
+        context,
+      ).allowAlarmsRemindersInAndroidUntilThenTheReminder;
     } else if (inexact) {
-      title = 'Pünktliche Planung ausstehend';
-      description =
-          'Der Termin ist noch ungenau geplant. Öffne die Erinnerung und speichere erneut.';
+      title = stringsOf(context).exactSchedulingPending;
+      description = stringsOf(
+        context,
+      ).theScheduledTimeIsStillApproximateOpenTheReminder;
     } else if (deliveryFailed) {
-      title = 'Letzte Zustellung fehlgeschlagen';
-      description =
-          'Bitte öffne die Erinnerung und nutze „Erinnerung jetzt testen“.';
+      title = stringsOf(context).lastDeliveryFailed;
+      description = stringsOf(context).openTheReminderAndChooseTestReminderNow;
     } else if (!known ||
         availability != ReminderAvailability.available ||
         exactPermission == null) {
-      title = 'Planungsstatus unbekannt';
-      description =
-          'Der Erinnerungsstatus konnte nicht bestätigt werden. Öffne die Erinnerung zum Prüfen.';
+      title = stringsOf(context).schedulingStatusUnknown;
+      description = stringsOf(
+        context,
+      ).couldNotConfirmReminderStatusOpenTheReminderTo;
     } else {
-      title = due ? 'Erinnerung steht noch aus' : 'Nächste Erinnerung';
-      description =
-          '${formatDateTime(next)} Uhr${due ? '. Android hat diesen Termin noch nicht verarbeitet.' : ''}';
+      title = due
+          ? stringsOf(context).reminderStillPending
+          : stringsOf(context).nextReminder;
+      description = stringsOf(context).reminderDeadline(
+        (formatDateTime(next)).toString(),
+        (due ? stringsOf(context).reminderNotProcessed : '').toString(),
+      );
     }
     final repair =
         cancelFailed ||
@@ -193,8 +199,8 @@ class ReminderScheduleStatus extends ConsumerWidget {
               icon: const Icon(Icons.settings_outlined),
               label: Text(
                 settingsAction
-                    ? 'Einstellungen öffnen'
-                    : 'Erinnerung bearbeiten',
+                    ? stringsOf(context).openSettings
+                    : stringsOf(context).editReminder,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -227,10 +233,8 @@ class ReminderScheduleStatus extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       AppSnackBar(
         message: exactMissing
-            ? 'Die Einstellungen konnten nicht geöffnet werden. Suche in den Einstellungen deines Smartphones nach „Alarme & Erinnerungen“ und wähle diese App.'
-            : 'Die Einstellungen konnten nicht geöffnet werden. Öffne in den '
-                  'Einstellungen deines Smartphones „Apps“, wähle diese App und '
-                  'dann „Benachrichtigungen“.',
+            ? stringsOf(context).couldNotOpenSettingsSearchYourPhoneSettingsFor
+            : stringsOf(context).couldNotOpenSettingsOpenAppsInYourPhone,
       ),
     );
   }

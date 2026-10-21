@@ -1,3 +1,5 @@
+import '../../../core/localization/regional_calendar_delegate.dart';
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -27,14 +29,16 @@ class EditReadingScreen extends ConsumerWidget {
         .when(
           loading: () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
-          error: (_, _) => const Scaffold(
+          error: (_, _) => Scaffold(
             body: Center(
-              child: Text('Projektstand konnte nicht geladen werden.'),
+              child: Text(stringsOf(context).couldNotLoadProgressEntry),
             ),
           ),
           data: (reading) => reading == null
-              ? const Scaffold(
-                  body: Center(child: Text('Projektstand nicht gefunden.')),
+              ? Scaffold(
+                  body: Center(
+                    child: Text(stringsOf(context).progressEntryNotFound),
+                  ),
                 )
               : _EditReadingForm(reading: reading),
         );
@@ -91,7 +95,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     final scaffold = Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: _handleBack),
-        title: const Text('Projektstand bearbeiten'),
+        title: Text(stringsOf(context).editProgressEntry),
       ),
       body: Form(
         key: _formKey,
@@ -106,7 +110,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
               decoration: InputDecoration(
                 labelText:
                     '${currentProgressLabel(widget.reading.meter.unit)} *',
-                suffixText: widget.reading.meter.unit,
+                suffixText: progressUnitLabel(widget.reading.meter.unit),
               ),
               keyboardType: TextInputType.number,
               onChanged: (_) => setState(() {}),
@@ -117,7 +121,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
                         widget.reading.value,
                       ) ==
                       null
-                  ? 'Bitte eine ganze Zahl ab 0 eingeben.'
+                  ? stringsOf(context).enterAWholeNumberOf0OrMore
                   : null,
             ),
             const SizedBox(height: 12),
@@ -125,7 +129,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _note,
-              decoration: const InputDecoration(labelText: 'Notiz'),
+              decoration: InputDecoration(labelText: stringsOf(context).note),
               maxLines: 3,
               onChanged: (_) => setState(() {}),
               onTapOutside: (_) => FocusScope.of(context).unfocus(),
@@ -139,7 +143,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save_outlined),
-              label: const Text('Änderungen speichern'),
+              label: Text(stringsOf(context).saveChanges),
             ),
           ],
         ),
@@ -172,10 +176,9 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     _discardDialogOpen = true;
     final discard = await confirmDiscardChanges(
       context,
-      title: 'Änderungen verwerfen?',
-      message:
-          'Deine Änderungen an diesem Projektstand wurden noch nicht gespeichert.',
-      discardLabel: 'Änderungen verwerfen',
+      title: stringsOf(context).discardChanges183,
+      message: stringsOf(context).yourChangesToThisProgressEntryHaveNotBeen,
+      discardLabel: stringsOf(context).discardChanges,
     );
     _discardDialogOpen = false;
     if (!mounted || !discard) return;
@@ -186,7 +189,9 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message: 'Änderungen konnten nicht verworfen werden: $error',
+            message: stringsOf(
+              context,
+            ).couldNotDiscardChanges(userErrorMessage(error)),
           ),
         );
       }
@@ -235,8 +240,10 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     if (!mounted || result.failures.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(
       AppSnackBar(
-        message:
-            '${result.photos.length} Fotos hinzugefügt. Nicht verarbeitet: ${result.failures.join(', ')}',
+        message: stringsOf(context).photosAddedNotProcessed(
+          result.photos.length,
+          (result.failures.join(', ')).toString(),
+        ),
       ),
     );
   }
@@ -258,7 +265,9 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message: 'Fotos konnten nicht hinzugefügt werden: $error',
+            message: stringsOf(
+              context,
+            ).couldNotAddPhotos(userErrorMessage(error)),
           ),
         );
       }
@@ -278,7 +287,11 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'Foto konnte nicht entfernt werden: $error'),
+          AppSnackBar(
+            message: stringsOf(
+              context,
+            ).couldNotRemovePhoto(userErrorMessage(error)),
+          ),
         );
       }
     }
@@ -291,7 +304,9 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message: 'Fotoreihenfolge konnte nicht gespeichert werden: $error',
+            message: stringsOf(
+              context,
+            ).couldNotSavePhotoOrder(userErrorMessage(error)),
           ),
         );
       }
@@ -316,8 +331,9 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message:
-                'Foto-Zwischenstand konnte nicht wiederhergestellt werden: $error',
+            message: stringsOf(
+              context,
+            ).couldNotRestorePhotoDraft(userErrorMessage(error)),
           ),
         );
       }
@@ -327,6 +343,7 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
   Future<void> _pickDate() async {
     FocusScope.of(context).unfocus();
     final date = await showDatePicker(
+      calendarDelegate: RegionalCalendarDelegate(),
       context: context,
       initialDate: _capturedAt,
       firstDate: firstSelectableReadingDate,
@@ -378,8 +395,8 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
             ..showSnackBar(
               AppSnackBar(
                 message: changed
-                    ? 'Änderungen gespeichert.'
-                    : 'Keine Änderungen vorhanden.',
+                    ? stringsOf(context).changesSaved
+                    : stringsOf(context).noChangesToSave,
               ),
             );
         }
@@ -388,7 +405,9 @@ class _EditReadingFormState extends ConsumerState<_EditReadingForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message: 'Änderungen konnten nicht gespeichert werden: $error',
+            message: stringsOf(
+              context,
+            ).couldNotSaveChanges(userErrorMessage(error)),
           ),
         );
         setState(() => _saving = false);

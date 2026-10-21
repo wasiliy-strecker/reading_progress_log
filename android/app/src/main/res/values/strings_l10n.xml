@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from lib/l10n ARB catalogs. Do not edit. -->
+<resources>
+    <string name="l10n_knitting">Knitting</string>
+    <string name="l10n_crochet">Crochet</string>
+    <string name="l10n_rows">Rows</string>
+    <string name="l10n_rounds">Rounds</string>
+    <string name="l10n_no_progress_entries_yet">No progress entries yet</string>
+    <string name="l10n_project_reminders">Project reminders</string>
+    <string name="l10n_on_time_project_reminders">On-time project reminders</string>
+    <string name="l10n_normal_channel_description">Optional reminders to record project progress regularly.</string>
+    <string name="l10n_exact_channel_description">On-time project reminders with an alarm sound.</string>
+    <string name="l10n_last_progress">Last progress: %1$s %2$s</string>
+    <string name="l10n_reminder_body">Record your current row or round and pick up comfortably later.</string>
+    <string name="l10n_test_notification_title">Test: %1$s · %2$s</string>
+    <string name="l10n_test_notification_app">This is a test reminder. Tap to open the app.</string>
+    <string name="l10n_test_notification_project">This is a test reminder. Tap to open the project.</string>
+    <string name="l10n_strick_h_kelbuch_backup">Strick &amp; Häkelbuch backup</string>
+    <string name="l10n_unexpected_error">Could not complete the operation. Please try again.</string>
+    <string name="l10n_language_save_failed">Could not save the language. Please try again.</string>
+</resources>

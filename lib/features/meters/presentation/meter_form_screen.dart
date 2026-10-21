@@ -1,3 +1,5 @@
+import '../../../core/localization/regional_calendar_delegate.dart';
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -49,12 +51,12 @@ class MeterFormScreen extends ConsumerWidget {
         .when(
           loading: () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
-          error: (_, _) => const Scaffold(
-            body: Center(child: Text('Projekt konnte nicht geladen werden.')),
+          error: (_, _) => Scaffold(
+            body: Center(child: Text(stringsOf(context).couldNotLoadProject)),
           ),
           data: (meter) => meter == null
-              ? const Scaffold(
-                  body: Center(child: Text('Projekt nicht gefunden.')),
+              ? Scaffold(
+                  body: Center(child: Text(stringsOf(context).projectNotFound)),
                 )
               : _MeterForm(meter: meter),
         );
@@ -221,7 +223,11 @@ class _MeterFormState extends ConsumerState<_MeterForm>
       child: Scaffold(
         appBar: AppBar(
           leading: BackButton(onPressed: _handleBack),
-          title: Text(editing ? 'Projekt bearbeiten' : 'Projekt anlegen'),
+          title: Text(
+            editing
+                ? stringsOf(context).editProject
+                : stringsOf(context).createProject,
+          ),
         ),
         body: Form(
           key: _formKey,
@@ -232,7 +238,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
               DropdownButtonFormField<MeterType>(
                 initialValue: _type,
                 isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Technik'),
+                decoration: InputDecoration(
+                  labelText: stringsOf(context).technique,
+                ),
                 items: [
                   for (final type in MeterType.values)
                     DropdownMenuItem(value: type, child: Text(type.label)),
@@ -247,30 +255,32 @@ class _MeterFormState extends ConsumerState<_MeterForm>
               const SizedBox(height: 14),
               TextFormField(
                 controller: _label,
-                decoration: const InputDecoration(
-                  labelText: 'Projektname *',
-                  hintText: 'z. B. Mein Salbei-Pullover',
+                decoration: InputDecoration(
+                  labelText: stringsOf(context).projectName224,
+                  hintText: stringsOf(context).projectNameExample,
                 ),
                 textInputAction: TextInputAction.next,
                 validator: (value) => value == null || value.trim().isEmpty
-                    ? 'Bitte einen Projektname eingeben.'
+                    ? stringsOf(context).enterAProjectName
                     : null,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _number,
-                decoration: const InputDecoration(
-                  labelText: 'Garn (optional)',
-                  hintText: 'z. B. Merinowolle, Salbei',
+                decoration: InputDecoration(
+                  labelText: stringsOf(context).yarnOptional,
+                  hintText: stringsOf(context).yarnExample,
                 ),
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _location,
-                decoration: const InputDecoration(
-                  labelText: 'Nadelstärke (optional)',
-                  hintText: 'z. B. 4,5 mm',
+                decoration: InputDecoration(
+                  labelText: stringsOf(context).needleOrHookSizeOptional,
+                  hintText: stringsOf(
+                    context,
+                  ).needleSizeExample(formatDecimal(4.5)),
                 ),
                 textInputAction: TextInputAction.next,
               ),
@@ -278,7 +288,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
               MeterUnitField(
                 meterType: _type,
                 value: _unit,
-                labelText: 'Zählweise *',
+                labelText: stringsOf(context).countingUnit228,
                 enabled: !_saving,
                 onChanged: (value) => setState(() => _unit = value),
               ),
@@ -290,9 +300,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                     children: [
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Projekterinnerung'),
-                        subtitle: const Text(
-                          'Optional und nur lokal auf diesem Gerät',
+                        title: Text(stringsOf(context).projectReminder),
+                        subtitle: Text(
+                          stringsOf(context).optionalAndOnlyOnThisDevice,
                         ),
                         value: _reminderEnabled,
                         onChanged: (value) =>
@@ -303,8 +313,8 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                         DropdownButtonFormField<ReminderInterval>(
                           initialValue: _interval,
                           isExpanded: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Intervall',
+                          decoration: InputDecoration(
+                            labelText: stringsOf(context).interval,
                           ),
                           items: [
                             for (final interval in ReminderInterval.values)
@@ -323,8 +333,8 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                           DropdownButtonFormField<int>(
                             initialValue: _month,
                             isExpanded: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Monat',
+                            decoration: InputDecoration(
+                              labelText: stringsOf(context).month,
                             ),
                             items: [
                               for (var month = 1; month <= 12; month++)
@@ -342,8 +352,8 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                           DropdownButtonFormField<int>(
                             initialValue: _weekday,
                             isExpanded: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Wochentag',
+                            decoration: InputDecoration(
+                              labelText: stringsOf(context).dayOfWeek,
                             ),
                             items: [
                               for (
@@ -366,7 +376,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                           DropdownButtonFormField<int>(
                             initialValue: _dayOfMonth,
                             isExpanded: true,
-                            decoration: const InputDecoration(labelText: 'Tag'),
+                            decoration: InputDecoration(
+                              labelText: stringsOf(context).day,
+                            ),
                             items: [
                               for (var day = 1; day <= 28; day++)
                                 DropdownMenuItem(
@@ -389,16 +401,18 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 10),
-                              const Expanded(
+                              Expanded(
                                 child: Text(
-                                  'Dev-Modus: Die nächste Erinnerung wird zum Beginn der nächsten Minute geplant. Normale Erinnerungen können leicht verzögert erscheinen.',
+                                  stringsOf(
+                                    context,
+                                  ).devModeTheNextReminderIsScheduledForThe,
                                 ),
                               ),
                             ],
                           ),
                         ] else if (_interval == ReminderInterval.hourly) ...[
                           Text(
-                            'Startdatum',
+                            stringsOf(context).startDate,
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                           Text(
@@ -410,11 +424,11 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                             key: const ValueKey('hourly-pick-date'),
                             onPressed: _saving ? null : _pickHourlyDate,
                             icon: const Icon(Icons.calendar_month_outlined),
-                            label: const Text('Datum ändern'),
+                            label: Text(stringsOf(context).changeDate),
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Startzeit',
+                            stringsOf(context).startTime,
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                           Text(
@@ -428,12 +442,26 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                             key: const ValueKey('hourly-pick-time'),
                             onPressed: _saving ? null : _pickHourlyTime,
                             icon: const Icon(Icons.schedule_outlined),
-                            label: const Text('Uhrzeit ändern'),
+                            label: Text(stringsOf(context).changeTime),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Ab dem gewählten Start alle 60 Minuten. '
-                            'Nächste Erinnerung: ${formatDateTime(nextReminderDate(ReadingReminderSchedule(interval: ReminderInterval.hourly, day: 1, hour: _hourlyStartsAt.hour, minute: _hourlyStartsAt.minute, startsAt: _hourlyStartsAt), DateTime.now()))} Uhr.',
+                            stringsOf(
+                              context,
+                            ).every60MinutesFromTheSelectedStartNextReminder(
+                              (formatDateTime(
+                                nextReminderDate(
+                                  ReadingReminderSchedule(
+                                    interval: ReminderInterval.hourly,
+                                    day: 1,
+                                    hour: _hourlyStartsAt.hour,
+                                    minute: _hourlyStartsAt.minute,
+                                    startsAt: _hourlyStartsAt,
+                                  ),
+                                  DateTime.now(),
+                                ),
+                              )).toString(),
+                            ),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ] else ...[
@@ -443,7 +471,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Uhrzeit',
+                                  stringsOf(context).time,
                                   style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(fontWeight: FontWeight.w800),
                                 ),
@@ -460,7 +488,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                             child: OutlinedButton.icon(
                               onPressed: _saving ? null : _pickReminderTime,
                               icon: const Icon(Icons.schedule_outlined),
-                              label: const Text('Uhrzeit ändern'),
+                              label: Text(stringsOf(context).changeTime),
                             ),
                           ),
                         ],
@@ -468,7 +496,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Art der Erinnerung',
+                            stringsOf(context).reminderType,
                             style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
@@ -476,9 +504,10 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                         const SizedBox(height: 8),
                         _ReminderModeCard(
                           key: const ValueKey('reminder-mode-normal'),
-                          title: 'Normale Erinnerung',
-                          description:
-                              'Kann leicht verzögert erscheinen. Die Systemeinstellung „Nicht stören“ wird berücksichtigt.',
+                          title: stringsOf(context).standardReminder,
+                          description: stringsOf(
+                            context,
+                          ).mayArriveSlightlyLateRespectsTheSystemDoNot,
                           icon: Icons.notifications_outlined,
                           selected:
                               _deliveryMode == ReminderDeliveryMode.normal,
@@ -491,9 +520,10 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                         const SizedBox(height: 8),
                         _ReminderModeCard(
                           key: const ValueKey('reminder-mode-punctual'),
-                          title: 'Pünktlich mit Ton',
-                          description:
-                              'Wird möglichst genau zur gewählten Uhrzeit wie ein Alarm ausgelöst.',
+                          title: stringsOf(context).onTimeWithSound,
+                          description: stringsOf(
+                            context,
+                          ).triggersAsCloseAsPossibleToTheSelectedTime,
                           icon: Icons.alarm_outlined,
                           selected:
                               _deliveryMode ==
@@ -530,10 +560,10 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                                   ? null
                                   : _openExactAlarmSettings,
                               icon: const Icon(Icons.open_in_new_outlined),
-                              label: const SizedBox(
+                              label: SizedBox(
                                 width: double.infinity,
                                 child: Text(
-                                  '„Alarme & Erinnerungen“ öffnen',
+                                  stringsOf(context).openAlarmsReminders,
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -574,10 +604,10 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                                     ),
                                   )
                                 : const Icon(Icons.notification_add_outlined),
-                            label: const SizedBox(
+                            label: SizedBox(
                               width: double.infinity,
                               child: Text(
-                                'Erinnerung jetzt testen',
+                                stringsOf(context).testReminderNow,
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -585,8 +615,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Prüfe beim Test die Benachrichtigungsleiste. '
-                          'Die Test-Erinnerung wird nach einer Minute automatisch entfernt.',
+                          stringsOf(
+                            context,
+                          ).checkTheNotificationShadeDuringTheTestTheTest,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -617,8 +648,8 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                 const SizedBox(height: 12),
               ],
               if (_needsReminderRepair) ...[
-                const Text(
-                  'Die Erinnerung ist nicht bestätigt. Mit Speichern wird sie erneut eingerichtet.',
+                Text(
+                  stringsOf(context).theReminderIsNotConfirmedSavingWillSetIt,
                 ),
                 const SizedBox(height: 8),
               ],
@@ -639,14 +670,14 @@ class _MeterFormState extends ConsumerState<_MeterForm>
                       ),
                 label: Text(
                   _saving
-                      ? 'Wird gespeichert …'
+                      ? stringsOf(context).saving
                       : editing && !hasUnsavedChanges && !_needsReminderRepair
-                      ? 'Alles gespeichert'
+                      ? stringsOf(context).everythingSaved
                       : _needsReminderRepair && !hasUnsavedChanges
-                      ? 'Erinnerung erneut speichern'
+                      ? stringsOf(context).saveReminderAgain
                       : editing
-                      ? 'Änderungen speichern'
-                      : 'Projekt speichern',
+                      ? stringsOf(context).saveChanges
+                      : stringsOf(context).saveProject,
                 ),
               ),
             ],
@@ -710,11 +741,15 @@ class _MeterFormState extends ConsumerState<_MeterForm>
     final editing = widget.meter != null;
     final discard = await confirmDiscardChanges(
       context,
-      title: editing ? 'Änderungen verwerfen?' : 'Eingaben verwerfen?',
+      title: editing
+          ? stringsOf(context).discardChanges183
+          : stringsOf(context).discardInput,
       message: editing
-          ? 'Deine Änderungen an diesem Projekt wurden noch nicht gespeichert.'
-          : 'Deine Eingaben für das neue Projekt wurden noch nicht gespeichert.',
-      discardLabel: editing ? 'Änderungen verwerfen' : 'Eingaben verwerfen',
+          ? stringsOf(context).yourChangesToThisProjectHaveNotBeenSaved
+          : stringsOf(context).yourNewProjectDetailsHaveNotBeenSaved,
+      discardLabel: editing
+          ? stringsOf(context).discardChanges
+          : stringsOf(context).discardInput256,
     );
     _discardDialogOpen = false;
     if (!mounted || !discard) return;
@@ -753,8 +788,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
       });
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
-          message:
-              'Für „Pünktlich mit Ton“ fehlt die Android-Berechtigung. Bitte den Modus erneut auswählen und erlauben.',
+          message: stringsOf(
+            context,
+          ).androidPermissionForOnTimeWithSoundIsMissing,
         ),
       );
       return;
@@ -825,11 +861,11 @@ class _MeterFormState extends ConsumerState<_MeterForm>
           ? null
           : AppSnackBar(
               message: delivery.blocked
-                  ? 'Projekt gespeichert. Erinnerungen sind in Android blockiert.'
+                  ? stringsOf(context).projectSavedRemindersAreBlockedInAndroid
                   : warning,
               action: delivery.blocked
                   ? SnackBarAction(
-                      label: 'Einstellungen',
+                      label: stringsOf(context).settings,
                       onPressed: () => openReminderSettings(
                         messenger: messenger,
                         reminders: reminders,
@@ -852,8 +888,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
             ..showSnackBar(
               blockedNotice ??
                   AppSnackBar(
-                    message:
-                        'Projekt gespeichert. Als Nächstes kannst du den ersten Projektstand erfassen.',
+                    message: stringsOf(
+                      context,
+                    ).projectSavedYouCanNowAddYourFirstProgress,
                   ),
             );
         });
@@ -865,15 +902,17 @@ class _MeterFormState extends ConsumerState<_MeterForm>
             ..hideCurrentSnackBar()
             ..showSnackBar(
               blockedNotice ??
-                  AppSnackBar(message: 'Änderungen am Projekt gespeichert.'),
+                  AppSnackBar(message: stringsOf(context).projectChangesSaved),
             );
         }
       }
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(AppSnackBar(message: 'Speichern fehlgeschlagen: $error'));
+      ScaffoldMessenger.of(context).showSnackBar(
+        AppSnackBar(
+          message: stringsOf(context).couldNotSave(userErrorMessage(error)),
+        ),
+      );
       setState(() => _saving = false);
     }
   }
@@ -887,6 +926,7 @@ class _MeterFormState extends ConsumerState<_MeterForm>
   Future<void> _pickHourlyDate() async {
     FocusScope.of(context).unfocus();
     final date = await showDatePicker(
+      calendarDelegate: RegionalCalendarDelegate(),
       context: context,
       initialDate: _hourlyStartsAt,
       firstDate: DateTime(2000),
@@ -923,8 +963,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
         candidate.day != date.day) {
       ScaffoldMessenger.of(context).showSnackBar(
         AppSnackBar(
-          message:
-              'Diese Uhrzeit ist wegen der Zeitumstellung nicht verfügbar. Bitte wähle eine andere Uhrzeit.',
+          message: stringsOf(
+            context,
+          ).thisTimeIsUnavailableDueToTheDaylightSaving,
         ),
       );
       return;
@@ -967,8 +1008,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
     });
     ScaffoldMessenger.of(context).showSnackBar(
       AppSnackBar(
-        message:
-            'Die Android-Einstellung „Alarme & Erinnerungen“ konnte nicht geöffnet werden. „Pünktlich mit Ton“ bleibt ausgewählt.',
+        message: stringsOf(
+          context,
+        ).couldNotOpenAndroidAlarmsRemindersSettingsOnTime,
       ),
     );
   }
@@ -982,8 +1024,9 @@ class _MeterFormState extends ConsumerState<_MeterForm>
     setState(() => _awaitingExactAlarmSettings = false);
     ScaffoldMessenger.of(context).showSnackBar(
       AppSnackBar(
-        message:
-            'Die Android-Einstellung „Alarme & Erinnerungen“ ist auf diesem Gerät nicht verfügbar.',
+        message: stringsOf(
+          context,
+        ).androidAlarmsRemindersSettingsAreUnavailableOnThisDevice,
       ),
     );
   }
@@ -1039,6 +1082,8 @@ class _MeterFormState extends ConsumerState<_MeterForm>
           meterType: _type,
           latestValue: latest?.value.displayText,
           latestUnit: latest?.meter.unit,
+          latestDigits: latest?.value.digits,
+          latestScale: latest?.value.scale,
           deliveryMode: _deliveryMode,
         ),
       );
@@ -1101,17 +1146,18 @@ class _FirstReadingHint extends StatelessWidget {
               child: Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(text: 'Nach dem Speichern kannst du unter '),
+                    TextSpan(text: stringsOf(context).afterSavingUse),
                     TextSpan(
-                      text: '„Projektstand erfassen“',
+                      text: stringsOf(context).recordProgressQuoted,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: colors.onSurface,
                       ),
                     ),
-                    const TextSpan(
-                      text:
-                          ' deinen ersten Projektstand erfassen und protokollieren.',
+                    TextSpan(
+                      text: stringsOf(
+                        context,
+                      ).toAddAndRecordYourFirstProgressEntry,
                     ),
                   ],
                 ),
@@ -1212,14 +1258,16 @@ class _ExactAlarmWarning extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Für pünktliche Erinnerungen muss Android „Alarme & Erinnerungen“ erlauben. Aktiviere die Freigabe, damit die Erinnerung zuverlässig zur gewählten Zeit mit Ton erscheint.',
+          Text(
+            stringsOf(
+              context,
+            ).androidMustAllowAlarmsRemindersForOnTimeReminders,
           ),
           const SizedBox(height: 8),
           TextButton.icon(
             onPressed: busy ? null : onPressed,
             icon: const Icon(Icons.settings_outlined),
-            label: const Text('Alarme & Erinnerungen erlauben'),
+            label: Text(stringsOf(context).allowAlarmsReminders),
           ),
         ],
       ),

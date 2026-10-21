@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/evidence_export.dart';
@@ -19,14 +20,14 @@ Future<EvidencePhotoMode?> showEvidencePhotoModeSheet(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'PDF-Inhalt wählen',
+              stringsOf(context).choosePDFContent,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 6),
             Text(
-              'Wähle, welche Inhalte deine PDF enthalten soll.',
+              stringsOf(context).chooseWhatToIncludeInYourPDF,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -36,8 +37,9 @@ Future<EvidencePhotoMode?> showEvidencePhotoModeSheet(
               mode: EvidencePhotoMode.withoutPhotos,
               kind: kind,
               icon: Icons.description_outlined,
-              description:
-                  'Projektstände, Zeitpunkte und Notizen – kompakt ohne Fotos.',
+              description: stringsOf(
+                context,
+              ).progressEntriesDatesAndNotesCompactWithoutPhotos,
             ),
             const SizedBox(height: 8),
             _PhotoModeTile(
@@ -46,8 +48,12 @@ Future<EvidencePhotoMode?> showEvidencePhotoModeSheet(
               kind: kind,
               icon: Icons.photo_outlined,
               description: kind == EvidenceExportKind.singleReading
-                  ? 'Enthält alle aktuell zugeordneten Fotos dieses Projektstands.'
-                  : 'Enthält alle aktuell zugeordneten Fotos jedes Projektstands.',
+                  ? stringsOf(
+                      context,
+                    ).includesAllPhotosCurrentlyAttachedToThisProgressEntry
+                  : stringsOf(
+                      context,
+                    ).includesAllPhotosCurrentlyAttachedToEachProgressEntry,
             ),
           ],
         ),
@@ -89,7 +95,7 @@ class _PhotoModeTile extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         subtitle: Text(
-          enabled ? description : 'Keine aktuellen Fotos vorhanden.',
+          enabled ? description : stringsOf(context).noCurrentPhotosAvailable,
           style: enabled ? null : TextStyle(color: colors.onSurfaceVariant),
         ),
         trailing: enabled ? const Icon(Icons.chevron_right) : null,

@@ -1,3 +1,5 @@
+import '../../../core/localization/regional_calendar_delegate.dart';
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -70,12 +72,12 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
         .when(
           loading: () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
-          error: (_, _) => const Scaffold(
-            body: Center(child: Text('Projekt konnte nicht geladen werden.')),
+          error: (_, _) => Scaffold(
+            body: Center(child: Text(stringsOf(context).couldNotLoadProject)),
           ),
           data: (meter) => meter == null
-              ? const Scaffold(
-                  body: Center(child: Text('Projekt nicht gefunden.')),
+              ? Scaffold(
+                  body: Center(child: Text(stringsOf(context).projectNotFound)),
                 )
               : _buildContent(meter),
         );
@@ -87,7 +89,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
     final scaffold = Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: _handleBack),
-        title: const Text('Projektstand erfassen'),
+        title: Text(stringsOf(context).recordProgress),
       ),
       body: Form(
         key: _formKey,
@@ -109,7 +111,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
                         _capturedAt = _initialCapturedAt;
                       }),
                 icon: const Icon(Icons.edit_note_outlined),
-                label: const Text('Stand eintragen'),
+                label: Text(stringsOf(context).enterProgress),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
@@ -117,7 +119,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
                     ? null
                     : () => _capture(ReadingSource.camera),
                 icon: const Icon(Icons.photo_camera_outlined),
-                label: const Text('Projekt fotografieren'),
+                label: Text(stringsOf(context).photographProject),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
@@ -125,14 +127,14 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
                     ? null
                     : () => _capture(ReadingSource.gallery),
                 icon: const Icon(Icons.photo_library_outlined),
-                label: const Text('Fotos aus Galerie'),
+                label: Text(stringsOf(context).photosFromGallery),
               ),
               const SizedBox(height: 12),
               if (_working) ...[
                 const SizedBox(height: 20),
                 const Center(child: CircularProgressIndicator()),
                 const SizedBox(height: 8),
-                const Center(child: Text('Foto wird vorbereitet …')),
+                Center(child: Text(stringsOf(context).preparingPhoto)),
               ],
             ] else ...[
               ReadingPhotoEditor(
@@ -150,8 +152,8 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
                 controller: _value,
                 decoration: InputDecoration(
                   labelText: '${currentProgressLabel(selectedUnit)} *',
-                  suffixText: selectedUnit,
-                  helperText: 'Trage ein, wo du gerade aufgehört hast.',
+                  suffixText: progressUnitLabel(selectedUnit),
+                  helperText: stringsOf(context).enterWhereYouLeftOff,
                 ),
                 autofocus: _manual,
                 keyboardType: TextInputType.number,
@@ -159,7 +161,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
                 onTapOutside: (_) => FocusScope.of(context).unfocus(),
                 validator: (value) =>
                     ReadingValue.tryParseWhole(value ?? '') == null
-                    ? 'Bitte eine ganze Zahl ab 0 eingeben.'
+                    ? stringsOf(context).enterAWholeNumberOf0OrMore
                     : null,
               ),
               const SizedBox(height: 12),
@@ -170,9 +172,9 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _note,
-                decoration: const InputDecoration(
-                  labelText: 'Notiz',
-                  hintText: 'Optional, z. B. mit dem Ärmel begonnen',
+                decoration: InputDecoration(
+                  labelText: stringsOf(context).note,
+                  hintText: stringsOf(context).optionalEGStartedTheSleeve,
                 ),
                 maxLines: 3,
                 onChanged: (_) => setState(() {}),
@@ -191,8 +193,8 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
                       ),
                 label: Text(
                   _manual
-                      ? 'Projektstand speichern'
-                      : 'Projektstand bestätigen und speichern',
+                      ? stringsOf(context).saveProgressEntry
+                      : stringsOf(context).confirmAndSaveProgress,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -234,10 +236,9 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
     _discardDialogOpen = true;
     final discard = await confirmDiscardChanges(
       context,
-      title: 'Projektstand verwerfen?',
-      message:
-          'Dein Projektstand und die ausgewählten Fotos wurden noch nicht gespeichert.',
-      discardLabel: 'Projektstand verwerfen',
+      title: stringsOf(context).discardProgressEntry,
+      message: stringsOf(context).yourProgressEntryAndSelectedPhotosHaveNotBeen,
+      discardLabel: stringsOf(context).discardProgressEntry333,
     );
     _discardDialogOpen = false;
     if (!mounted || !discard) return;
@@ -262,9 +263,9 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message:
-                'Die ungespeicherten Fotos konnten nicht entfernt werden. '
-                'Bitte versuche es erneut.',
+            message: stringsOf(
+              context,
+            ).couldNotRemoveUnsavedPhotosPleaseTryAgain,
           ),
         );
       }
@@ -298,8 +299,10 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
     if (!mounted || result.failures.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(
       AppSnackBar(
-        message:
-            '${result.photos.length} Fotos hinzugefügt. Nicht verarbeitet: ${result.failures.join(', ')}',
+        message: stringsOf(context).photosAddedNotProcessed(
+          result.photos.length,
+          (result.failures.join(', ')).toString(),
+        ),
       ),
     );
   }
@@ -327,7 +330,9 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message: 'Fotos konnten nicht hinzugefügt werden: $error',
+            message: stringsOf(
+              context,
+            ).couldNotAddPhotos(userErrorMessage(error)),
           ),
         );
       }
@@ -359,8 +364,9 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message:
-                'Foto-Zwischenstand konnte nicht wiederhergestellt werden: $error',
+            message: stringsOf(
+              context,
+            ).couldNotRestorePhotoDraft(userErrorMessage(error)),
           ),
         );
       }
@@ -380,7 +386,11 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'Foto konnte nicht entfernt werden: $error'),
+          AppSnackBar(
+            message: stringsOf(
+              context,
+            ).couldNotRemovePhoto(userErrorMessage(error)),
+          ),
         );
       }
     }
@@ -393,7 +403,9 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message: 'Fotoreihenfolge konnte nicht gespeichert werden: $error',
+            message: stringsOf(
+              context,
+            ).couldNotSavePhotoOrder(userErrorMessage(error)),
           ),
         );
       }
@@ -403,6 +415,7 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
   Future<void> _pickCapturedAt() async {
     FocusScope.of(context).unfocus();
     final date = await showDatePicker(
+      calendarDelegate: RegionalCalendarDelegate(),
       context: context,
       initialDate: _capturedAt,
       firstDate: firstSelectableReadingDate,
@@ -453,12 +466,16 @@ class _CaptureReadingScreenState extends ConsumerState<CaptureReadingScreen> {
         if (!messenger.mounted) return;
         messenger
           ..hideCurrentSnackBar()
-          ..showSnackBar(AppSnackBar(message: 'Projektstand gespeichert.'));
+          ..showSnackBar(
+            AppSnackBar(message: stringsOf(context).progressEntrySaved),
+          );
       });
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'Speichern fehlgeschlagen: $error'),
+          AppSnackBar(
+            message: stringsOf(context).couldNotSave(userErrorMessage(error)),
+          ),
         );
         setState(() => _saving = false);
       }
@@ -477,18 +494,18 @@ class _CaptureGuidance extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Hier machst du weiter',
+            stringsOf(context).pickUpFromHere,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 10),
-          const Text(
-            'Merke dir deine aktuelle Reihe oder Runde. Fotos halten fest, wie dein Projekt gerade aussieht.',
+          Text(
+            stringsOf(context).rememberYourCurrentRowOrRoundPhotosCaptureHow,
           ),
           const SizedBox(height: 8),
           Text(
-            'Deinen Stand trägst du selbst ein. Fotos und Notizen bleiben auf deinem Gerät.',
+            stringsOf(context).youEnterYourProgressYourselfPhotosAndNotesStay,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

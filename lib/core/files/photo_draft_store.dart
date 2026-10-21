@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,14 +44,14 @@ class PreferencesPhotoDraftStore implements PhotoDraftStore {
   @override
   Future<void> write(String route, Map<String, dynamic> draft) async {
     if (!await preferences.setString('$_prefix$route', jsonEncode(draft))) {
-      throw StateError('Der Foto-Zwischenstand konnte nicht gesichert werden.');
+      throw StateError(appStrings.couldNotSaveThePhotoDraft);
     }
   }
 
   @override
   Future<void> remove(String route) async {
     if (!await preferences.remove('$_prefix$route')) {
-      throw StateError('Der Foto-Zwischenstand konnte nicht entfernt werden.');
+      throw StateError(appStrings.couldNotRemoveThePhotoDraft);
     }
   }
 

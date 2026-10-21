@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -70,8 +71,8 @@ class _PdfExportProgressDialogState extends State<PdfExportProgressDialog> {
           size: 36,
           color: colors.primary,
         ),
-        title: const Text(
-          'Projektprotokoll wird erstellt',
+        title: Text(
+          stringsOf(context).creatingProjectReport,
           textAlign: TextAlign.center,
         ),
         content: Semantics(
@@ -90,7 +91,7 @@ class _PdfExportProgressDialogState extends State<PdfExportProgressDialog> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Bitte kurz warten …',
+                stringsOf(context).pleaseWait,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colors.onSurfaceVariant,

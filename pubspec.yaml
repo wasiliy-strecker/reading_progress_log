@@ -76,6 +76,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true
   # Local runs and flutter attach use Dev; Store builds select --flavor store.
   default-flavor: dev
 

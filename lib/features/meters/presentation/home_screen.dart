@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -52,7 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         title: const Text('Strick & Häkelbuch'),
         actions: [
           IconButton(
-            tooltip: 'Einstellungen',
+            tooltip: stringsOf(context).settings,
             onPressed: () => context.pushNamed('settings'),
             icon: const Icon(Icons.settings_outlined),
           ),
@@ -70,7 +71,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       floatingActionButton: AppFloatingActionButton(
         onPressed: () => context.pushNamed('meterNew'),
         icon: Icons.add,
-        label: 'Projekt anlegen',
+        label: stringsOf(context).createProject,
       ),
     );
   }
@@ -80,9 +81,9 @@ enum _MeterSort { lastEdited, name, type }
 
 extension on _MeterSort {
   String get label => switch (this) {
-    _MeterSort.lastEdited => 'Zuletzt bearbeitet',
-    _MeterSort.name => 'Name A–Z',
-    _MeterSort.type => 'Technik',
+    _MeterSort.lastEdited => appStrings.lastEdited,
+    _MeterSort.name => appStrings.nameAZ,
+    _MeterSort.type => appStrings.technique,
   };
 }
 
@@ -132,7 +133,7 @@ class _MeterListState extends ConsumerState<_MeterList> {
         16,
         AppFloatingActionButton.contentBottomPadding(
           context,
-          'Projekt anlegen',
+          stringsOf(context).createProject,
         ),
       ),
       itemCount: entries.isEmpty ? 1 : entries.length + 1,
@@ -142,14 +143,14 @@ class _MeterListState extends ConsumerState<_MeterList> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Deine Projekte',
+                stringsOf(context).yourProjects,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                'Deine Projekte, dein Tempo. Merke dir, wo du weitermachst.',
+                stringsOf(context).yourProjectsYourPaceRememberWhereToPickUp,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -158,13 +159,13 @@ class _MeterListState extends ConsumerState<_MeterList> {
               TextField(
                 controller: _search,
                 decoration: InputDecoration(
-                  labelText: 'Projekte suchen',
-                  hintText: 'Name, Technik, Garn oder Nadelstärke',
+                  labelText: stringsOf(context).searchProjects,
+                  hintText: stringsOf(context).nameTechniqueYarnOrNeedleSize,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: query.isEmpty
                       ? null
                       : IconButton(
-                          tooltip: 'Suche löschen',
+                          tooltip: stringsOf(context).clearSearch,
                           onPressed: () {
                             _search.clear();
                             setState(() {});
@@ -185,10 +186,8 @@ class _MeterListState extends ConsumerState<_MeterList> {
                 children: [
                   Text(
                     query.isEmpty
-                        ? entries.length == 1
-                              ? '1 Projekt'
-                              : '${entries.length} Projekte'
-                        : '${entries.length} Treffer',
+                        ? stringsOf(context).projectCount(entries.length)
+                        : stringsOf(context).matchCount(entries.length),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -239,7 +238,7 @@ class _MeterListState extends ConsumerState<_MeterList> {
       entry.meter.type.label,
       entry.meter.meterNumber,
       entry.meter.location,
-      entry.meter.unit,
+      progressUnitLabel(entry.meter.unit),
       if (entry.latestValue != null) entry.latestValue!.displayText,
     ].any((value) => value.toLowerCase().contains(query));
   }
@@ -322,9 +321,9 @@ class _MeterCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       item.latestValue == null
-                          ? 'Noch kein Projektstand'
+                          ? stringsOf(context).noProgressEntriesYet
                           : progressValueLabel(
-                              item.latestValue!.displayText,
+                              formatReadingValue(item.latestValue!),
                               item.latestUnit ?? meter.unit,
                             ),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -334,7 +333,9 @@ class _MeterCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Zuletzt bearbeitet: ${formatDateTime(item.lastEdited)}',
+                      stringsOf(context).lastEdited206(
+                        (formatDateTime(item.lastEdited)).toString(),
+                      ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -353,7 +354,9 @@ class _MeterCard extends StatelessWidget {
                     if (reminder != null) ...[
                       const SizedBox(height: 8),
                       Text(
-                        'Erinnern: ${_reminderSummary(reminder)}',
+                        stringsOf(
+                          context,
+                        ).reminder((_reminderSummary(reminder)).toString()),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -389,8 +392,12 @@ class _MeterCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 reminderStatus?.lastTriggeredAt == null
-                                    ? 'Letzte Erinnerung: noch keine'
-                                    : 'Letzte Erinnerung: ${formatDateTime(reminderStatus!.lastTriggeredAt!)} Uhr',
+                                    ? stringsOf(context).lastReminderNoneYet
+                                    : stringsOf(context).lastReminder(
+                                        (formatDateTime(
+                                          reminderStatus!.lastTriggeredAt!,
+                                        )).toString(),
+                                      ),
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: Theme.of(
@@ -417,21 +424,28 @@ class _MeterCard extends StatelessWidget {
 }
 
 String _reminderSummary(ReadingReminderSchedule reminder) {
-  final time =
-      '${reminder.hour.toString().padLeft(2, '0')}:${reminder.minute.toString().padLeft(2, '0')} Uhr';
+  final time = formatClockTime(reminder.hour, reminder.minute);
   final schedule = switch (reminder.interval) {
-    ReminderInterval.minutely => 'minütlich (Dev)',
-    ReminderInterval.hourly =>
-      'stündlich ab ${formatDateTime(reminder.startsAt!)} Uhr',
-    ReminderInterval.daily => 'täglich um $time',
-    ReminderInterval.weekly =>
-      'wöchentlich am ${reminderWeekdayLabel(reminder.day)} um $time',
-    ReminderInterval.monthly => 'monatlich am ${reminder.day}. um $time',
-    ReminderInterval.yearly =>
-      'jährlich am ${reminder.day}.${(reminder.month ?? 1).toString().padLeft(2, '0')}. um $time',
+    ReminderInterval.minutely => appStrings.everyMinuteDev210,
+    ReminderInterval.hourly => appStrings.hourlyFrom(
+      (formatDateTime(reminder.startsAt!)).toString(),
+    ),
+    ReminderInterval.daily => appStrings.dailyAt((time).toString()),
+    ReminderInterval.weekly => appStrings.weeklyOnAt(
+      (reminderWeekdayLabel(reminder.day)).toString(),
+      (time).toString(),
+    ),
+    ReminderInterval.monthly => appStrings.monthlyOnDayAt(
+      (reminder.day).toString(),
+      (time).toString(),
+    ),
+    ReminderInterval.yearly => appStrings.annualReminder(
+      formatMonthDay(reminder.month ?? 1, reminder.day),
+      time,
+    ),
   };
   return reminder.deliveryMode == ReminderDeliveryMode.punctualWithSound
-      ? '$schedule · pünktlich mit Ton'
+      ? appStrings.onTimeWithSound216((schedule).toString())
       : schedule;
 }
 
@@ -451,8 +465,8 @@ class _NoSearchResults extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Keine passenden Projekte gefunden.',
+            Text(
+              stringsOf(context).noMatchingProjectsFound,
               textAlign: TextAlign.center,
             ),
           ],
@@ -480,14 +494,14 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Erstes Projekt anlegen',
+              stringsOf(context).createYourFirstProject,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Vom ersten Anschlag bis zur letzten Masche: Halte fest, bei welcher Reihe oder Runde du weitermachst – mit Fotos und Notizen, ganz für dich.',
+            Text(
+              stringsOf(context).fromTheFirstStitchToTheLastRememberWhich,
               textAlign: TextAlign.center,
             ),
           ],
@@ -508,7 +522,7 @@ class _ErrorState extends StatelessWidget {
       child: FilledButton.icon(
         onPressed: onRetry,
         icon: const Icon(Icons.refresh),
-        label: const Text('Erneut laden'),
+        label: Text(stringsOf(context).reload),
       ),
     );
   }

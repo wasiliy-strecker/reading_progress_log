@@ -36,6 +36,7 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        AppLocaleBridge.register(this, flutterEngine.dartExecutor.binaryMessenger)
         reminderChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             "com.appfactory.strick_haekelbuch/reminders",
@@ -128,7 +129,7 @@ class MainActivity : FlutterActivity() {
             "getNotificationAvailability" -> {
                 val mode = call.argument<String>("deliveryMode")
                 if (mode != "normal" && mode != "punctualWithSound") {
-                    result.error("invalid_mode", "Erinnerungsart fehlt.", null)
+                    result.error("invalid_mode", AppLocaleBridge.text(this, R.string.l10n_unexpected_error), null)
                 } else {
                     result.success(ReminderNotifier.availability(this, mode == "punctualWithSound").wireValue)
                 }
@@ -136,7 +137,7 @@ class MainActivity : FlutterActivity() {
             "openNotificationSettings" -> {
                 val mode = call.argument<String>("deliveryMode")
                 if (mode != null && mode != "normal" && mode != "punctualWithSound") {
-                    result.error("invalid_mode", "Erinnerungsart ist ungültig.", null)
+                    result.error("invalid_mode", AppLocaleBridge.text(this, R.string.l10n_unexpected_error), null)
                 } else {
                     result.success(openNotificationSettings(mode))
                 }
@@ -161,13 +162,13 @@ class MainActivity : FlutterActivity() {
 
     private fun saveBackup(call: MethodCall, result: MethodChannel.Result) {
         if (pendingBackupSave != null) {
-            result.error("save_pending", "Eine Speicherortwahl läuft bereits.", null)
+            result.error("save_pending", AppLocaleBridge.text(this, R.string.l10n_unexpected_error), null)
             return
         }
         val arguments = call.arguments as? Map<*, *>
         val path = arguments?.get("path") as? String
         if (path.isNullOrBlank()) {
-            result.error("missing_path", "Der Backup-Pfad fehlt.", null)
+            result.error("missing_path", AppLocaleBridge.text(this, R.string.l10n_unexpected_error), null)
             return
         }
         try {
@@ -199,7 +200,7 @@ class MainActivity : FlutterActivity() {
             try {
                 request.backup.inputStream().buffered(backupCopyBufferSize).use { input ->
                     val output = contentResolver.openOutputStream(destination, "w")
-                        ?: throw IllegalStateException("Der Speicherort konnte nicht geöffnet werden.")
+                        ?: throw IllegalStateException(AppLocaleBridge.text(this, R.string.l10n_unexpected_error))
                     output.buffered(backupCopyBufferSize).use { target ->
                         input.copyTo(target, backupCopyBufferSize)
                     }
@@ -224,10 +225,10 @@ class MainActivity : FlutterActivity() {
     private fun shareBackup(call: MethodCall, result: MethodChannel.Result) {
         val arguments = call.arguments as? Map<*, *>
         val path = arguments?.get("path") as? String
-        val title = arguments?.get("title") as? String ?: "Strick & Häkelbuch Backup"
+        val title = arguments?.get("title") as? String ?: AppLocaleBridge.text(this, R.string.l10n_strick_h_kelbuch_backup)
         val text = arguments?.get("text") as? String
         if (path.isNullOrBlank()) {
-            result.error("missing_path", "Der Backup-Pfad fehlt.", null)
+            result.error("missing_path", AppLocaleBridge.text(this, R.string.l10n_unexpected_error), null)
             return
         }
         try {
@@ -269,7 +270,7 @@ class MainActivity : FlutterActivity() {
             backupRoot.path + File.separator,
         )
         if (!isInsideBackupRoot || !backup.isFile) {
-            throw IllegalArgumentException("Die Backup-Datei ist ungültig.")
+            throw IllegalArgumentException(AppLocaleBridge.text(this, R.string.l10n_unexpected_error))
         }
         return backup
     }
@@ -316,7 +317,7 @@ class MainActivity : FlutterActivity() {
             return
         }
         if (notificationPermissionResult != null) {
-            result.error("permission_pending", "Die Abfrage läuft bereits.", null)
+            result.error("permission_pending", AppLocaleBridge.text(this, R.string.l10n_unexpected_error), null)
             return
         }
         notificationPermissionResult = result
@@ -414,7 +415,7 @@ class MainActivity : FlutterActivity() {
             minute == null || deliveryMode.isNullOrBlank() ||
             (interval == "hourly" && startsAtMillis == null)
         ) {
-            result.error("invalid_schedule", "Erinnerungsdaten sind unvollständig.", null)
+            result.error("invalid_schedule", AppLocaleBridge.text(this, R.string.l10n_unexpected_error), null)
             return
         }
         val reminder = StoredReminder(
@@ -424,6 +425,8 @@ class MainActivity : FlutterActivity() {
             meterTypeLabel = meterTypeLabel,
             latestValue = arguments["latestValue"] as? String,
             latestUnit = arguments["latestUnit"] as? String,
+            latestDigits = arguments["latestDigits"] as? String,
+            latestScale = arguments["latestScale"] as? Int,
             interval = interval,
             day = day,
             month = arguments["month"] as? Int,
@@ -480,7 +483,7 @@ class MainActivity : FlutterActivity() {
             label.isNullOrBlank() || meterType.isNullOrBlank() ||
             meterTypeLabel.isNullOrBlank() || deliveryMode.isNullOrBlank()
         ) {
-            result.error("invalid_test", "Testdaten sind unvollständig.", null)
+            result.error("invalid_test", AppLocaleBridge.text(this, R.string.l10n_unexpected_error), null)
             return
         }
         result.success(
@@ -492,6 +495,8 @@ class MainActivity : FlutterActivity() {
                 meterTypeLabel = meterTypeLabel,
                 latestValue = arguments["latestValue"] as? String,
                 latestUnit = arguments["latestUnit"] as? String,
+            latestDigits = arguments["latestDigits"] as? String,
+            latestScale = arguments["latestScale"] as? Int,
                 punctual = deliveryMode == "punctualWithSound",
             ),
         )

@@ -1,3 +1,4 @@
+import '../../../core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 import '../domain/meter.dart';
 
@@ -27,7 +28,10 @@ class MeterUnitField extends StatelessWidget {
     ),
     items: [
       for (final unit in meterType.availableUnits)
-        DropdownMenuItem(value: unit, child: Text(unit)),
+        DropdownMenuItem(
+          value: unit,
+          child: Text(progressUnitLabel(unit, strings: stringsOf(context))),
+        ),
     ],
     onChanged: enabled
         ? (unit) {

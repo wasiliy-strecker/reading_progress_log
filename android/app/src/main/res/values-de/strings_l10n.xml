@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from lib/l10n ARB catalogs. Do not edit. -->
+<resources>
+    <string name="l10n_knitting">Stricken</string>
+    <string name="l10n_crochet">Häkeln</string>
+    <string name="l10n_rows">Reihen</string>
+    <string name="l10n_rounds">Runden</string>
+    <string name="l10n_no_progress_entries_yet">Noch kein Projektstand</string>
+    <string name="l10n_project_reminders">Projekterinnerungen</string>
+    <string name="l10n_on_time_project_reminders">Pünktliche Projekterinnerungen</string>
+    <string name="l10n_normal_channel_description">Optionale Erinnerungen für regelmäßige Projektstände.</string>
+    <string name="l10n_exact_channel_description">Pünktliche Projekterinnerungen mit Alarmton.</string>
+    <string name="l10n_last_progress">Letzter Projektstand: %1$s %2$s</string>
+    <string name="l10n_reminder_body">Halte deine aktuelle Reihe oder Runde fest und mache später entspannt weiter.</string>
+    <string name="l10n_test_notification_title">Test: %1$s · %2$s</string>
+    <string name="l10n_test_notification_app">Das ist eine Test-Erinnerung. Tippen öffnet die App.</string>
+    <string name="l10n_test_notification_project">Das ist eine Test-Erinnerung. Tippen öffnet die Projektkarte.</string>
+    <string name="l10n_strick_h_kelbuch_backup">Strick &amp; Häkelbuch Backup</string>
+    <string name="l10n_unexpected_error">Der Vorgang konnte nicht abgeschlossen werden. Bitte versuche es erneut.</string>
+    <string name="l10n_language_save_failed">Die Sprache konnte nicht gespeichert werden. Bitte versuche es erneut.</string>
+</resources>

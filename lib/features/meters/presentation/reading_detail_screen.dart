@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'reading_photo_gallery.dart';
 import 'package:universal_io/io.dart';
 
@@ -39,14 +40,16 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
         .when(
           loading: () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
-          error: (_, _) => const Scaffold(
+          error: (_, _) => Scaffold(
             body: Center(
-              child: Text('Projektstand konnte nicht geladen werden.'),
+              child: Text(stringsOf(context).couldNotLoadProgressEntry),
             ),
           ),
           data: (reading) => reading == null
-              ? const Scaffold(
-                  body: Center(child: Text('Projektstand nicht gefunden.')),
+              ? Scaffold(
+                  body: Center(
+                    child: Text(stringsOf(context).progressEntryNotFound),
+                  ),
                 )
               : _buildContent(reading),
         );
@@ -66,13 +69,15 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
         export.id: File(export.filePath).existsSync(),
     };
     return Scaffold(
-      appBar: AppBar(title: const Text('Projektstand')),
+      appBar: AppBar(title: Text(stringsOf(context).progressEntry)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           if (reading.hasPhoto) ...[
             Text(
-              'Aktuelle Fotos (${reading.currentPhotos.length})',
+              stringsOf(
+                context,
+              ).currentPhotos((reading.currentPhotos.length).toString()),
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -85,8 +90,8 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
                   pathParameters: {'id': reading.id},
                 ),
                 icon: const Icon(Icons.swap_horiz),
-                label: const Text(
-                  'Fotos sortieren',
+                label: Text(
+                  stringsOf(context).sortPhotos,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -96,7 +101,7 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
             const SizedBox(height: 16),
           ],
           Text(
-            '${reading.value.displayText} ${reading.meter.unit}',
+            '${formatReadingValue(reading.value)} ${progressUnitLabel(reading.meter.unit)}',
             style: Theme.of(
               context,
             ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w900),
@@ -114,7 +119,7 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
           _InfoCard(reading: reading),
           const SizedBox(height: 20),
           Text(
-            'Gespeicherte Projektprotokolle',
+            stringsOf(context).savedProjectReports,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -129,9 +134,9 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
             for (final export in singleExports)
               EvidenceExportCard(
                 export: export,
-                title: 'Projektprotokoll · Einzelner Projektstand',
+                title: stringsOf(context).projectReportSingleEntry,
                 detail:
-                    '${currentProgressLabel(reading.meter.unit)}: ${reading.value.displayText}\n${export.photoMode.labelFor(export.kind)}',
+                    '${currentProgressLabel(reading.meter.unit)}: ${formatReadingValue(reading.value)}\n${export.photoMode.labelFor(export.kind)}',
                 fileAvailable: availableFiles[export.id] == true,
                 onTap: availableFiles[export.id] != true
                     ? null
@@ -158,8 +163,10 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
       final report = await runWithPdfExportProgress(
         context,
         description: photoMode == EvidencePhotoMode.withoutPhotos
-            ? 'Projektstand und Notizen werden für die kompakte PDF zusammengestellt.'
-            : 'Die aktuellen Fotos, der Projektstand und die Notizen werden für die PDF zusammengestellt.',
+            ? stringsOf(context).preparingTheProgressEntryAndNotesForTheCompact
+            : stringsOf(
+                context,
+              ).preparingCurrentPhotosProgressAndNotesForThePDF,
         operation: () async {
           final revisions = await ref
               .read(meterReadingRepositoryProvider)
@@ -179,7 +186,11 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'PDF konnte nicht erstellt werden: $error'),
+          AppSnackBar(
+            message: stringsOf(
+              context,
+            ).couldNotCreatePDF(userErrorMessage(error)),
+          ),
         );
       }
     } finally {
@@ -193,7 +204,7 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
       if (mounted) {
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(
-          AppSnackBar(message: 'Die gespeicherte PDF-Datei fehlt.'),
+          AppSnackBar(message: stringsOf(context).theSavedPDFFileIsMissing),
         );
       }
       return;
@@ -209,9 +220,8 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
     if (_deletingExportIds.contains(record.id)) return;
     final confirmed = await confirmDestructiveAction(
       context,
-      title: 'Projektprotokoll löschen?',
-      message:
-          'Die PDF wird dauerhaft aus Strick & Häkelbuch gelöscht. Bereits geteilte oder außerhalb der App gespeicherte Kopien bleiben erhalten.',
+      title: stringsOf(context).deleteProjectReport288,
+      message: stringsOf(context).thePDFWillBePermanentlyDeletedFromStrickH,
     );
     if (!confirmed || !mounted) return;
     setState(() => _deletingExportIds.add(record.id));
@@ -219,16 +229,17 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
       await ref.read(evidenceReportServiceProvider).delete(record);
       ref.invalidate(evidenceForMeterProvider(record.meterId));
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(AppSnackBar(message: 'Projektprotokoll gelöscht.'));
+        ScaffoldMessenger.of(context).showSnackBar(
+          AppSnackBar(message: stringsOf(context).projectReportDeleted),
+        );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           AppSnackBar(
-            message:
-                'Projektprotokoll konnte nicht gelöscht werden. Bitte versuche es erneut.',
+            message: stringsOf(
+              context,
+            ).couldNotDeleteProjectReportPleaseTryAgain,
           ),
         );
       }
@@ -242,9 +253,10 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
   Future<void> _delete(MeterReading reading) async {
     final confirmed = await confirmDestructiveAction(
       context,
-      title: 'Projektstand löschen?',
-      message:
-          'Projektstand, alle zugehörigen Anhänge und Einzel-PDFs dieses Projektstands werden dauerhaft gelöscht. Gespeicherte Verlaufs-PDFs bleiben erhalten. Bereits außerhalb der App gespeicherte Kopien bleiben bestehen.',
+      title: stringsOf(context).deleteProgressEntry,
+      message: stringsOf(
+        context,
+      ).thisEntryItsAttachmentsAndItsIndividualPDFsWill,
     );
     if (!confirmed || !mounted) return;
     try {
@@ -260,7 +272,9 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
       }
       messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(AppSnackBar(message: 'Projektstand gelöscht.'));
+        ..showSnackBar(
+          AppSnackBar(message: stringsOf(context).progressEntryDeleted),
+        );
     } catch (_) {
       if (!mounted) return;
       ref.invalidate(evidenceForMeterProvider(reading.meterId));
@@ -268,8 +282,9 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           AppSnackBar(
-            message:
-                'Projektstand konnte nicht vollständig gelöscht werden. Bitte versuche es erneut.',
+            message: stringsOf(
+              context,
+            ).couldNotCompletelyDeleteTheProgressEntryPleaseTry,
           ),
         );
     }
@@ -298,12 +313,12 @@ class _SinglePdfAction extends StatelessWidget {
               children: [
                 Icon(Icons.picture_as_pdf_outlined, color: colors.primary),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Projektprotokoll dieses Projektstands',
+                        stringsOf(context).reportForThisProgressEntry,
                         style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                       SizedBox(height: 4),
@@ -317,8 +332,8 @@ class _SinglePdfAction extends StatelessWidget {
             FilledButton.icon(
               onPressed: exporting ? null : onPressed,
               icon: const Icon(Icons.picture_as_pdf_outlined),
-              label: const Text(
-                'Projektprotokoll als PDF erstellen',
+              label: Text(
+                stringsOf(context).createProjectReportAsPDF,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -344,7 +359,7 @@ class _ReadingActions extends StatelessWidget {
         OutlinedButton.icon(
           onPressed: onEdit,
           icon: const Icon(Icons.edit_outlined),
-          label: const Text('Bearbeiten'),
+          label: Text(stringsOf(context).edit),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
@@ -354,7 +369,7 @@ class _ReadingActions extends StatelessWidget {
           ),
           onPressed: onDelete,
           icon: const Icon(Icons.delete_outline),
-          label: const Text('Projektstand löschen'),
+          label: Text(stringsOf(context).deleteProgressEntry299),
         ),
       ],
     );
@@ -374,11 +389,11 @@ class _InfoCard extends StatelessWidget {
         child: Column(
           children: [
             _row(
-              'Zeitpunkt des Projektstands',
+              stringsOf(context).progressDateAndTime,
               formatDateTime(reading.capturedAt),
             ),
             _row(
-              'Quelle',
+              stringsOf(context).source,
               reading.hasPhoto
                   ? reading.currentPhotos
                         .map((photo) => photo.source.label)
@@ -387,8 +402,12 @@ class _InfoCard extends StatelessWidget {
                   : ReadingSource.manual.label,
             ),
             if (reading.lowerReadingReason != null)
-              _row('Niedrigerer Stand', reading.lowerReadingReason!.label),
-            if (reading.note.isNotEmpty) _row('Notiz', reading.note),
+              _row(
+                stringsOf(context).lowerCount301,
+                reading.lowerReadingReason!.label,
+              ),
+            if (reading.note.isNotEmpty)
+              _row(stringsOf(context).note, reading.note),
           ],
         ),
       ),

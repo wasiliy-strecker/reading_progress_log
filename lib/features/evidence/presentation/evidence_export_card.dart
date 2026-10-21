@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/formatters.dart';
@@ -72,7 +73,9 @@ class EvidenceExportCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'Erstellt am ${formatDateTime(export.createdAt)} Uhr',
+                          stringsOf(context).createdOn(
+                            (formatDateTime(export.createdAt)).toString(),
+                          ),
                           style: TextStyle(color: colors.onSurfaceVariant),
                         ),
                         const SizedBox(height: 4),
@@ -105,8 +108,8 @@ class EvidenceExportCard extends StatelessWidget {
                                 Flexible(
                                   child: Text(
                                     fileAvailable
-                                        ? 'Lokal gespeichert'
-                                        : 'Datei fehlt',
+                                        ? stringsOf(context).savedLocally
+                                        : stringsOf(context).fileMissing,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: Theme.of(context)
@@ -143,7 +146,7 @@ class EvidenceExportCard extends StatelessWidget {
                           )
                         : IconButton(
                             key: ValueKey('delete-evidence-${export.id}'),
-                            tooltip: 'Projektprotokoll löschen',
+                            tooltip: stringsOf(context).deleteProjectReport,
                             onPressed: onDelete,
                             color: colors.error,
                             icon: const Icon(Icons.delete_outline),

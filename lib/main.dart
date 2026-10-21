@@ -1,3 +1,5 @@
+import 'core/localization/app_locale.dart';
+import 'core/localization/locale_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/files/photo_draft_store.dart';
@@ -10,6 +12,10 @@ import 'core/reminders/local_notification_reminder_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppLocale.initialize();
+  final localeSettings = PlatformLocaleSettingsRepository();
+  final locale = await localeSettings.load();
+  AppLocale.install(locale);
   final appVersion = await _loadAppVersion();
   final photoDraftStore = PreferencesPhotoDraftStore(
     await SharedPreferences.getInstance(),
@@ -19,6 +25,8 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [
+        initialLocaleProvider.overrideWithValue(locale),
+        localeSettingsRepositoryProvider.overrideWithValue(localeSettings),
         appVersionProvider.overrideWithValue(appVersion),
         photoDraftStoreProvider.overrideWithValue(photoDraftStore),
         initialPhotoDraftRouteProvider.overrideWithValue(photoDraftRoute),

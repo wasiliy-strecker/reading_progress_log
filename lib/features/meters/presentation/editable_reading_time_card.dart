@@ -1,3 +1,4 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/formatters.dart';
@@ -37,7 +38,7 @@ class EditableReadingTimeCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Zeitpunkt des Projektstands',
+                        stringsOf(context).progressDateAndTime,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
@@ -54,7 +55,7 @@ class EditableReadingTimeCard extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onPressed,
                 icon: const Icon(Icons.edit_calendar_outlined),
-                label: const Text('Datum & Uhrzeit ändern'),
+                label: Text(stringsOf(context).changeDateTime),
               ),
             ),
           ],

@@ -30,8 +30,8 @@
     },
     "lib/core/files/meter_photo_store.dart": {
       "sourceSha256": "624a0b26bc739d901436247ec420be2c4062b8fb4c6e2b4dea05a97cfd89811b",
-      "localSha256": "9df9bcf98d79eb7ede7b9a7ffbf71361c0408a12fc89aa3dc73a884f556b7305",
-      "reason": "Persist every selected or recovered photo in order with isolated processing failures and temporary-file cleanup.",
+      "localSha256": "46764389447807b188474de2e16bea590fdb6dace8eef6faeb0845f3fedf7955",
+      "reason": "Persist every selected or recovered photo in order with isolated processing failures and temporary-file cleanup. Localize user-facing photo import errors without changing file processing, bytes or hashes.",
       "tests": [
         "test/core/files/meter_photo_store_test.dart"
       ]
@@ -56,11 +56,12 @@
     },
     "lib/features/evidence/domain/evidence_export.dart": {
       "sourceSha256": "9a5a050f97354b76002f23e3a16cc8728d2d7b9f47fc97608478bd80c6842e51",
-      "localSha256": "1545531a731f0ba6234c3144c51d04ae25ec673fd9590e954298511400454c37",
-      "reason": "Name current-photo exports consistently for a collection while retaining historical export metadata.",
+      "localSha256": "e7365616b753fe27efad0f544cd93b44f0f0fa63c5ecd75b6e4a55ee12d2164c",
+      "reason": "Name current-photo exports consistently for a collection while retaining historical export metadata. Localize display labels without changing serialized enum names or stored PDF metadata.",
       "tests": [
         "test/features/evidence/multiple_photo_pdf_test.dart",
-        "test/features/meters/reading_evidence_explanation_test.dart"
+        "test/features/meters/reading_evidence_explanation_test.dart",
+        "test/features/evidence/localized_pdf_test.dart"
       ]
     },
     "lib/features/meters/application/reading_revision_photos.dart": {
@@ -80,6 +81,14 @@
         "test/features/meters/multiple_photos_test.dart",
         "test/core/persistence/app_database_migration_test.dart"
       ]
+    },
+    "lib/core/utils/formatters.dart": {
+      "sourceSha256": "4511e544b1edb581aac4a8c5a03c9527a5e74d8a7d1d11d6a5cf624d4acd24d5",
+      "reason": "Format dates and exact digits/scale using the device region independently of the UI language. Never parse or rewrite stored displayText. Normalize only strict complete regional dates for existing history search.",
+      "tests": [
+        "test/core/localization_test.dart"
+      ],
+      "localSha256": "f1b4390b76c600ad461bb12788a70cab0a4d9e35e286885a7408b315e630cb1a"
     }
   }
 }

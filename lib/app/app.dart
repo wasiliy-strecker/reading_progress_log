@@ -1,7 +1,8 @@
+import '../core/localization/app_locale.dart';
+import '../core/localization/locale_settings.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/reminders/local_notification_reminder_repository.dart';
@@ -52,7 +53,13 @@ class _MeterReadingLogAppState extends ConsumerState<MeterReadingLogApp>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(_permissionRecovery.refresh());
+      unawaited(ref.read(appLocaleProvider.notifier).refreshDeviceSettings());
     }
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    unawaited(ref.read(appLocaleProvider.notifier).refreshDeviceSettings());
   }
 
   Future<void> _openInitialNotification(
@@ -105,6 +112,8 @@ class _MeterReadingLogAppState extends ConsumerState<MeterReadingLogApp>
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(appLocaleProvider);
+    AppLocale.install(locale);
     return MaterialApp.router(
       restorationScopeId: 'app',
       title: 'Strick & Häkelbuch',
@@ -113,13 +122,15 @@ class _MeterReadingLogAppState extends ConsumerState<MeterReadingLogApp>
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
       routerConfig: ref.watch(appRouterProvider),
-      locale: const Locale('de'),
-      supportedLocales: const [Locale('de')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      locale: locale.uiLocale,
+      supportedLocales: appSupportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(alwaysUse24HourFormat: locale.is24Hour),
+        child: child!,
+      ),
     );
   }
 }

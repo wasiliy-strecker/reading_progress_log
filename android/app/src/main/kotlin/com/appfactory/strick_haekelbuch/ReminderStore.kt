@@ -28,6 +28,8 @@ internal data class StoredReminder(
     val minute: Int,
     val deliveryMode: String,
     val startsAtMillis: Long? = null,
+    val latestDigits: String? = null,
+    val latestScale: Int? = null,
 ) {
     val isPunctual: Boolean
         get() = deliveryMode == "punctualWithSound"
@@ -39,6 +41,8 @@ internal data class StoredReminder(
         .put("meterTypeLabel", meterTypeLabel)
         .put("latestValue", latestValue)
         .put("latestUnit", latestUnit)
+        .put("latestDigits", latestDigits)
+        .put("latestScale", latestScale)
         .put("interval", interval)
         .put("day", day)
         .put("month", month)
@@ -187,6 +191,8 @@ internal data class StoredReminder(
                     .takeIf { it.isNotBlank() },
                 latestUnit = json.optString("latestUnit", "")
                     .takeIf { it.isNotBlank() },
+                latestDigits = if (json.isNull("latestDigits")) null else json.getString("latestDigits"),
+                latestScale = if (json.isNull("latestScale")) null else json.getInt("latestScale"),
                 interval = json.getString("interval"),
                 day = json.getInt("day"),
                 month = if (json.isNull("month")) null else json.getInt("month"),

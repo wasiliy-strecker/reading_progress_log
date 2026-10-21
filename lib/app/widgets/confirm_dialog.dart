@@ -1,10 +1,11 @@
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/material.dart';
 
 Future<bool> confirmDestructiveAction(
   BuildContext context, {
   required String title,
   required String message,
-  String confirmLabel = 'Löschen',
+  String? confirmLabel,
 }) async {
   return await showDialog<bool>(
         context: context,
@@ -24,12 +25,18 @@ Future<bool> confirmDestructiveAction(
                 ),
                 onPressed: () => Navigator.pop(context, true),
                 icon: const Icon(Icons.delete_outline),
-                label: Text(confirmLabel, textAlign: TextAlign.center),
+                label: Text(
+                  confirmLabel ?? stringsOf(context).delete,
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Abbrechen', textAlign: TextAlign.center),
+                child: Text(
+                  stringsOf(context).cancel,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           ),
@@ -42,8 +49,8 @@ Future<bool> confirmDiscardChanges(
   BuildContext context, {
   required String title,
   required String message,
-  String discardLabel = 'Änderungen verwerfen',
-  String continueLabel = 'Weiter bearbeiten',
+  String? discardLabel,
+  String? continueLabel,
 }) async {
   return await showDialog<bool>(
         context: context,
@@ -62,12 +69,18 @@ Future<bool> confirmDiscardChanges(
                   foregroundColor: Theme.of(context).colorScheme.onError,
                 ),
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(discardLabel, textAlign: TextAlign.center),
+                child: Text(
+                  discardLabel ?? stringsOf(context).discardChanges,
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(continueLabel, textAlign: TextAlign.center),
+                child: Text(
+                  continueLabel ?? stringsOf(context).continueEditing,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           ),

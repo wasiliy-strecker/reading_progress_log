@@ -1,3 +1,5 @@
+import '../../../core/utils/formatters.dart';
+import 'package:strick_haekelbuch/core/localization/app_locale.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
@@ -45,7 +47,7 @@ class PlatformBackupFileExporter implements BackupFileExporter {
   Future<BackupSaveResult> save(CreatedBackup backup) async {
     if (!supportsDirectSave) {
       throw UnsupportedError(
-        'Die direkte Speicherortwahl ist auf dieser Plattform noch nicht verfügbar.',
+        appStrings.choosingASaveLocationIsNotYetAvailableOn,
       );
     }
     final value = await _channel.invokeMapMethod<String, Object?>(
@@ -63,20 +65,11 @@ class PlatformBackupFileExporter implements BackupFileExporter {
 
   @override
   Future<void> share(CreatedBackup backup) {
-    final title = 'Strick & Häkelbuch Backup';
+    final title = appStrings.strickHKelbuchBackup;
     final sizeInMb = backup.sizeBytes / (1024 * 1024);
-    final bookCount = _countLabel(
-      backup.preview.meterCount,
-      'Projekt',
-      'Projekte',
-    );
-    final readingCount = _countLabel(
-      backup.preview.readingCount,
-      'Projektstand',
-      'Projektstände',
-    );
-    final text =
-        '$bookCount, $readingCount · ${sizeInMb.toStringAsFixed(1)} MB';
+    final bookCount = appStrings.projectCount(backup.preview.meterCount);
+    final readingCount = appStrings.entryCount(backup.preview.readingCount);
+    final text = '$bookCount, $readingCount · ${formatDecimal(sizeInMb)} MB';
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return _channel.invokeMethod<void>('shareBackup', {
         'path': backup.path,
@@ -108,8 +101,4 @@ class PlatformBackupFileExporter implements BackupFileExporter {
   }
 
   static String _fileName(String path) => path.split(RegExp(r'[/\\]')).last;
-
-  static String _countLabel(int count, String singular, String plural) {
-    return '$count ${count == 1 ? singular : plural}';
-  }
 }

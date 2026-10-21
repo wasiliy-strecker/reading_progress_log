@@ -222,23 +222,18 @@ internal object ReminderNotifier {
         } else {
             NotificationCompat.CATEGORY_REMINDER
         }
-        val latestReading = if (
-            !reminder.latestValue.isNullOrBlank() &&
-            !reminder.latestUnit.isNullOrBlank()
-        ) {
-            "Letzter Projektstand: ${reminder.latestValue} ${reminder.latestUnit}"
-        } else {
-            "Noch kein Projektstand"
-        }
-        val summary = "${reminder.meterTypeLabel} · $latestReading"
+        val latestReading = AppLocaleBridge.progress(context, reminder.latestValue,
+            reminder.latestUnit, reminder.latestDigits, reminder.latestScale)
+        val technique = AppLocaleBridge.technique(context, reminder.meterType, reminder.meterTypeLabel)
+        val summary = "$technique · $latestReading"
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(notificationIcon(reminder.meterType))
             .setColor(notificationColor(reminder.meterType))
-            .setContentTitle("${reminder.meterTypeLabel} · ${reminder.label}")
+            .setContentTitle("$technique · ${reminder.label}")
             .setContentText(summary)
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    "$latestReading\nHalte deine aktuelle Reihe oder Runde fest und mache später entspannt weiter.",
+                    "$latestReading\n${AppLocaleBridge.text(context, R.string.l10n_reminder_body)}",
                 ),
             )
             .apply { configureLegacySound(this, reminder.isPunctual) }
@@ -293,26 +288,26 @@ internal object ReminderNotifier {
         latestValue: String?,
         latestUnit: String?,
         punctual: Boolean,
+        latestDigits: String? = null,
+        latestScale: Int? = null,
     ): String {
         val availability = availability(context, punctual)
         if (availability != ReminderAvailability.AVAILABLE) return availability.wireValue
-        val latestReading = if (!latestValue.isNullOrBlank() && !latestUnit.isNullOrBlank()) {
-            "Letzter Projektstand: $latestValue $latestUnit"
-        } else {
-            "Noch kein Projektstand"
-        }
-        val target = if (meterId.isNullOrBlank()) "die App" else "die Projektkarte"
+        val latestReading = AppLocaleBridge.progress(context, latestValue, latestUnit, latestDigits, latestScale)
+        val technique = AppLocaleBridge.technique(context, meterType, meterTypeLabel)
+        val testBody = AppLocaleBridge.text(context, if (meterId.isNullOrBlank())
+            R.string.l10n_test_notification_app else R.string.l10n_test_notification_project)
         val notification = NotificationCompat.Builder(
             context,
             channelId(punctual),
         )
             .setSmallIcon(notificationIcon(meterType))
             .setColor(notificationColor(meterType))
-            .setContentTitle("Test: $meterTypeLabel · $label")
+            .setContentTitle(AppLocaleBridge.text(context, R.string.l10n_test_notification_title, technique, label))
             .setContentText(latestReading)
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    "$latestReading\nDas ist eine Test-Erinnerung. Tippen öffnet $target.",
+                    "$latestReading\n$testBody",
                 ),
             )
             .apply { configureLegacySound(this, punctual) }
@@ -391,15 +386,17 @@ internal object ReminderNotifier {
         context.getSystemService(NotificationManager::class.java).cancel(testTag, testNotificationId)
     }
 
+    fun refreshChannelNames(context: Context) = ensureChannels(context)
+
     private fun ensureChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java)
         val normal = NotificationChannel(
             normalChannelId,
-            "Projekterinnerungen",
+            AppLocaleBridge.text(context, R.string.l10n_project_reminders),
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "Optionale Erinnerungen für regelmäßige Projektstände."
+            description = AppLocaleBridge.text(context, R.string.l10n_normal_channel_description)
             enableVibration(true)
             setSound(
                 RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
@@ -413,10 +410,10 @@ internal object ReminderNotifier {
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val alarm = NotificationChannel(
             alarmChannelId,
-            "Pünktliche Projekterinnerungen",
+            AppLocaleBridge.text(context, R.string.l10n_on_time_project_reminders),
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "Pünktliche Projekterinnerungen mit Alarmton."
+            description = AppLocaleBridge.text(context, R.string.l10n_exact_channel_description)
             enableVibration(true)
             setSound(
                 alarmSound,
