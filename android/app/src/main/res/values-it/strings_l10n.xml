@@ -3,6 +3,8 @@
 <resources>
     <string name="l10n_knitting">Maglia</string>
     <string name="l10n_crochet">Uncinetto</string>
+    <string name="l10n_row">Riga</string>
+    <string name="l10n_round">Giro</string>
     <string name="l10n_rows">Righe</string>
     <string name="l10n_rounds">Giri</string>
     <string name="l10n_no_progress_entries_yet">Ancora nessuna voce di avanzamento</string>

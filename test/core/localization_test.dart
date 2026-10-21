@@ -100,6 +100,83 @@ void main() {
     expect(calendar.parseCompactDate('31.02.2026', material), isNull);
   });
 
+  test(
+    'quantity grammar uses exact digits for singular, zero and fractions',
+    () {
+      for (final locale in appSupportedLocales) {
+        AppLocale.install(AppLocaleData(choice: locale.toLanguageTag()));
+        for (final digits in ['1', '-1']) {
+          expect(
+            progressUnitLabel(
+              'Reihen',
+              quantity: ReadingValue(displayText: '', digits: digits, scale: 0),
+            ),
+            appStrings.row,
+          );
+        }
+        expect(
+          progressUnitLabel(
+            'Runden',
+            quantity: const ReadingValue(
+              displayText: '',
+              digits: '1000',
+              scale: 3,
+            ),
+          ),
+          appStrings.round,
+        );
+        expect(
+          progressUnitLabel(
+            'Reihen',
+            quantity: const ReadingValue(
+              displayText: '',
+              digits: '0',
+              scale: 0,
+            ),
+          ),
+          locale.languageCode == 'fr' ? appStrings.row : appStrings.rows,
+        );
+        expect(
+          progressUnitLabel(
+            'Reihen',
+            quantity: const ReadingValue(
+              displayText: '',
+              digits: '15',
+              scale: 1,
+            ),
+          ),
+          ['fr', 'pt'].contains(locale.languageCode)
+              ? appStrings.row
+              : appStrings.rows,
+        );
+        expect(
+          progressUnitLabel(
+            'Reihen',
+            quantity: const ReadingValue(
+              displayText: '',
+              digits: '100000000000000000001',
+              scale: 20,
+            ),
+          ),
+          ['fr', 'pt'].contains(locale.languageCode)
+              ? appStrings.row
+              : appStrings.rows,
+        );
+        expect(
+          progressUnitLabel(
+            'custom',
+            quantity: const ReadingValue(
+              displayText: '',
+              digits: '1',
+              scale: 0,
+            ),
+          ),
+          'custom',
+        );
+      }
+    },
+  );
+
   test('US region and Brazilian region retain exact legacy decimals', () {
     const value = ReadingValue(
       displayText: '1.234,500',

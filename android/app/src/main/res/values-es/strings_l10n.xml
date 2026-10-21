@@ -3,6 +3,8 @@
 <resources>
     <string name="l10n_knitting">Punto</string>
     <string name="l10n_crochet">Ganchillo</string>
+    <string name="l10n_row">Fila</string>
+    <string name="l10n_round">Vuelta</string>
     <string name="l10n_rows">Filas</string>
     <string name="l10n_rounds">Vueltas</string>
     <string name="l10n_no_progress_entries_yet">Aún no hay registros de avance</string>

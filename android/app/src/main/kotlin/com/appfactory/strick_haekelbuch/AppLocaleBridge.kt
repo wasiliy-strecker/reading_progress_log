@@ -92,10 +92,19 @@ internal object AppLocaleBridge {
         else -> legacy
     }
 
-    fun unit(context: Context, value: String): String = when (value) {
-        "Reihen" -> text(context, R.string.l10n_rows)
-        "Runden" -> text(context, R.string.l10n_rounds)
-        else -> value
+    fun unit(context: Context, value: String, quantity: BigDecimal? = null): String {
+        val magnitude = quantity?.abs()
+        val language = uiLocale(context).language
+        val singular = magnitude != null && when (language) {
+            "fr" -> magnitude < BigDecimal(2)
+            "pt" -> magnitude > BigDecimal.ZERO && magnitude < BigDecimal(2)
+            else -> magnitude.compareTo(BigDecimal.ONE) == 0
+        }
+        return when (value) {
+            "Reihen" -> text(context, if (singular) R.string.l10n_row else R.string.l10n_rows)
+            "Runden" -> text(context, if (singular) R.string.l10n_round else R.string.l10n_rounds)
+            else -> value
+        }
     }
 
     fun progress(context: Context, legacy: String?, unit: String?, digits: String?, scale: Int?): String {
@@ -104,15 +113,16 @@ internal object AppLocaleBridge {
         }
         // Old cached reminders are displayed verbatim until the normal app
         // synchronization supplies exact digits. Never parse an ambiguous value.
-        val value = if (digits != null && scale != null && scale >= 0) {
-            try {
-                val number = BigDecimal(BigInteger(digits), scale)
+        val number = if (digits != null && scale != null && scale >= 0) {
+            try { BigDecimal(BigInteger(digits), scale) }
+            catch (_: NumberFormatException) { null }
+        } else null
+        val value = if (number != null) {
                 NumberFormat.getNumberInstance(systemLocales(context).first()).apply {
-                    minimumFractionDigits = scale
-                    maximumFractionDigits = scale
+                    minimumFractionDigits = number.scale()
+                    maximumFractionDigits = number.scale()
                 }.format(number)
-            } catch (_: NumberFormatException) { legacy }
         } else legacy
-        return text(context, R.string.l10n_last_progress, value, unit(context, unit))
+        return text(context, R.string.l10n_last_progress, value, unit(context, unit, number))
     }
 }

@@ -2618,7 +2618,7 @@ abstract class AppLocalizations {
   /// Application text. Preserve the meaning of placeholders.
   ///
   /// In en, this message translates to:
-  /// **' {p0} = {p1} progress'**
+  /// **' {p0} = {p1}'**
   String progressEquation(String p0, String p1);
 
   /// Application text. Preserve the meaning of placeholders.
@@ -2678,7 +2678,7 @@ abstract class AppLocalizations {
   /// Application text. Preserve the meaning of placeholders.
   ///
   /// In en, this message translates to:
-  /// **'{p0} {p1} → {p2} = {p3} {p4} progress'**
+  /// **'{p0} {p1} → {p2} = {p3} {p4}'**
   String progressChange(String p0, String p1, String p2, String p3, String p4);
 
   /// Application text. Preserve the meaning of placeholders.
@@ -2848,6 +2848,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{p0} of {p1}'**
   String positionOfTotal(String p0, String p1);
+
+  /// Unit label for an exact quantity. Count is a safe plural-category representative, never the displayed value.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Row} other{Rows}}'**
+  String rowQuantityUnit(num count);
+
+  /// Unit label for an exact quantity. Count is a safe plural-category representative, never the displayed value.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Round} other{Rounds}}'**
+  String roundQuantityUnit(num count);
 }
 
 class _AppLocalizationsDelegate

@@ -3,6 +3,8 @@
 <resources>
     <string name="l10n_knitting">Tricot</string>
     <string name="l10n_crochet">Crochet</string>
+    <string name="l10n_row">Rang</string>
+    <string name="l10n_round">Tour</string>
     <string name="l10n_rows">Rangs</string>
     <string name="l10n_rounds">Tours</string>
     <string name="l10n_no_progress_entries_yet">Aucun avancement pour le moment</string>

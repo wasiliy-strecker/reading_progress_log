@@ -3,6 +3,8 @@
 <resources>
     <string name="l10n_knitting">Tricô</string>
     <string name="l10n_crochet">Crochê</string>
+    <string name="l10n_row">Carreira</string>
+    <string name="l10n_round">Volta</string>
     <string name="l10n_rows">Carreiras</string>
     <string name="l10n_rounds">Voltas</string>
     <string name="l10n_no_progress_entries_yet">Ainda não há registros de progresso</string>

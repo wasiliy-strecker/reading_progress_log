@@ -1718,4 +1718,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String positionOfTotal(String p0, String p1) {
     return '$p0 sur $p1';
   }
+
+  @override
+  String rowQuantityUnit(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rangs',
+      one: 'Rang',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String roundQuantityUnit(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tours',
+      one: 'Tour',
+    );
+    return '$_temp0';
+  }
 }

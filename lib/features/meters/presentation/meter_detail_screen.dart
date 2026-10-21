@@ -499,7 +499,7 @@ class _MeterHeader extends StatelessWidget {
               Text(
                 latest == null
                     ? stringsOf(context).noProgressEntriesYet
-                    : '${formatReadingValue(latest.value)} ${progressUnitLabel(latest.meter.unit)}',
+                    : '${formatReadingValue(latest.value)} ${progressUnitLabel(latest.meter.unit, quantity: latest.value)}',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: color,
                   fontWeight: FontWeight.w900,

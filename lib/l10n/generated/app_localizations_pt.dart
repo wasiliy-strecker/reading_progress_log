@@ -1723,4 +1723,28 @@ class AppLocalizationsPt extends AppLocalizations {
   String positionOfTotal(String p0, String p1) {
     return '$p0 de $p1';
   }
+
+  @override
+  String rowQuantityUnit(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Carreiras',
+      one: 'Carreira',
+      zero: 'Carreiras',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String roundQuantityUnit(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Voltas',
+      one: 'Volta',
+      zero: 'Voltas',
+    );
+    return '$_temp0';
+  }
 }

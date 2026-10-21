@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.content.Intent
 import java.util.Locale
+import java.math.BigDecimal
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -59,6 +60,17 @@ class AppLocaleTest {
         assertEquals(precise, StoredReminder.fromJson(precise.toJson()))
         val text = AppLocaleBridge.progress(context, precise.latestValue, precise.latestUnit, precise.latestDigits, precise.latestScale)
         assertTrue(text, text.contains("345"))
+    }
+
+    @Test fun quantitiesKeepExactSingularAndRegionalPluralRules() {
+        val labels = mapOf("de" to ("Reihe" to "Reihen"), "en" to ("Row" to "Rows"), "es" to ("Fila" to "Filas"), "fr" to ("Rang" to "Rangs"), "it" to ("Riga" to "Righe"), "pt-BR" to ("Carreira" to "Carreiras"))
+        for ((locale, names) in labels) {
+            AppLocaleBridge.setChoice(context, locale)
+            assertEquals(names.first, AppLocaleBridge.unit(context, "Reihen", BigDecimal("1.000")))
+            assertEquals(names.first, AppLocaleBridge.unit(context, "Reihen", BigDecimal("-1")))
+            assertEquals(if (locale == "fr") names.first else names.second, AppLocaleBridge.unit(context, "Reihen", BigDecimal.ZERO))
+            assertEquals(if (locale in listOf("fr", "pt-BR")) names.first else names.second, AppLocaleBridge.unit(context, "Reihen", BigDecimal("1.00000000000000000001")))
+        }
     }
 
     @Test fun languageChangesDoNotMovePendingAlarmsOrChangeChannelIdentity() {

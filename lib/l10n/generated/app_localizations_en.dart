@@ -1510,7 +1510,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String progressEquation(String p0, String p1) {
-    return ' $p0 = $p1 progress';
+    return ' $p0 = $p1';
   }
 
   @override
@@ -1593,7 +1593,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String progressChange(String p0, String p1, String p2, String p3, String p4) {
-    return '$p0 $p1 → $p2 = $p3 $p4 progress';
+    return '$p0 $p1 → $p2 = $p3 $p4';
   }
 
   @override
@@ -1699,5 +1699,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String positionOfTotal(String p0, String p1) {
     return '$p0 of $p1';
+  }
+
+  @override
+  String rowQuantityUnit(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rows',
+      one: 'Row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String roundQuantityUnit(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rounds',
+      one: 'Round',
+    );
+    return '$_temp0';
   }
 }

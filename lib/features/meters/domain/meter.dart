@@ -1,4 +1,5 @@
 import 'package:strick_haekelbuch/core/localization/app_locale.dart';
+import 'reading_value.dart';
 
 enum MeterType { knitting, crochet }
 
@@ -17,12 +18,36 @@ String progressUnitSingular(String unit) => switch (unit) {
   'Reihen' => appStrings.row,
   _ => unit,
 };
-String progressUnitLabel(String unit, {AppLocalizations? strings}) =>
-    switch (unit) {
-      'Runden' => (strings ?? appStrings).rounds,
-      'Reihen' => (strings ?? appStrings).rows,
-      _ => unit,
-    };
+
+/// Select grammar from exact digits without converting the displayed quantity
+/// to floating point. The supported languages distinguish 0, 1 and fractions
+/// below 2. Larger magnitudes all use the plural unit label.
+num quantityPluralCount(ReadingValue value) {
+  final numerator = value.unscaled.abs();
+  final denominator = BigInt.from(10).pow(value.scale);
+  if (numerator == BigInt.zero) return 0;
+  if (numerator == denominator) return 1;
+  // 0.5 represents every non-integer magnitude below 2 for these six
+  // catalogs. It also avoids intl rounding 1.5 to an integer operand of 2.
+  if (numerator < denominator * BigInt.two) return 0.5;
+  return 2;
+}
+
+String progressUnitLabel(
+  String unit, {
+  AppLocalizations? strings,
+  ReadingValue? quantity,
+}) {
+  final catalog = strings ?? appStrings;
+  final count = quantity == null ? null : quantityPluralCount(quantity);
+  return switch (unit) {
+    'Runden' =>
+      count == null ? catalog.rounds : catalog.roundQuantityUnit(count),
+    'Reihen' => count == null ? catalog.rows : catalog.rowQuantityUnit(count),
+    _ => unit,
+  };
+}
+
 String currentProgressLabel(String unit) => unit == 'Runden'
     ? appStrings.currentRound
     : unit == 'Reihen'

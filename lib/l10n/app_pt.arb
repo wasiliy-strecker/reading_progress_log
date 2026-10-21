@@ -454,5 +454,7 @@
   "compactFilePart": "compacto",
   "photosFilePart": "com_fotos",
   "annualReminder": "anualmente em {date} às {time}",
-  "positionOfTotal": "{p0} de {p1}"
+  "positionOfTotal": "{p0} de {p1}",
+  "rowQuantityUnit": "{count, plural, =0{Carreiras} one{Carreira} other{Carreiras}}",
+  "roundQuantityUnit": "{count, plural, =0{Voltas} one{Volta} other{Voltas}}"
 }

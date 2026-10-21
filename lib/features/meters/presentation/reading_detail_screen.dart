@@ -101,7 +101,7 @@ class _ReadingDetailScreenState extends ConsumerState<ReadingDetailScreen> {
             const SizedBox(height: 16),
           ],
           Text(
-            '${formatReadingValue(reading.value)} ${progressUnitLabel(reading.meter.unit)}',
+            '${formatReadingValue(reading.value)} ${progressUnitLabel(reading.meter.unit, quantity: reading.value)}',
             style: Theme.of(
               context,
             ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w900),

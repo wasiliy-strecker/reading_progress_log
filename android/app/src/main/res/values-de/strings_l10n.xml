@@ -3,6 +3,8 @@
 <resources>
     <string name="l10n_knitting">Stricken</string>
     <string name="l10n_crochet">Häkeln</string>
+    <string name="l10n_row">Reihe</string>
+    <string name="l10n_round">Runde</string>
     <string name="l10n_rows">Reihen</string>
     <string name="l10n_rounds">Runden</string>
     <string name="l10n_no_progress_entries_yet">Noch kein Projektstand</string>

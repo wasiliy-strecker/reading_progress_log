@@ -454,5 +454,7 @@
   "compactFilePart": "kompakt",
   "photosFilePart": "mit_fotos",
   "annualReminder": "jährlich am {date} um {time}",
-  "positionOfTotal": "{p0} von {p1}"
+  "positionOfTotal": "{p0} von {p1}",
+  "rowQuantityUnit": "{count, plural, one{Reihe} other{Reihen}}",
+  "roundQuantityUnit": "{count, plural, one{Runde} other{Runden}}"
 }

@@ -141,7 +141,12 @@ class ReadingHistoryTile extends StatelessWidget {
                               (formatReadingValue(previous!.value)).toString(),
                               (formatReadingValue(reading.value)).toString(),
                               (delta).toString(),
-                              progressUnitLabel(reading.meter.unit),
+                              progressUnitLabel(
+                                reading.meter.unit,
+                                quantity: reading.value.difference(
+                                  previous!.value,
+                                ),
+                              ),
                             ),
                           ),
                         ],

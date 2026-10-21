@@ -2053,7 +2053,7 @@
   "@repeatPassword": {
     "description": "Passwort wiederholen Context: lib/features/backup/presentation/settings_screen.dart"
   },
-  "progressEquation": " {p0} = {p1} progress",
+  "progressEquation": " {p0} = {p1}",
   "@progressEquation": {
     "description": "Application text. Preserve the meaning of placeholders.",
     "placeholders": {
@@ -2139,7 +2139,7 @@
   "@reminderNotProcessed": {
     "description": "Application text. Preserve the meaning of placeholders."
   },
-  "progressChange": "{p0} {p1} → {p2} = {p3} {p4} progress",
+  "progressChange": "{p0} {p1} → {p2} = {p3} {p4}",
   "@progressChange": {
     "description": "Application text. Preserve the meaning of placeholders.",
     "placeholders": {
@@ -2311,6 +2311,24 @@
       },
       "p1": {
         "type": "String"
+      }
+    }
+  },
+  "rowQuantityUnit": "{count, plural, one{Row} other{Rows}}",
+  "@rowQuantityUnit": {
+    "description": "Unit label for an exact quantity. Count is a safe plural-category representative, never the displayed value.",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "roundQuantityUnit": "{count, plural, one{Round} other{Rounds}}",
+  "@roundQuantityUnit": {
+    "description": "Unit label for an exact quantity. Count is a safe plural-category representative, never the displayed value.",
+    "placeholders": {
+      "count": {
+        "type": "num"
       }
     }
   }

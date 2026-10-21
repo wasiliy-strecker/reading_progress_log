@@ -3,6 +3,8 @@
 <resources>
     <string name="l10n_knitting">Knitting</string>
     <string name="l10n_crochet">Crochet</string>
+    <string name="l10n_row">Row</string>
+    <string name="l10n_round">Round</string>
     <string name="l10n_rows">Rows</string>
     <string name="l10n_rounds">Rounds</string>
     <string name="l10n_no_progress_entries_yet">No progress entries yet</string>

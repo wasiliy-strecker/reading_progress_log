@@ -520,12 +520,12 @@ class EvidenceReportService {
     for (var index = 0; index < readings.length; index++)
       [
         readingTimeText(readings[index], date),
-        '${formatReadingValue(readings[index].value)} ${progressUnitLabel(readings[index].meter.unit)}',
+        '${formatReadingValue(readings[index].value)} ${progressUnitLabel(readings[index].meter.unit, quantity: readings[index].value)}',
         index == readings.length - 1
             ? '–'
             : readings[index].meter.unit != readings[index + 1].meter.unit
             ? appStrings.unitChanged
-            : '${formatReadingValue(readings[index].value.difference(readings[index + 1].value))} ${progressUnitLabel(readings[index].meter.unit)}',
+            : '${formatReadingValue(readings[index].value.difference(readings[index + 1].value))} ${progressUnitLabel(readings[index].meter.unit, quantity: readings[index].value.difference(readings[index + 1].value))}',
       ],
   ];
 
@@ -600,7 +600,7 @@ class EvidenceReportService {
         _dataTable([
           [
             currentProgressLabel(reading.meter.unit),
-            '${formatReadingValue(reading.value)} ${progressUnitLabel(reading.meter.unit)}',
+            '${formatReadingValue(reading.value)} ${progressUnitLabel(reading.meter.unit, quantity: reading.value)}',
           ],
           [appStrings.progressDateAndTime, readingTimeText(reading, date)],
         ]),

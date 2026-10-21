@@ -454,5 +454,7 @@
   "compactFilePart": "compacto",
   "photosFilePart": "con_fotos",
   "annualReminder": "cada año el {date} a las {time}",
-  "positionOfTotal": "{p0} de {p1}"
+  "positionOfTotal": "{p0} de {p1}",
+  "rowQuantityUnit": "{count, plural, one{Fila} other{Filas}}",
+  "roundQuantityUnit": "{count, plural, one{Vuelta} other{Vueltas}}"
 }
