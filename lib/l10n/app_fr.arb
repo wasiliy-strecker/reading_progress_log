@@ -370,6 +370,8 @@
   "developerAndPrivacyContactNWasiliyStreckerAppFabrikAI": "Développeur et contact pour la confidentialité\nWasiliy Strecker · AppFabrik AI",
   "openPrivacyPolicy": "Ouvrir la politique de confidentialité",
   "aboutStrickHKelbuch": "À propos de Strick & Häkelbuch",
+  "sourceCodeOnGitHub": "Code source sur GitHub",
+  "theSourceCodeCouldNotBeOpened": "Le code source n’a pas pu être ouvert. Réessayez.",
   "openSourceMPL20": "Code ouvert · MPL 2.0",
   "couldNotOpenThePrivacyPolicyPleaseTryAgain": "Impossible d’ouvrir la politique de confidentialité. Veuillez réessayer.",
   "preparingFiles": "Préparation des fichiers…",

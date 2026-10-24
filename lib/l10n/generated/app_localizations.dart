@@ -2328,6 +2328,18 @@ abstract class AppLocalizations {
   /// **'About Strick & Häkelbuch'**
   String get aboutStrickHKelbuch;
 
+  /// Open the source code repository of Strick & Häkelbuch on GitHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Source code on GitHub'**
+  String get sourceCodeOnGitHub;
+
+  /// Shown when opening the source code repository in an external browser fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The source code could not be opened. Please try again.'**
+  String get theSourceCodeCouldNotBeOpened;
+
   /// Open Source · MPL 2.0 Context: lib/features/backup/presentation/settings_screen.dart
   ///
   /// In en, this message translates to:

@@ -55,6 +55,12 @@ void main() {
             find.byKey(const ValueKey('open-privacy-policy')),
             250,
           );
+          await tester.scrollUntilVisible(
+            find.byKey(const ValueKey('open-source-code')),
+            250,
+          );
+          expect(find.text(locale.strings.sourceCodeOnGitHub), findsOneWidget);
+          expect(find.text(locale.strings.openSourceMPL20), findsOneWidget);
           expect(tester.takeException(), isNull);
           await tester.pumpWidget(app(const MeterFormScreen()));
           await tester.pumpAndSettle();

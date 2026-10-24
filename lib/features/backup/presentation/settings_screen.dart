@@ -194,8 +194,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         const Divider(height: 1),
                         ListTile(
-                          leading: Icon(Icons.code_rounded),
-                          title: Text(stringsOf(context).openSourceMPL20),
+                          key: const ValueKey('open-source-code'),
+                          leading: const Icon(Icons.code_rounded),
+                          title: Text(stringsOf(context).sourceCodeOnGitHub),
+                          subtitle: Text(stringsOf(context).openSourceMPL20),
+                          trailing: const Icon(Icons.open_in_new_rounded),
+                          enabled: !_working,
+                          onTap: _openSourceCode,
                         ),
                       ],
                     ),
@@ -228,9 +233,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _openPrivacyPolicy() async {
-    final uri = Uri.parse(
-      'https://github.com/wasiliy-strecker/reading_progress_log/blob/main/PRIVACY.md',
+    await _openExternalUrl(
+      Uri.parse(
+        'https://github.com/wasiliy-strecker/reading_progress_log/blob/main/PRIVACY.md',
+      ),
+      stringsOf(context).couldNotOpenThePrivacyPolicyPleaseTryAgain,
     );
+  }
+
+  Future<void> _openSourceCode() async {
+    await _openExternalUrl(
+      Uri.parse('https://github.com/wasiliy-strecker/reading_progress_log'),
+      stringsOf(context).theSourceCodeCouldNotBeOpened,
+    );
+  }
+
+  Future<void> _openExternalUrl(Uri uri, String failureMessage) async {
     final launcher = widget.externalUrlLauncher ?? _launchExternalUrl;
     var opened = false;
     try {
@@ -239,9 +257,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       opened = false;
     }
     if (!opened && mounted) {
-      _showMessage(
-        stringsOf(context).couldNotOpenThePrivacyPolicyPleaseTryAgain,
-      );
+      _showMessage(failureMessage);
     }
   }
 

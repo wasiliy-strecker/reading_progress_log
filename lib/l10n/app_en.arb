@@ -1781,6 +1781,14 @@
   "@aboutStrickHKelbuch": {
     "description": "Über Strick & Häkelbuch Context: lib/features/backup/presentation/settings_screen.dart"
   },
+  "sourceCodeOnGitHub": "Source code on GitHub",
+  "@sourceCodeOnGitHub": {
+    "description": "Open the source code repository of Strick & Häkelbuch on GitHub."
+  },
+  "theSourceCodeCouldNotBeOpened": "The source code could not be opened. Please try again.",
+  "@theSourceCodeCouldNotBeOpened": {
+    "description": "Shown when opening the source code repository in an external browser fails."
+  },
   "openSourceMPL20": "Open source · MPL 2.0",
   "@openSourceMPL20": {
     "description": "Open Source · MPL 2.0 Context: lib/features/backup/presentation/settings_screen.dart"

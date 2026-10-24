@@ -14,6 +14,80 @@ import 'package:strick_haekelbuch/features/backup/presentation/settings_screen.d
 import '../../support/fakes.dart';
 
 void main() {
+  testWidgets('source code card opens the own public GitHub repository', (
+    tester,
+  ) async {
+    final opened = <Uri>[];
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: SettingsScreen(
+            externalUrlLauncher: (uri) async {
+              opened.add(uri);
+              return true;
+            },
+          ),
+        ),
+      ),
+    );
+    final tile = find.byKey(const ValueKey('open-source-code'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      tile,
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Quellcode auf GitHub'), findsOneWidget);
+    expect(find.text('Open Source · MPL 2.0'), findsOneWidget);
+
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+
+    expect(opened, [
+      Uri.parse('https://github.com/wasiliy-strecker/reading_progress_log'),
+    ]);
+    expect(find.byType(SnackBar), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final throws in [false, true]) {
+    testWidgets('source code launch failure explains retry, throws=$throws', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: SettingsScreen(
+              externalUrlLauncher: (_) async {
+                if (throws) throw StateError('No external application');
+                return false;
+              },
+            ),
+          ),
+        ),
+      );
+      final tile = find.byKey(const ValueKey('open-source-code'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        tile,
+        240,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Der Quellcode konnte nicht geöffnet werden. Bitte versuche es erneut.',
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('privacy opens the own public GitHub policy', (tester) async {
     final opened = <Uri>[];
     await tester.pumpWidget(

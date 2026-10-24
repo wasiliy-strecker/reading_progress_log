@@ -1346,6 +1346,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get aboutStrickHKelbuch => 'Sobre o Strick & Häkelbuch';
 
   @override
+  String get sourceCodeOnGitHub => 'Código fonte no GitHub';
+
+  @override
+  String get theSourceCodeCouldNotBeOpened =>
+      'Não foi possível abrir o código-fonte. Tente novamente.';
+
+  @override
   String get openSourceMPL20 => 'Código aberto · MPL 2.0';
 
   @override
